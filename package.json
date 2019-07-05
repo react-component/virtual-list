@@ -1,0 +1,60 @@
+{
+  "name": "rc-virtual-list",
+  "version": "0.0.0-alpha.0",
+  "description": "React Virtual List Component",
+  "keywords": [
+    "react",
+    "react-component",
+    "virtual-list"
+  ],
+  "homepage": "https://github.com/react-component/virtual-list",
+  "author": "smith3816@gmail.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/react-component/virtual-list.git"
+  },
+  "bugs": {
+    "url": "https://github.com/react-component/virtual-list/issues"
+  },
+  "files": [
+    "lib",
+    "es",
+    "dist",
+    "assets/*.css"
+  ],
+  "license": "MIT",
+  "main": "./lib/index",
+  "module": "./es/index",
+  "scripts": {
+    "start": "father doc dev --storybook",
+    "build": "father doc build --storybook",
+    "compile": "father build",
+    "prepublishOnly": "npm run compile && np --no-cleanup --yolo --no-publish",
+    "lint": "eslint src/ --ext .tsx,.ts",
+    "test": "father test",
+    "now-build": "npm run build"
+  },
+  "peerDependencies": {
+    "react": "*"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.135",
+    "@types/react": "^16.8.19",
+    "@types/react-dom": "^16.8.4",
+    "@types/warning": "^3.0.0",
+    "enzyme": "^3.1.0",
+    "enzyme-adapter-react-16": "^1.0.2",
+    "enzyme-to-json": "^3.1.4",
+    "father": "^2.13.2",
+    "np": "^5.0.3",
+    "react": "^v16.9.0-alpha.0",
+    "react-dom": "^v16.9.0-alpha.0",
+    "typescript": "^3.5.2"
+  },
+  "dependencies": {
+    "async-validator": "^1.11.2",
+    "lodash": "^4.17.4",
+    "rc-util": "^4.6.0",
+    "warning": "^4.0.3"
+  }
+}
