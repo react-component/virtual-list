@@ -1,7 +1,6 @@
 import * as React from 'react';
-import { findDOMNode } from 'react-dom';
 import Filler from './Filler';
-import { getLocationItem, getScrollPercentage } from './util';
+import { getLocationItem, getScrollPercentage, getNodeHeight } from './util';
 
 type RenderFunc<T> = (item: T) => React.ReactNode;
 
@@ -16,6 +15,8 @@ export interface ListProps<T> extends React.HTMLAttributes<any> {
 interface ListState {
   status: 'NONE' | 'MEASURE_START' | 'MEASURE_DONE';
 
+  scrollTop: number | null;
+  scrollPtg: number;
   itemIndex: number;
   itemOffsetPtg: number;
   startIndex: number;
@@ -40,6 +41,8 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
 
   state: ListState = {
     status: 'NONE',
+    scrollTop: null,
+    scrollPtg: 0,
     itemIndex: 0,
     itemOffsetPtg: 0,
     startIndex: 0,
@@ -50,28 +53,33 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
 
   itemElements: { [index: number]: HTMLElement } = {};
 
+  itemElementHeights: { [index: number]: number } = {};
+
   /**
-   * Initial should sync with default scroll top
+   * Phase 1: Initial should sync with default scroll top
    */
   public componentDidMount() {
     this.listRef.current.scrollTop = 0;
     this.onScroll();
   }
 
+  /**
+   * Phase 4: Record used item height
+   * Phase 5: Trigger re-render to use correct position
+   */
   public componentDidUpdate() {
     const { status, startIndex, endIndex } = this.state;
     if (status === 'MEASURE_START') {
-      const heightList: number[] = [];
+      // Record here since measure item height will get warning in `render`
       for (let index = startIndex; index <= endIndex; index += 1) {
-        const element: HTMLElement = this.itemElements[index];
-        heightList[index] =
-          'offsetHeight' in element
-            ? element.offsetHeight
-            : (findDOMNode(element) as HTMLElement).offsetHeight;
+        this.itemElementHeights[index] = getNodeHeight(this.itemElements[index]);
       }
+
       this.setState({ status: 'MEASURE_DONE' });
     }
   }
+
+  public getItemHeight = (index: number) => this.itemElementHeights[index] || 0;
 
   /**
    * Phase 2: Trigger render since we should re-calculate current position.
@@ -79,15 +87,25 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
   public onScroll = () => {
     const { dataSource, height, itemHeight } = this.props;
 
-    const scrollTopPtg = getScrollPercentage(this.listRef.current);
-    const { index, offsetPtg } = getLocationItem(scrollTopPtg, dataSource.length);
+    const { scrollTop } = this.listRef.current;
+
+    // Skip if `scrollTop` not change to avoid shake
+    if (scrollTop === this.state.scrollTop) {
+      return;
+    }
+
+    const scrollPtg = getScrollPercentage(this.listRef.current);
+
+    const { index, offsetPtg } = getLocationItem(scrollPtg, dataSource.length);
     const visibleCount = Math.ceil(height / itemHeight);
 
-    const beforeCount = Math.ceil(scrollTopPtg * visibleCount);
-    const afterCount = Math.ceil((1 - scrollTopPtg) * visibleCount);
+    const beforeCount = Math.ceil(scrollPtg * visibleCount);
+    const afterCount = Math.ceil((1 - scrollPtg) * visibleCount);
 
     this.setState({
       status: 'MEASURE_START',
+      scrollTop,
+      scrollPtg,
       itemIndex: index,
       itemOffsetPtg: offsetPtg,
       startIndex: Math.max(0, index - beforeCount),
@@ -95,20 +113,23 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
     });
   };
 
-  public renderChildren = (list: T[], renderFunc: RenderFunc<T>) =>
+  /**
+   * Phase 4: Render item and get all the visible items height
+   */
+  public renderChildren = (list: T[], startIndex: number, renderFunc: RenderFunc<T>) =>
     // We should measure rendered item height
-     list.map((item, index) => {
+    list.map((item, index) => {
       const node = renderFunc(item) as React.ReactElement;
+      const eleIndex = startIndex + index;
 
       // Pass `key` and `ref` for internal measure
       return React.cloneElement(node, {
-        key: index,
+        key: eleIndex,
         ref: (ele: HTMLElement) => {
-          this.itemElements[index] = ele;
+          this.itemElements[eleIndex] = ele;
         },
       });
-    })
-  ;
+    });
 
   public render() {
     const {
@@ -125,14 +146,29 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
     if (height === undefined) {
       return (
         <Component style={style} {...restProps}>
-          {this.renderChildren(dataSource, children)}
+          {this.renderChildren(dataSource, 0, children)}
         </Component>
       );
     }
 
-    const { itemIndex, startIndex, endIndex } = this.state;
+    const { status, startIndex, endIndex, itemIndex, itemOffsetPtg, scrollPtg } = this.state;
 
     const contentHeight = dataSource.length * itemHeight;
+
+    // TODO: refactor
+    let startItemTop = 0;
+    if (status === 'MEASURE_DONE') {
+      const locatedItemHeight = this.getItemHeight(itemIndex);
+      const locatedItemTop = scrollPtg * this.listRef.current.clientHeight;
+      const locatedItemOffset = itemOffsetPtg * locatedItemHeight;
+      const locatedItemMergedTop =
+        this.listRef.current.scrollTop + locatedItemTop - locatedItemOffset;
+
+      startItemTop = locatedItemMergedTop;
+      for (let index = itemIndex - 1; index >= startIndex; index -= 1) {
+        startItemTop -= this.getItemHeight(index);
+      }
+    }
 
     return (
       <Component
@@ -140,13 +176,14 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
           ...style,
           height,
           overflowY: 'auto',
+          overflowAnchor: 'none',
         }}
         {...restProps}
         onScroll={this.onScroll}
         ref={this.listRef}
       >
-        <Filler height={contentHeight}>
-          {this.renderChildren(dataSource.slice(startIndex, endIndex + 1), children)}
+        <Filler height={contentHeight} offset={status === 'MEASURE_DONE' ? startItemTop : 0}>
+          {this.renderChildren(dataSource.slice(startIndex, endIndex + 1), startIndex, children)}
         </Filler>
       </Component>
     );

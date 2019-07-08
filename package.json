@@ -35,7 +35,8 @@
     "now-build": "npm run build"
   },
   "peerDependencies": {
-    "react": "*"
+    "react": "*",
+    "react-dom": "*"
   },
   "devDependencies": {
     "@types/lodash": "^4.14.135",
