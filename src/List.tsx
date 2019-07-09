@@ -22,6 +22,12 @@ interface ListState {
   itemOffsetPtg: number;
   startIndex: number;
   endIndex: number;
+  /**
+   * Calculated by `scrollTop`.
+   * We cache in the state since if `dataSource` length change,
+   * we need revert back to the located item index.
+   */
+  startItemTop: number;
 }
 
 /**
@@ -48,6 +54,7 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
     itemOffsetPtg: 0,
     startIndex: 0,
     endIndex: 0,
+    startItemTop: 0,
   };
 
   listRef = React.createRef<HTMLElement>();
@@ -69,7 +76,7 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
    * Phase 5: Trigger re-render to use correct position
    */
   public componentDidUpdate(prevProps: ListProps<T>) {
-    const { status, startIndex, endIndex } = this.state;
+    const { status, scrollPtg, startIndex, endIndex, itemIndex, itemOffsetPtg } = this.state;
     const { dataSource, itemKey } = this.props;
 
     if (status === 'MEASURE_START') {
@@ -80,7 +87,19 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
         this.itemElementHeights[index] = getNodeHeight(this.itemElements[eleKey]);
       }
 
-      this.setState({ status: 'MEASURE_DONE' });
+      // Calculate top visible item top offset
+      const locatedItemHeight = this.getItemHeight(itemIndex);
+      const locatedItemTop = scrollPtg * this.listRef.current.clientHeight;
+      const locatedItemOffset = itemOffsetPtg * locatedItemHeight;
+      const locatedItemMergedTop =
+        this.listRef.current.scrollTop + locatedItemTop - locatedItemOffset;
+
+      let startItemTop = locatedItemMergedTop;
+      for (let index = itemIndex - 1; index >= startIndex; index -= 1) {
+        startItemTop -= this.getItemHeight(index);
+      }
+
+      this.setState({ status: 'MEASURE_DONE', startItemTop });
     }
 
     // Re-calculate the scroll position align with the current visible item position
@@ -165,24 +184,8 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
       );
     }
 
-    const { status, startIndex, endIndex, itemIndex, itemOffsetPtg, scrollPtg } = this.state;
-
+    const { status, startIndex, endIndex, startItemTop } = this.state;
     const contentHeight = dataSource.length * itemHeight;
-
-    // TODO: refactor
-    let startItemTop = 0;
-    if (status === 'MEASURE_DONE') {
-      const locatedItemHeight = this.getItemHeight(itemIndex);
-      const locatedItemTop = scrollPtg * this.listRef.current.clientHeight;
-      const locatedItemOffset = itemOffsetPtg * locatedItemHeight;
-      const locatedItemMergedTop =
-        this.listRef.current.scrollTop + locatedItemTop - locatedItemOffset;
-
-      startItemTop = locatedItemMergedTop;
-      for (let index = itemIndex - 1; index >= startIndex; index -= 1) {
-        startItemTop -= this.getItemHeight(index);
-      }
-    }
 
     return (
       <Component
