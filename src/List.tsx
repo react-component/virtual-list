@@ -68,7 +68,7 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
    * Phase 4: Record used item height
    * Phase 5: Trigger re-render to use correct position
    */
-  public componentDidUpdate() {
+  public componentDidUpdate(prevProps: ListProps<T>) {
     const { status, startIndex, endIndex } = this.state;
     const { dataSource, itemKey } = this.props;
 
@@ -81,6 +81,11 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
       }
 
       this.setState({ status: 'MEASURE_DONE' });
+    }
+
+    // Re-calculate the scroll position align with the current visible item position
+    if (prevProps.dataSource.length !== dataSource.length) {
+      console.log('!!!!!!');
     }
   }
 
@@ -147,6 +152,7 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
       itemHeight,
       dataSource,
       children,
+      itemKey,
       ...restProps
     } = this.props;
 
