@@ -47,3 +47,5 @@ export function getNodeHeight(node: HTMLElement) {
 
   return findDOMNode(node).offsetHeight;
 }
+
+export function getStartItemTop(itemIndex: number) {}

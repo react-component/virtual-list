@@ -9,7 +9,8 @@ let uuid = 0;
 function genItem() {
   uuid += 1;
   return {
-    id: uuid,
+    id: `key_${uuid}`,
+    uuid,
   };
 }
 
@@ -19,22 +20,23 @@ for (let i = 0; i < 19; i += 1) {
 }
 
 interface Item {
-  id: number;
+  id: string;
+  uuid: number;
 }
 
 interface MyItemProps extends Item {
   visible: boolean;
-  onClose: (id: number) => void;
-  onLeave: (id: number) => void;
-  onInsertBefore: (id: number) => void;
-  onInsertAfter: (id: number) => void;
+  onClose: (id: string) => void;
+  onLeave: (id: string) => void;
+  onInsertBefore: (id: string) => void;
+  onInsertAfter: (id: string) => void;
 }
 
 const getCurrentHeight = (node: HTMLElement) => ({ height: node.offsetHeight });
 const getCollapsedHeight = () => ({ height: 0, opacity: 0 });
 
 const MyItem: React.FC<MyItemProps> = (
-  { id, visible, onClose, onLeave, onInsertBefore, onInsertAfter },
+  { id, uuid, visible, onClose, onLeave, onInsertBefore, onInsertAfter },
   ref,
 ) => {
   return (
@@ -50,7 +52,7 @@ const MyItem: React.FC<MyItemProps> = (
     >
       {({ className, style }, motionRef) => (
         <div ref={motionRef} className={classNames('item', className)} style={style}>
-          <div style={{ height: id % 2 ? 100 : undefined }}>
+          <div style={{ height: uuid % 2 ? 100 : undefined }}>
             <button
               onClick={() => {
                 onClose(id);
@@ -86,24 +88,24 @@ const Demo = () => {
   const [dataSource, setDataSource] = React.useState(originDataSource);
   const [closeMap, setCloseMap] = React.useState<{ [id: number]: boolean }>({});
 
-  const onClose = (id: number) => {
+  const onClose = (id: string) => {
     setCloseMap({
       ...closeMap,
       [id]: true,
     });
   };
 
-  const onLeave = (id: number) => {
+  const onLeave = (id: string) => {
     const newDataSource = dataSource.filter(item => item.id !== id);
     setDataSource(newDataSource);
   };
 
-  const onInsertBefore = (id: number) => {
+  const onInsertBefore = (id: string) => {
     const index = dataSource.findIndex(item => item.id === id);
     const newDataSource = [...dataSource.slice(0, index), genItem(), ...dataSource.slice(index)];
     setDataSource(newDataSource);
   };
-  const onInsertAfter = (id: number) => {
+  const onInsertAfter = (id: string) => {
     const index = dataSource.findIndex(item => item.id === id) + 1;
     const newDataSource = [...dataSource.slice(0, index), genItem(), ...dataSource.slice(index)];
     setDataSource(newDataSource);
