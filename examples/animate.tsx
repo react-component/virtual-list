@@ -5,6 +5,19 @@ import classNames from 'classnames';
 import List from '../src/List';
 import './animate.less';
 
+let uuid = 0;
+function genItem() {
+  uuid += 1;
+  return {
+    id: uuid,
+  };
+}
+
+const originDataSource: Item[] = [];
+for (let i = 0; i < 19; i += 1) {
+  originDataSource.push(genItem());
+}
+
 interface Item {
   id: number;
 }
@@ -13,12 +26,17 @@ interface MyItemProps extends Item {
   visible: boolean;
   onClose: (id: number) => void;
   onLeave: (id: number) => void;
+  onInsertBefore: (id: number) => void;
+  onInsertAfter: (id: number) => void;
 }
 
 const getCurrentHeight = (node: HTMLElement) => ({ height: node.offsetHeight });
 const getCollapsedHeight = () => ({ height: 0, opacity: 0 });
 
-const MyItem: React.FC<MyItemProps> = ({ id, onClose, onLeave, visible }, ref) => {
+const MyItem: React.FC<MyItemProps> = (
+  { id, visible, onClose, onLeave, onInsertBefore, onInsertAfter },
+  ref,
+) => {
   return (
     <CSSMotion
       visible={visible}
@@ -32,15 +50,30 @@ const MyItem: React.FC<MyItemProps> = ({ id, onClose, onLeave, visible }, ref) =
     >
       {({ className, style }, motionRef) => (
         <div ref={motionRef} className={classNames('item', className)} style={style}>
-          <button
-            style={{ verticalAlign: 'text-top', marginRight: 16 }}
-            onClick={() => {
-              onClose(id);
-            }}
-          >
-            Close
-          </button>
-          {id}
+          <div style={{ height: id % 2 ? 100 : undefined }}>
+            <button
+              onClick={() => {
+                onClose(id);
+              }}
+            >
+              Close
+            </button>
+            <button
+              onClick={() => {
+                onInsertBefore(id);
+              }}
+            >
+              Insert Before
+            </button>
+            <button
+              onClick={() => {
+                onInsertAfter(id);
+              }}
+            >
+              Insert After
+            </button>
+            {id}
+          </div>
         </div>
       )}
     </CSSMotion>
@@ -48,13 +81,6 @@ const MyItem: React.FC<MyItemProps> = ({ id, onClose, onLeave, visible }, ref) =
 };
 
 const ForwardMyItem = React.forwardRef(MyItem);
-
-const originDataSource: Item[] = [];
-for (let i = 0; i < 100; i += 1) {
-  originDataSource.push({
-    id: i,
-  });
-}
 
 const Demo = () => {
   const [dataSource, setDataSource] = React.useState(originDataSource);
@@ -72,6 +98,17 @@ const Demo = () => {
     setDataSource(newDataSource);
   };
 
+  const onInsertBefore = (id: number) => {
+    const index = dataSource.findIndex(item => item.id === id);
+    const newDataSource = [...dataSource.slice(0, index), genItem(), ...dataSource.slice(index)];
+    setDataSource(newDataSource);
+  };
+  const onInsertAfter = (id: number) => {
+    const index = dataSource.findIndex(item => item.id === id) + 1;
+    const newDataSource = [...dataSource.slice(0, index), genItem(), ...dataSource.slice(index)];
+    setDataSource(newDataSource);
+  };
+
   return (
     <React.StrictMode>
       <div>
@@ -81,6 +118,7 @@ const Demo = () => {
           dataSource={dataSource}
           height={200}
           itemHeight={30}
+          itemKey="id"
           style={{
             border: '1px solid red',
             boxSizing: 'border-box',
@@ -92,6 +130,8 @@ const Demo = () => {
               visible={!closeMap[item.id]}
               onClose={onClose}
               onLeave={onLeave}
+              onInsertBefore={onInsertBefore}
+              onInsertAfter={onInsertAfter}
             />
           )}
         </List>

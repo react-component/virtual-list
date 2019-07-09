@@ -9,6 +9,7 @@ export interface ListProps<T> extends React.HTMLAttributes<any> {
   dataSource: T[];
   height?: number;
   itemHeight?: number;
+  itemKey?: string;
   component?: string | React.FC<any> | React.ComponentClass<any>;
 }
 
@@ -69,10 +70,14 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
    */
   public componentDidUpdate() {
     const { status, startIndex, endIndex } = this.state;
+    const { dataSource, itemKey } = this.props;
+
     if (status === 'MEASURE_START') {
       // Record here since measure item height will get warning in `render`
       for (let index = startIndex; index <= endIndex; index += 1) {
-        this.itemElementHeights[index] = getNodeHeight(this.itemElements[index]);
+        const item = dataSource[index];
+        const eleKey = itemKey ? item[itemKey] : index;
+        this.itemElementHeights[index] = getNodeHeight(this.itemElements[eleKey]);
       }
 
       this.setState({ status: 'MEASURE_DONE' });
@@ -116,20 +121,23 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
   /**
    * Phase 4: Render item and get all the visible items height
    */
-  public renderChildren = (list: T[], startIndex: number, renderFunc: RenderFunc<T>) =>
+  public renderChildren = (list: T[], startIndex: number, renderFunc: RenderFunc<T>) => {
+    const { itemKey } = this.props;
     // We should measure rendered item height
-    list.map((item, index) => {
+    return list.map((item, index) => {
       const node = renderFunc(item) as React.ReactElement;
       const eleIndex = startIndex + index;
+      const eleKey = itemKey ? item[itemKey] : eleIndex;
 
       // Pass `key` and `ref` for internal measure
       return React.cloneElement(node, {
-        key: eleIndex,
+        key: eleKey,
         ref: (ele: HTMLElement) => {
-          this.itemElements[eleIndex] = ele;
+          this.itemElements[eleKey] = ele;
         },
       });
     });
+  };
 
   public render() {
     const {
