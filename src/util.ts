@@ -1,4 +1,4 @@
-import { findDOMNode } from 'react-dom';
+import findDOMNode from 'rc-util/lib/Dom/findDOMNode';
 
 interface LocationItemResult {
   /** Located item index */
@@ -45,7 +45,5 @@ export function getNodeHeight(node: HTMLElement) {
     return 0;
   }
 
-  return 'offsetHeight' in node
-    ? node.offsetHeight
-    : (findDOMNode(node) as HTMLElement).offsetHeight;
+  return findDOMNode(node).offsetHeight;
 }

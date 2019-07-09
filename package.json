@@ -39,24 +39,22 @@
     "react-dom": "*"
   },
   "devDependencies": {
-    "@types/lodash": "^4.14.135",
     "@types/react": "^16.8.19",
     "@types/react-dom": "^16.8.4",
     "@types/warning": "^3.0.0",
+    "classnames": "^2.2.6",
     "cross-env": "^5.2.0",
     "enzyme": "^3.1.0",
     "enzyme-adapter-react-16": "^1.0.2",
     "enzyme-to-json": "^3.1.4",
     "father": "^2.13.2",
     "np": "^5.0.3",
+    "rc-animate": "^2.9.1",
     "react": "^v16.9.0-alpha.0",
     "react-dom": "^v16.9.0-alpha.0",
     "typescript": "^3.5.2"
   },
   "dependencies": {
-    "async-validator": "^1.11.2",
-    "lodash": "^4.17.4",
-    "rc-util": "^4.6.0",
-    "warning": "^4.0.3"
+    "rc-util": "^4.8.0"
   }
 }
