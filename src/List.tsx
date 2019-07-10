@@ -1,6 +1,12 @@
 import * as React from 'react';
 import Filler from './Filler';
-import { getScrollPercentage, getNodeHeight, getRangeIndex } from './util';
+import {
+  getElementScrollPercentage,
+  getScrollPercentage,
+  getNodeHeight,
+  getRangeIndex,
+  getStartItemTop,
+} from './util';
 
 type RenderFunc<T> = (item: T) => React.ReactNode;
 
@@ -84,18 +90,29 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
         this.itemElementHeights[eleKey] = getNodeHeight(this.itemElements[eleKey]);
       }
 
-      // Calculate top visible item top offset
-      const scrollPtg = getScrollPercentage(this.listRef.current);
-      const locatedItemHeight = this.itemElementHeights[this.getItemKey(itemIndex)] || 0;
-      const locatedItemTop = scrollPtg * this.listRef.current.clientHeight;
-      const locatedItemOffset = itemOffsetPtg * locatedItemHeight;
-      const locatedItemMergedTop =
-        this.listRef.current.scrollTop + locatedItemTop - locatedItemOffset;
+      // // Calculate top visible item top offset
+      // const scrollPtg = getScrollPercentage(this.listRef.current);
+      // const locatedItemHeight = this.itemElementHeights[this.getItemKey(itemIndex)] || 0;
+      // const locatedItemTop = scrollPtg * this.listRef.current.clientHeight;
+      // const locatedItemOffset = itemOffsetPtg * locatedItemHeight;
+      // const locatedItemMergedTop =
+      //   this.listRef.current.scrollTop + locatedItemTop - locatedItemOffset;
 
-      let startItemTop = locatedItemMergedTop;
-      for (let index = itemIndex - 1; index >= startIndex; index -= 1) {
-        startItemTop -= this.itemElementHeights[this.getItemKey(index)] || 0;
-      }
+      // let startItemTop = locatedItemMergedTop;
+      // for (let index = itemIndex - 1; index >= startIndex; index -= 1) {
+      //   startItemTop -= this.itemElementHeights[this.getItemKey(index)] || 0;
+      // }
+
+      const startItemTop = getStartItemTop({
+        itemIndex,
+        startIndex,
+        itemOffsetPtg,
+        itemElementHeights: this.itemElementHeights,
+        scrollTop: this.listRef.current.scrollTop,
+        scrollPtg: getElementScrollPercentage(this.listRef.current),
+        clientHeight: this.listRef.current.clientHeight,
+        getItemKey: this.getItemKey,
+      });
 
       this.setState({ status: 'MEASURE_DONE', startItemTop });
     }
@@ -119,7 +136,7 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
       return;
     }
 
-    const scrollPtg = getScrollPercentage(this.listRef.current);
+    const scrollPtg = getElementScrollPercentage(this.listRef.current);
     const visibleCount = Math.ceil(height / itemHeight);
 
     const { itemIndex, itemOffsetPtg, startIndex, endIndex } = getRangeIndex(

@@ -26,7 +26,7 @@ function getLocationItem(scrollPtg: number, total: number): LocationItemResult {
   };
 }
 
-function internalGetScrollPercentage({
+export function getScrollPercentage({
   scrollTop,
   scrollHeight,
   clientHeight,
@@ -43,12 +43,12 @@ function internalGetScrollPercentage({
   return scrollTopPtg;
 }
 
-export function getScrollPercentage(element: HTMLElement | null) {
+export function getElementScrollPercentage(element: HTMLElement | null) {
   if (!element) {
     return 0;
   }
 
-  return internalGetScrollPercentage(element);
+  return getScrollPercentage(element);
 }
 
 /**
@@ -80,11 +80,42 @@ export function getRangeIndex(scrollPtg: number, itemCount: number, visibleCount
   };
 }
 
-interface ItemTopConfig {
-  clientHeight: number;
+interface ItemTopConfig<T> {
+  itemIndex: number;
+  itemElementHeights: { [key: string]: number };
+  startIndex: number;
+  itemOffsetPtg: number;
+
   scrollTop: number;
   scrollPtg: number;
-  itemOffsetPtg: number;
+  clientHeight: number;
+
+  getItemKey: (index: number) => string;
 }
 
-export function getStartItemTop(itemIndex: number, itemElementHeights: { [key: string]: number }) {}
+/**
+ * Calculate virtual list start item top offset position.
+ */
+export function getStartItemTop({
+  itemIndex,
+  startIndex,
+  itemOffsetPtg,
+  itemElementHeights,
+  scrollTop,
+  scrollPtg,
+  clientHeight,
+  getItemKey,
+}: ItemTopConfig) {
+  // Calculate top visible item top offset
+  const locatedItemHeight = itemElementHeights[getItemKey(itemIndex)] || 0;
+  const locatedItemTop = scrollPtg * clientHeight;
+  const locatedItemOffset = itemOffsetPtg * locatedItemHeight;
+  const locatedItemMergedTop = scrollTop + locatedItemTop - locatedItemOffset;
+
+  let startItemTop = locatedItemMergedTop;
+  for (let index = itemIndex - 1; index >= startIndex; index -= 1) {
+    startItemTop -= itemElementHeights[getItemKey(index)] || 0;
+  }
+
+  return startItemTop;
+}
