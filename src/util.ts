@@ -32,6 +32,10 @@ export function getScrollPercentage(element: HTMLElement | null) {
   }
 
   const { scrollTop, scrollHeight, clientHeight } = element;
+  if (scrollHeight <= clientHeight) {
+    return 0;
+  }
+
   const scrollTopPtg = scrollTop / (scrollHeight - clientHeight);
   return scrollTopPtg;
 }

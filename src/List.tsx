@@ -150,7 +150,7 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
    */
   public renderChildren = (list: T[], startIndex: number, renderFunc: RenderFunc<T>) =>
     // We should measure rendered item height
-     list.map((item, index) => {
+    list.map((item, index) => {
       const node = renderFunc(item) as React.ReactElement;
       const eleIndex = startIndex + index;
       const eleKey = this.getItemKey(eleIndex);
@@ -162,8 +162,7 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
           this.itemElements[eleKey] = ele;
         },
       });
-    })
-  ;
+    });
 
   public render() {
     const {
@@ -177,11 +176,18 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
       ...restProps
     } = this.props;
 
-    // Render pure list if not set height
-    if (height === undefined) {
+    const mergedStyle = {
+      ...style,
+      height,
+      overflowY: 'auto',
+      overflowAnchor: 'none',
+    };
+
+    // Render pure list if not set height or height is enough for all items
+    if (height === undefined || dataSource.length * itemHeight <= height) {
       return (
-        <Component style={style} {...restProps}>
-          {this.renderChildren(dataSource, 0, children)}
+        <Component style={mergedStyle} {...restProps}>
+          <Filler height={height}>{this.renderChildren(dataSource, 0, children)}</Filler>
         </Component>
       );
     }
@@ -190,17 +196,7 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
     const contentHeight = dataSource.length * itemHeight;
 
     return (
-      <Component
-        style={{
-          ...style,
-          height,
-          overflowY: 'auto',
-          overflowAnchor: 'none',
-        }}
-        {...restProps}
-        onScroll={this.onScroll}
-        ref={this.listRef}
-      >
+      <Component style={mergedStyle} {...restProps} onScroll={this.onScroll} ref={this.listRef}>
         <Filler height={contentHeight} offset={status === 'MEASURE_DONE' ? startItemTop : 0}>
           {this.renderChildren(dataSource.slice(startIndex, endIndex + 1), startIndex, children)}
         </Filler>
