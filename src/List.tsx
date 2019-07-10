@@ -14,6 +14,8 @@ import {
 
 type RenderFunc<T> = (item: T) => React.ReactNode;
 
+const ITEM_SCALE_RATE = 1;
+
 export interface ListProps<T> extends React.HTMLAttributes<any> {
   children: RenderFunc<T>;
   dataSource: T[];
@@ -83,6 +85,12 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
   itemElements: { [index: number]: HTMLElement } = {};
 
   itemElementHeights: { [index: number]: number } = {};
+
+  /**
+   * Lock scroll process with `onScroll` event.
+   * This is used for `dataSource` length change and `scrollTop` restore
+   */
+  lockScroll: boolean = false;
 
   /**
    * Phase 1: Initial should sync with default scroll top
@@ -156,13 +164,18 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
 
       let bestScrollTop: number | null = null;
       let bestSimilarity = Number.MAX_VALUE;
+      let bestItemIndex = 0;
+      let bestItemOffsetPtg = 0;
+      let bestStartIndex = 0;
+      let bestEndIndex = 0;
+
       let debugItemTops: TargetValues = null;
 
       for (let scrollTop = 0; scrollTop < maxScrollTop; scrollTop += 1) {
         const scrollPtg = getScrollPercentage({ scrollTop, scrollHeight, clientHeight });
         const visibleCount = Math.ceil(height / itemHeight);
 
-        const { itemIndex, itemOffsetPtg, startIndex } = getRangeIndex(
+        const { itemIndex, itemOffsetPtg, startIndex, endIndex } = getRangeIndex(
           scrollPtg,
           dataSource.length,
           visibleCount,
@@ -187,18 +200,42 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
         }
 
         const similarity = getSimilarity(originItemTops, itemTops);
-        if (similarity < bestSimilarity) {
-          bestSimilarity = similarity;
+        const absSimilarity = Math.abs(similarity);
+
+        if (absSimilarity < bestSimilarity) {
+          bestSimilarity = absSimilarity;
           bestScrollTop = scrollTop;
+          bestItemIndex = itemIndex;
+          bestItemOffsetPtg = itemOffsetPtg;
+          bestStartIndex = startIndex;
+          bestEndIndex = endIndex;
+
           debugItemTops = itemTops;
         }
 
-        console.log('=>', scrollTop, itemTops, getSimilarity(originItemTops, itemTops));
+        console.log('COMPARE:', absSimilarity.toFixed(3), itemTops);
       }
 
       if (bestScrollTop) {
-        console.log('Best Top:', bestScrollTop, debugItemTops);
+        console.log('Best Top:', bestScrollTop, bestSimilarity, debugItemTops);
+        console.log('StartIndex:', bestStartIndex, this.getItemKey(bestStartIndex));
+        this.lockScroll = true;
         this.listRef.current.scrollTop = bestScrollTop;
+
+        this.setState({
+          status: 'MEASURE_START',
+          scrollTop: bestScrollTop,
+          itemIndex: bestItemIndex,
+          itemOffsetPtg: bestItemOffsetPtg,
+          startIndex: bestStartIndex,
+          endIndex: bestEndIndex,
+        });
+
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            this.lockScroll = false;
+          });
+        });
       }
     }
   }
@@ -212,7 +249,7 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
     const { scrollTop } = this.listRef.current;
 
     // Skip if `scrollTop` not change to avoid shake
-    if (scrollTop === this.state.scrollTop) {
+    if (scrollTop === this.state.scrollTop || this.lockScroll) {
       return;
     }
 
@@ -298,7 +335,7 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
     }
 
     const { status, startIndex, endIndex, startItemTop } = this.state;
-    const contentHeight = dataSource.length * itemHeight;
+    const contentHeight = dataSource.length * itemHeight * ITEM_SCALE_RATE;
 
     return (
       <Component style={mergedStyle} {...restProps} onScroll={this.onScroll} ref={this.listRef}>

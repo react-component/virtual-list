@@ -16,7 +16,7 @@ function genItem() {
 }
 
 const originDataSource: Item[] = [];
-for (let i = 0; i < 10; i += 1) {
+for (let i = 0; i < 20; i += 1) {
   originDataSource.push(genItem());
 }
 

@@ -130,7 +130,7 @@ export function getSimilarity(origin: OriginValues, target: TargetValues): numbe
   for (let index = 0; index < origin.length; index += 1) {
     const { key, top } = origin[index];
     if (key in target) {
-      return Math.abs(target[key] - top);
+      return target[key] - top;
     }
   }
   return Number.MAX_VALUE;
