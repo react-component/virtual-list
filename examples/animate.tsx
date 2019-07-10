@@ -7,11 +7,12 @@ import './animate.less';
 
 let uuid = 0;
 function genItem() {
-  uuid += 1;
-  return {
+  const item = {
     id: `key_${uuid}`,
     uuid,
   };
+  uuid += 1;
+  return item;
 }
 
 const originDataSource: Item[] = [];

@@ -127,16 +127,18 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
     // Re-calculate the scroll position align with the current visible item position
     if (prevProps.dataSource.length !== dataSource.length && height) {
       // We will record all the visible item top for next loop match check
-      const itemTops: { [key: string]: number } = {};
+      const originItemTops: { [key: string]: number } = {};
       const { startIndex: originStartIndex, itemIndex: originItemIndex } = this.state;
       let originStartItemTop = this.state.startItemTop;
       for (let index = originStartIndex; index <= originItemIndex; index += 1) {
-        const key = this.getItemKey(index);
-        itemTops[key] = originStartItemTop;
+        const key = this.getItemKey(index, prevProps);
+        originItemTops[key] = originStartItemTop;
         originStartItemTop += this.itemElementHeights[key] || 0;
       }
 
-      console.log('Length changed. Origin top:', itemTops, this.itemElementHeights);
+      console.log('Length changed. Origin top:', originItemTops, this.state.startIndex);
+
+      // Loop to get the adjusted item top
       const { scrollHeight, clientHeight } = this.listRef.current;
       const maxScrollTop = scrollHeight - clientHeight;
       for (let scrollTop = 0; scrollTop <= maxScrollTop; scrollTop += 1) {
@@ -149,18 +151,24 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
           visibleCount,
         );
 
-        // const startItemTop = getStartItemTop({
-        //   itemIndex,
-        //   startIndex,
-        //   itemOffsetPtg,
-        //   itemElementHeights: this.itemElementHeights,
-        //   scrollTop: this.listRef.current.scrollTop,
-        //   scrollPtg,
-        //   clientHeight: this.listRef.current.clientHeight,
-        //   getItemKey: this.getItemKey,
-        // });
+        const locatedItemTop = getItemTop({
+          itemIndex,
+          itemOffsetPtg,
+          itemElementHeights: this.itemElementHeights,
+          scrollTop: this.listRef.current.scrollTop,
+          scrollPtg,
+          clientHeight: this.listRef.current.clientHeight,
+          getItemKey: this.getItemKey,
+        });
 
-        // console.log('=>', scrollTop, startIndex, startItemTop);
+        const itemTops: { [key: string]: number } = {};
+        for (let index = itemIndex; index >= startIndex; index -= 1) {
+          const key = this.getItemKey(index);
+          itemTops[key] = locatedItemTop;
+          originStartItemTop -= this.itemElementHeights[key] || 0;
+        }
+
+        console.log('=>', scrollTop, itemTops);
       }
     }
   }
@@ -197,8 +205,8 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
     });
   };
 
-  public getItemKey = (index: number) => {
-    const { dataSource, itemKey } = this.props;
+  public getItemKey = (index: number, props?: ListProps<T>) => {
+    const { dataSource, itemKey } = props || this.props;
     const item = dataSource[index];
     return item && itemKey ? item[itemKey] : index;
   };
