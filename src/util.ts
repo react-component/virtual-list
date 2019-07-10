@@ -80,10 +80,9 @@ export function getRangeIndex(scrollPtg: number, itemCount: number, visibleCount
   };
 }
 
-interface ItemTopConfig<T> {
+interface ItemTopConfig {
   itemIndex: number;
   itemElementHeights: { [key: string]: number };
-  startIndex: number;
   itemOffsetPtg: number;
 
   scrollTop: number;
@@ -94,11 +93,10 @@ interface ItemTopConfig<T> {
 }
 
 /**
- * Calculate virtual list start item top offset position.
+ * Calculate the located item top.
  */
-export function getStartItemTop({
+export function getItemTop({
   itemIndex,
-  startIndex,
   itemOffsetPtg,
   itemElementHeights,
   scrollTop,
@@ -112,10 +110,5 @@ export function getStartItemTop({
   const locatedItemOffset = itemOffsetPtg * locatedItemHeight;
   const locatedItemMergedTop = scrollTop + locatedItemTop - locatedItemOffset;
 
-  let startItemTop = locatedItemMergedTop;
-  for (let index = itemIndex - 1; index >= startIndex; index -= 1) {
-    startItemTop -= itemElementHeights[getItemKey(index)] || 0;
-  }
-
-  return startItemTop;
+  return locatedItemMergedTop;
 }

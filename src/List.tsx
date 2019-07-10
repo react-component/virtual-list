@@ -5,7 +5,7 @@ import {
   getScrollPercentage,
   getNodeHeight,
   getRangeIndex,
-  getStartItemTop,
+  getItemTop,
 } from './util';
 
 type RenderFunc<T> = (item: T) => React.ReactNode;
@@ -23,7 +23,9 @@ interface ListState {
   status: 'NONE' | 'MEASURE_START' | 'MEASURE_DONE';
 
   scrollTop: number | null;
+  /** Located item index */
   itemIndex: number;
+  /** Located item bind its height percentage with the `scrollTop` */
   itemOffsetPtg: number;
   startIndex: number;
   endIndex: number;
@@ -44,6 +46,17 @@ interface ListState {
  * 3. [Render] Render visible items
  * 4. Get all the visible items height
  * 5. [Render] Update top item `margin-top` to fit the position
+ *
+ * Algorithm:
+ * We split scroll bar into equal slice. An item with whatever height occupy the same range slice.
+ * When `scrollTop` change,
+ * it will calculate the item percentage position and move item to the position.
+ * Then calculate other item position base on the located item.
+ *
+ * Concept:
+ *
+ * # located item
+ * The base position item which other items position calculate base on.
  */
 class List<T> extends React.Component<ListProps<T>, ListState> {
   static defaultProps = {
@@ -80,32 +93,21 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
    * Phase 5: Trigger re-render to use correct position
    */
   public componentDidUpdate(prevProps: ListProps<T>) {
-    const { status, startIndex, endIndex, itemIndex, itemOffsetPtg } = this.state;
-    const { dataSource } = this.props;
+    const { status } = this.state;
+    const { dataSource, height, itemHeight } = this.props;
 
     if (status === 'MEASURE_START') {
+      const { startIndex, endIndex, itemIndex, itemOffsetPtg } = this.state;
+
       // Record here since measure item height will get warning in `render`
       for (let index = startIndex; index <= endIndex; index += 1) {
         const eleKey = this.getItemKey(index);
         this.itemElementHeights[eleKey] = getNodeHeight(this.itemElements[eleKey]);
       }
 
-      // // Calculate top visible item top offset
-      // const scrollPtg = getScrollPercentage(this.listRef.current);
-      // const locatedItemHeight = this.itemElementHeights[this.getItemKey(itemIndex)] || 0;
-      // const locatedItemTop = scrollPtg * this.listRef.current.clientHeight;
-      // const locatedItemOffset = itemOffsetPtg * locatedItemHeight;
-      // const locatedItemMergedTop =
-      //   this.listRef.current.scrollTop + locatedItemTop - locatedItemOffset;
-
-      // let startItemTop = locatedItemMergedTop;
-      // for (let index = itemIndex - 1; index >= startIndex; index -= 1) {
-      //   startItemTop -= this.itemElementHeights[this.getItemKey(index)] || 0;
-      // }
-
-      const startItemTop = getStartItemTop({
+      // Calculate top visible item top offset
+      const locatedItemTop = getItemTop({
         itemIndex,
-        startIndex,
         itemOffsetPtg,
         itemElementHeights: this.itemElementHeights,
         scrollTop: this.listRef.current.scrollTop,
@@ -114,12 +116,52 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
         getItemKey: this.getItemKey,
       });
 
+      let startItemTop = locatedItemTop;
+      for (let index = itemIndex - 1; index >= startIndex; index -= 1) {
+        startItemTop -= this.itemElementHeights[this.getItemKey(index)] || 0;
+      }
+
       this.setState({ status: 'MEASURE_DONE', startItemTop });
     }
 
     // Re-calculate the scroll position align with the current visible item position
-    if (prevProps.dataSource.length !== dataSource.length) {
-      console.log('!!!!!!');
+    if (prevProps.dataSource.length !== dataSource.length && height) {
+      // We will record all the visible item top for next loop match check
+      const itemTops: { [key: string]: number } = {};
+      const { startIndex: originStartIndex, itemIndex: originItemIndex } = this.state;
+      let originStartItemTop = this.state.startItemTop;
+      for (let index = originStartIndex; index <= originItemIndex; index += 1) {
+        const key = this.getItemKey(index);
+        itemTops[key] = originStartItemTop;
+        originStartItemTop += this.itemElementHeights[key] || 0;
+      }
+
+      console.log('Length changed. Origin top:', itemTops, this.itemElementHeights);
+      const { scrollHeight, clientHeight } = this.listRef.current;
+      const maxScrollTop = scrollHeight - clientHeight;
+      for (let scrollTop = 0; scrollTop <= maxScrollTop; scrollTop += 1) {
+        const scrollPtg = getScrollPercentage({ scrollTop, scrollHeight, clientHeight });
+        const visibleCount = Math.ceil(height / itemHeight);
+
+        const { itemIndex, itemOffsetPtg, startIndex } = getRangeIndex(
+          scrollPtg,
+          dataSource.length,
+          visibleCount,
+        );
+
+        // const startItemTop = getStartItemTop({
+        //   itemIndex,
+        //   startIndex,
+        //   itemOffsetPtg,
+        //   itemElementHeights: this.itemElementHeights,
+        //   scrollTop: this.listRef.current.scrollTop,
+        //   scrollPtg,
+        //   clientHeight: this.listRef.current.clientHeight,
+        //   getItemKey: this.getItemKey,
+        // });
+
+        // console.log('=>', scrollTop, startIndex, startItemTop);
+      }
     }
   }
 
