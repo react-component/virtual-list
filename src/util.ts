@@ -14,7 +14,7 @@ interface LocationItemResult {
  *
  * `total` should be the real count instead of `total - 1` in calculation.
  */
-export function getLocationItem(scrollPtg: number, total: number): LocationItemResult {
+function getLocationItem(scrollPtg: number, total: number): LocationItemResult {
   const itemIndex = Math.floor(scrollPtg * total);
   const itemTopPtg = itemIndex / total;
   const itemBottomPtg = (itemIndex + 1) / total;
@@ -26,18 +26,29 @@ export function getLocationItem(scrollPtg: number, total: number): LocationItemR
   };
 }
 
-export function getScrollPercentage(element: HTMLElement | null) {
-  if (!element) {
-    return 0;
-  }
-
-  const { scrollTop, scrollHeight, clientHeight } = element;
+function internalGetScrollPercentage({
+  scrollTop,
+  scrollHeight,
+  clientHeight,
+}: {
+  scrollTop: number;
+  scrollHeight: number;
+  clientHeight: number;
+}): number {
   if (scrollHeight <= clientHeight) {
     return 0;
   }
 
   const scrollTopPtg = scrollTop / (scrollHeight - clientHeight);
   return scrollTopPtg;
+}
+
+export function getScrollPercentage(element: HTMLElement | null) {
+  if (!element) {
+    return 0;
+  }
+
+  return internalGetScrollPercentage(element);
 }
 
 /**
@@ -52,4 +63,28 @@ export function getNodeHeight(node: HTMLElement) {
   return findDOMNode(node).offsetHeight;
 }
 
-export function getStartItemTop(itemIndex: number) {}
+/**
+ * Get display items start, end, located item index. This is pure math calculation
+ */
+export function getRangeIndex(scrollPtg: number, itemCount: number, visibleCount: number) {
+  const { index, offsetPtg } = getLocationItem(scrollPtg, itemCount);
+
+  const beforeCount = Math.ceil(scrollPtg * visibleCount);
+  const afterCount = Math.ceil((1 - scrollPtg) * visibleCount);
+
+  return {
+    itemIndex: index,
+    itemOffsetPtg: offsetPtg,
+    startIndex: Math.max(0, index - beforeCount),
+    endIndex: Math.min(itemCount - 1, index + afterCount),
+  };
+}
+
+interface ItemTopConfig {
+  clientHeight: number;
+  scrollTop: number;
+  scrollPtg: number;
+  itemOffsetPtg: number;
+}
+
+export function getStartItemTop(itemIndex: number, itemElementHeights: { [key: string]: number }) {}

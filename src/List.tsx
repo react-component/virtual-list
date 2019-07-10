@@ -1,6 +1,6 @@
 import * as React from 'react';
 import Filler from './Filler';
-import { getLocationItem, getScrollPercentage, getNodeHeight } from './util';
+import { getScrollPercentage, getNodeHeight, getRangeIndex } from './util';
 
 type RenderFunc<T> = (item: T) => React.ReactNode;
 
@@ -17,7 +17,6 @@ interface ListState {
   status: 'NONE' | 'MEASURE_START' | 'MEASURE_DONE';
 
   scrollTop: number | null;
-  scrollPtg: number;
   itemIndex: number;
   itemOffsetPtg: number;
   startIndex: number;
@@ -49,7 +48,6 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
   state: ListState = {
     status: 'NONE',
     scrollTop: null,
-    scrollPtg: 0,
     itemIndex: 0,
     itemOffsetPtg: 0,
     startIndex: 0,
@@ -76,8 +74,8 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
    * Phase 5: Trigger re-render to use correct position
    */
   public componentDidUpdate(prevProps: ListProps<T>) {
-    const { status, scrollPtg, startIndex, endIndex, itemIndex, itemOffsetPtg } = this.state;
-    const { dataSource, itemKey } = this.props;
+    const { status, startIndex, endIndex, itemIndex, itemOffsetPtg } = this.state;
+    const { dataSource } = this.props;
 
     if (status === 'MEASURE_START') {
       // Record here since measure item height will get warning in `render`
@@ -87,6 +85,7 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
       }
 
       // Calculate top visible item top offset
+      const scrollPtg = getScrollPercentage(this.listRef.current);
       const locatedItemHeight = this.itemElementHeights[this.getItemKey(itemIndex)] || 0;
       const locatedItemTop = scrollPtg * this.listRef.current.clientHeight;
       const locatedItemOffset = itemOffsetPtg * locatedItemHeight;
@@ -121,21 +120,21 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
     }
 
     const scrollPtg = getScrollPercentage(this.listRef.current);
-
-    const { index, offsetPtg } = getLocationItem(scrollPtg, dataSource.length);
     const visibleCount = Math.ceil(height / itemHeight);
 
-    const beforeCount = Math.ceil(scrollPtg * visibleCount);
-    const afterCount = Math.ceil((1 - scrollPtg) * visibleCount);
+    const { itemIndex, itemOffsetPtg, startIndex, endIndex } = getRangeIndex(
+      scrollPtg,
+      dataSource.length,
+      visibleCount,
+    );
 
     this.setState({
       status: 'MEASURE_START',
       scrollTop,
-      scrollPtg,
-      itemIndex: index,
-      itemOffsetPtg: offsetPtg,
-      startIndex: Math.max(0, index - beforeCount),
-      endIndex: Math.min(dataSource.length - 1, index + afterCount),
+      itemIndex,
+      itemOffsetPtg,
+      startIndex,
+      endIndex,
     });
   };
 
