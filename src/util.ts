@@ -118,3 +118,20 @@ export function getItemTop({
 
   return locatedItemMergedTop;
 }
+
+export type OriginValues = {
+  key: string;
+  top: number;
+}[];
+export interface TargetValues {
+  [key: string]: number;
+}
+export function getSimilarity(origin: OriginValues, target: TargetValues): number {
+  for (let index = 0; index < origin.length; index += 1) {
+    const { key, top } = origin[index];
+    if (key in target) {
+      return Math.abs(target[key] - top);
+    }
+  }
+  return Number.MAX_VALUE;
+}

@@ -7,6 +7,9 @@ import {
   getRangeIndex,
   getItemTop,
   GHOST_ITEM_KEY,
+  OriginValues,
+  TargetValues,
+  getSimilarity,
 } from './util';
 
 type RenderFunc<T> = (item: T) => React.ReactNode;
@@ -128,12 +131,15 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
     // Re-calculate the scroll position align with the current visible item position
     if (prevProps.dataSource.length !== dataSource.length && height) {
       // We will record all the visible item top for next loop match check
-      const originItemTops: { [key: string]: number } = {};
+      const originItemTops: OriginValues = [];
       const { startIndex: originStartIndex, itemIndex: originItemIndex } = this.state;
       let originStartItemTop = this.state.startItemTop;
       for (let index = originStartIndex; index <= originItemIndex; index += 1) {
         const key = this.getItemKey(index, prevProps);
-        originItemTops[key] = originStartItemTop;
+        originItemTops.push({
+          key,
+          top: originStartItemTop,
+        });
         originStartItemTop += this.itemElementHeights[key] || 0;
       }
 
@@ -147,7 +153,12 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
       // Loop to get the adjusted item top
       const { scrollHeight, clientHeight } = this.listRef.current;
       const maxScrollTop = scrollHeight - clientHeight;
-      for (let scrollTop = 0; scrollTop <= maxScrollTop; scrollTop += 1) {
+
+      let bestScrollTop: number | null = null;
+      let bestSimilarity = Number.MAX_VALUE;
+      let debugItemTops: TargetValues = null;
+
+      for (let scrollTop = 0; scrollTop < maxScrollTop; scrollTop += 1) {
         const scrollPtg = getScrollPercentage({ scrollTop, scrollHeight, clientHeight });
         const visibleCount = Math.ceil(height / itemHeight);
 
@@ -167,14 +178,27 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
           getItemKey: this.getItemKey,
         });
 
-        const itemTops: { [key: string]: number } = {};
-        for (let index = itemIndex; index >= startIndex; index -= 1) {
+        const itemTops: TargetValues = {};
+        for (let index = itemIndex; index > startIndex; index -= 1) {
           const key = this.getItemKey(index);
           itemTops[key] = locatedItemTop;
-          locatedItemTop -= this.itemElementHeights[key] || 0;
+          const prevItemKey = this.getItemKey(index - 1);
+          locatedItemTop -= this.itemElementHeights[prevItemKey] || 0;
         }
 
-        console.log('=>', scrollTop, itemTops);
+        const similarity = getSimilarity(originItemTops, itemTops);
+        if (similarity < bestSimilarity) {
+          bestSimilarity = similarity;
+          bestScrollTop = scrollTop;
+          debugItemTops = itemTops;
+        }
+
+        console.log('=>', scrollTop, itemTops, getSimilarity(originItemTops, itemTops));
+      }
+
+      if (bestScrollTop) {
+        console.log('Best Top:', bestScrollTop, debugItemTops);
+        this.listRef.current.scrollTop = bestScrollTop;
       }
     }
   }
