@@ -6,6 +6,7 @@ import {
   getNodeHeight,
   getRangeIndex,
   getItemTop,
+  GHOST_ITEM_KEY,
 } from './util';
 
 type RenderFunc<T> = (item: T) => React.ReactNode;
@@ -136,7 +137,12 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
         originStartItemTop += this.itemElementHeights[key] || 0;
       }
 
-      console.log('Length changed. Origin top:', originItemTops, this.state.startIndex);
+      console.log(
+        'Length changed. Origin top:',
+        originItemTops,
+        this.state.startIndex,
+        this.itemElementHeights,
+      );
 
       // Loop to get the adjusted item top
       const { scrollHeight, clientHeight } = this.listRef.current;
@@ -151,7 +157,7 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
           visibleCount,
         );
 
-        const locatedItemTop = getItemTop({
+        let locatedItemTop = getItemTop({
           itemIndex,
           itemOffsetPtg,
           itemElementHeights: this.itemElementHeights,
@@ -165,7 +171,7 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
         for (let index = itemIndex; index >= startIndex; index -= 1) {
           const key = this.getItemKey(index);
           itemTops[key] = locatedItemTop;
-          originStartItemTop -= this.itemElementHeights[key] || 0;
+          locatedItemTop -= this.itemElementHeights[key] || 0;
         }
 
         console.log('=>', scrollTop, itemTops);
@@ -207,7 +213,16 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
 
   public getItemKey = (index: number, props?: ListProps<T>) => {
     const { dataSource, itemKey } = props || this.props;
+
+    // Return ghost key as latest index item
+    if (index === dataSource.length) {
+      return GHOST_ITEM_KEY;
+    }
+
     const item = dataSource[index];
+    if (!item) {
+      console.error('Not find index item. Please report this since it is a bug.');
+    }
     return item && itemKey ? item[itemKey] : index;
   };
 
