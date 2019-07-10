@@ -136,40 +136,45 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
       this.setState({ status: 'MEASURE_DONE', startItemTop });
     }
 
+    // TODO: If is add node
     // Re-calculate the scroll position align with the current visible item position
     if (prevProps.dataSource.length !== dataSource.length && height) {
-      // We will record all the visible item top for next loop match check
-      const originItemTops: OriginValues = [];
+      /**
+       * When an item removed,
+       * we should know the item (called as compare item) before the removed item position.
+       * After loop re-calculation, we need keep the compare item position not change.
+       */
+      // Find removed item key
+      const removedItemIndex: number = prevProps.dataSource.findIndex((_, index) => {
+        const key = this.getItemKey(index, prevProps);
+        return dataSource.every((__, nextIndex) => key !== this.getItemKey(nextIndex));
+      });
+
+      // We use the item before removed item as base compare position to enhance the accuracy
+      const compareItemIndex = removedItemIndex - 1;
+      const compareItemKey = this.getItemKey(compareItemIndex, prevProps);
+
       const { startIndex: originStartIndex, itemIndex: originItemIndex } = this.state;
-      let originStartItemTop = this.state.startItemTop;
+      let compareItemTop = this.state.startItemTop;
       for (let index = originStartIndex; index <= originItemIndex; index += 1) {
         const key = this.getItemKey(index, prevProps);
-        originItemTops.push({
-          key,
-          top: originStartItemTop,
-        });
-        originStartItemTop += this.itemElementHeights[key] || 0;
+        if (key === compareItemKey) {
+          break;
+        }
+
+        compareItemTop += this.itemElementHeights[key] || 0;
       }
 
-      console.log(
-        'Length changed. Origin top:',
-        originItemTops,
-        this.state.startIndex,
-        this.itemElementHeights,
-      );
-
-      // Loop to get the adjusted item top
+      // Loop to generate compared item top and find best one
       const { scrollHeight, clientHeight } = this.listRef.current;
       const maxScrollTop = scrollHeight - clientHeight;
 
-      let bestScrollTop: number | null = null;
-      let bestSimilarity = Number.MAX_VALUE;
+      let bestScrollTop: number = null;
+      let bestSimilarity: number = Number.MAX_VALUE;
       let bestItemIndex = 0;
       let bestItemOffsetPtg = 0;
       let bestStartIndex = 0;
       let bestEndIndex = 0;
-
-      let debugItemTops: TargetValues = null;
 
       for (let scrollTop = 0; scrollTop < maxScrollTop; scrollTop += 1) {
         const scrollPtg = getScrollPercentage({ scrollTop, scrollHeight, clientHeight });
@@ -191,34 +196,38 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
           getItemKey: this.getItemKey,
         });
 
-        const itemTops: TargetValues = {};
-        for (let index = itemIndex; index > startIndex; index -= 1) {
+        let newCompareItemTop: number = null;
+        for (let index = itemIndex; index >= startIndex; index -= 1) {
           const key = this.getItemKey(index);
-          itemTops[key] = locatedItemTop;
+          if (key === compareItemKey) {
+            newCompareItemTop = locatedItemTop;
+            break;
+          }
+
+          if (index <= 0) {
+            break;
+          }
+
           const prevItemKey = this.getItemKey(index - 1);
           locatedItemTop -= this.itemElementHeights[prevItemKey] || 0;
         }
 
-        const similarity = getSimilarity(originItemTops, itemTops);
-        const absSimilarity = Math.abs(similarity);
-
-        if (absSimilarity < bestSimilarity) {
-          bestSimilarity = absSimilarity;
-          bestScrollTop = scrollTop;
-          bestItemIndex = itemIndex;
-          bestItemOffsetPtg = itemOffsetPtg;
-          bestStartIndex = startIndex;
-          bestEndIndex = endIndex;
-
-          debugItemTops = itemTops;
+        if (newCompareItemTop !== null) {
+          const similarity = Math.abs(newCompareItemTop - compareItemTop);
+          if (similarity < bestSimilarity) {
+            bestScrollTop = scrollTop;
+            bestSimilarity = similarity;
+            bestItemIndex = itemIndex;
+            bestItemOffsetPtg = itemOffsetPtg;
+            bestStartIndex = startIndex;
+            bestEndIndex = endIndex;
+          }
         }
-
-        console.log('COMPARE:', absSimilarity.toFixed(3), itemTops);
       }
 
-      if (bestScrollTop) {
-        console.log('Best Top:', bestScrollTop, bestSimilarity, debugItemTops);
-        console.log('StartIndex:', bestStartIndex, this.getItemKey(bestStartIndex));
+      // Update `scrollTop` to new calculated position
+      console.log('DONE:', bestScrollTop);
+      if (bestScrollTop !== null) {
         this.lockScroll = true;
         this.listRef.current.scrollTop = bestScrollTop;
 
