@@ -52,7 +52,7 @@ const MyItem: React.FC<MyItemProps> = (
       }}
     >
       {({ className, style }, motionRef) => (
-        <div ref={motionRef} className={classNames('item', className)} style={style}>
+        <div ref={motionRef} className={classNames('item', className)} style={style} data-id={id}>
           <div style={{ height: uuid % 2 ? 100 : undefined }}>
             <button
               onClick={() => {
@@ -119,6 +119,7 @@ const Demo = () => {
 
         <List
           dataSource={dataSource}
+          data-id="list"
           height={200}
           itemHeight={30}
           itemKey="id"

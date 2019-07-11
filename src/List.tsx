@@ -127,6 +127,25 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
         getItemKey: this.getItemKey,
       });
 
+      // TODO: REMOVE ME
+      const locatedItemRelativeTop = getItemRelativeTop({
+        itemIndex,
+        itemOffsetPtg,
+        itemElementHeights: this.itemElementHeights,
+        scrollPtg: getElementScrollPercentage(this.listRef.current),
+        clientHeight: this.listRef.current.clientHeight,
+        getItemKey: this.getItemKey,
+      });
+      console.warn('MEASURE:::', this.getItemKey(itemIndex), locatedItemRelativeTop);
+      console.warn(
+        ' ->',
+        itemIndex,
+        itemOffsetPtg,
+        this.itemElementHeights,
+        getElementScrollPercentage(this.listRef.current),
+        this.listRef.current.clientHeight,
+      );
+
       let startItemTop = locatedItemTop;
       for (let index = itemIndex - 1; index >= startIndex; index -= 1) {
         startItemTop -= this.itemElementHeights[this.getItemKey(index)] || 0;
@@ -145,6 +164,7 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
         itemOffsetPtg: originItemOffsetPtg,
         startIndex: originStartIndex,
         endIndex: originEndIndex,
+        scrollTop: originScrollTop,
       } = this.state;
 
       // 1. Get origin located item top
@@ -152,7 +172,11 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
         itemIndex: originItemIndex,
         itemOffsetPtg: originItemOffsetPtg,
         itemElementHeights: this.itemElementHeights,
-        scrollPtg: getElementScrollPercentage(this.listRef.current),
+        scrollPtg: getScrollPercentage({
+          scrollTop: originScrollTop,
+          scrollHeight: prevProps.dataSource.length * itemHeight,
+          clientHeight: this.listRef.current.clientHeight,
+        }),
         clientHeight: this.listRef.current.clientHeight,
         getItemKey: (index: number) => this.getItemKey(index, prevProps),
       });
@@ -163,6 +187,18 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
         originItemOffsetPtg,
         this.getItemKey(originItemIndex, prevProps),
         originLocatedItemRelativeTop,
+      );
+      console.warn(
+        ' -> ',
+        originItemIndex,
+        originItemOffsetPtg,
+        this.itemElementHeights,
+        getScrollPercentage({
+          scrollTop: originScrollTop,
+          scrollHeight: prevProps.dataSource.length * itemHeight,
+          clientHeight: this.listRef.current.clientHeight,
+        }),
+        this.listRef.current.clientHeight,
       );
 
       // 2. Find the compare item
