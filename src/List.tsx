@@ -152,22 +152,34 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
 
       let originCompareItemIndex = removedItemIndex - 1;
       if (originCompareItemIndex >= originItemIndex) originCompareItemIndex = originItemIndex;
-      const compareItemKey = this.getItemKey(originCompareItemIndex, prevProps);
 
+      // Find compare item key & offset top
+      let compareItemIndex: number;
+      let compareItemKey: string;
       let originCompareItemTop = this.state.startItemTop;
-      for (let index = originStartIndex; index <= originItemIndex; index += 1) {
-        const key = this.getItemKey(index, prevProps);
-        if (key === compareItemKey) {
-          break;
+      if (originCompareItemIndex < 0) {
+        // If remove item is the first one, we have compare next one
+        originCompareItemIndex = 0;
+        compareItemIndex = 0;
+        compareItemKey = this.getItemKey(compareItemIndex);
+      } else {
+        // If exist compare item
+        compareItemKey = this.getItemKey(originCompareItemIndex, prevProps);
+
+        for (let index = originStartIndex; index <= originItemIndex; index += 1) {
+          const key = this.getItemKey(index, prevProps);
+          if (key === compareItemKey) {
+            break;
+          }
+
+          originCompareItemTop += this.itemElementHeights[key] || 0;
         }
 
-        originCompareItemTop += this.itemElementHeights[key] || 0;
+        // Find current compare item index
+        compareItemIndex = dataSource.findIndex(
+          (_, index) => this.getItemKey(index) === compareItemKey,
+        );
       }
-
-      // Find current compare item index
-      const compareItemIndex = dataSource.findIndex(
-        (_, index) => this.getItemKey(index) === compareItemKey,
-      );
 
       // Loop to generate compared item top and find best one
       const { scrollHeight, clientHeight } = this.listRef.current;
