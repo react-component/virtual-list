@@ -112,7 +112,6 @@ export function getItemRelativeTop({
   const locatedItemHeight = itemElementHeights[getItemKey(itemIndex)] || 0;
   const locatedItemTop = scrollPtg * clientHeight;
   const locatedItemOffset = itemOffsetPtg * locatedItemHeight;
-  console.error('GIRT:', locatedItemTop, scrollPtg, clientHeight);
   return locatedItemTop - locatedItemOffset;
 }
 
