@@ -194,9 +194,12 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
       let bestStartIndex: number = null;
       let bestEndIndex: number = null;
 
+      let missSimilarity = 0;
+
       const scrollHeight = dataSource.length * itemHeight;
       const { clientHeight } = this.listRef.current;
       const maxScrollTop = scrollHeight - clientHeight;
+
       for (let i = 0; i < maxScrollTop; i += 1) {
         const scrollTop = getIndexByStartLoc(0, maxScrollTop, originScrollTop, i);
 
@@ -240,7 +243,18 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
             bestItemOffsetPtg = itemOffsetPtg;
             bestStartIndex = startIndex;
             bestEndIndex = endIndex;
+
+            missSimilarity = 0;
+          } else {
+            missSimilarity += 1;
           }
+        }
+
+        // If keeping 10 times not match similarity,
+        // check more scrollTop is meaningless.
+        // Here boundary is set to 10.
+        if (missSimilarity > 10) {
+          break;
         }
       }
 
