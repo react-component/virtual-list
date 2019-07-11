@@ -9,7 +9,8 @@ import {
   GHOST_ITEM_KEY,
   getItemRelativeTop,
   getCompareItemRelativeTop,
-} from './util';
+} from './utils/itemUtil';
+import { getIndexByStartLoc, findListDiffIndex } from './utils/algorithmUtil';
 
 type RenderFunc<T> = (item: T) => React.ReactNode;
 
@@ -20,7 +21,7 @@ export interface ListProps<T> extends React.HTMLAttributes<any> {
   dataSource: T[];
   height?: number;
   itemHeight?: number;
-  itemKey?: string;
+  itemKey: string;
   component?: string | React.FC<any> | React.ComponentClass<any>;
 }
 
@@ -112,7 +113,7 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
 
       // Record here since measure item height will get warning in `render`
       for (let index = startIndex; index <= endIndex; index += 1) {
-        const eleKey = this.getItemKey(index);
+        const eleKey = this.getIndexKey(index);
         this.itemElementHeights[eleKey] = getNodeHeight(this.itemElements[eleKey]);
       }
 
@@ -124,12 +125,12 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
         scrollTop: this.listRef.current.scrollTop,
         scrollPtg: getElementScrollPercentage(this.listRef.current),
         clientHeight: this.listRef.current.clientHeight,
-        getItemKey: this.getItemKey,
+        getItemKey: this.getIndexKey,
       });
 
       let startItemTop = locatedItemTop;
       for (let index = itemIndex - 1; index >= startIndex; index -= 1) {
-        startItemTop -= this.itemElementHeights[this.getItemKey(index)] || 0;
+        startItemTop -= this.itemElementHeights[this.getIndexKey(index)] || 0;
       }
 
       this.setState({ status: 'MEASURE_DONE', startItemTop });
@@ -159,14 +160,15 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
           clientHeight: this.listRef.current.clientHeight,
         }),
         clientHeight: this.listRef.current.clientHeight,
-        getItemKey: (index: number) => this.getItemKey(index, prevProps),
+        getItemKey: (index: number) => this.getIndexKey(index, prevProps),
       });
 
       // 2. Find the compare item
-      const removedItemIndex: number = prevProps.dataSource.findIndex((_, index) => {
-        const key = this.getItemKey(index, prevProps);
-        return dataSource.every((__, nextIndex) => key !== this.getItemKey(nextIndex));
-      });
+      const removedItemIndex: number = findListDiffIndex(
+        prevProps.dataSource,
+        dataSource,
+        this.getItemKey,
+      );
       let originCompareItemIndex = removedItemIndex - 1;
       // Use next one since there are not more item before removed
       if (originCompareItemIndex < 0) {
@@ -180,7 +182,7 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
         compareItemIndex: originCompareItemIndex,
         startIndex: originStartIndex,
         endIndex: originEndIndex,
-        getItemKey: (index: number) => this.getItemKey(index, prevProps),
+        getItemKey: (index: number) => this.getIndexKey(index, prevProps),
         itemElementHeights: this.itemElementHeights,
       });
 
@@ -195,7 +197,9 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
       const scrollHeight = dataSource.length * itemHeight;
       const { clientHeight } = this.listRef.current;
       const maxScrollTop = scrollHeight - clientHeight;
-      for (let scrollTop = 0; scrollTop < maxScrollTop; scrollTop += 1) {
+      for (let i = 0; i < maxScrollTop; i += 1) {
+        const scrollTop = getIndexByStartLoc(0, maxScrollTop, originScrollTop, i);
+
         const scrollPtg = getScrollPercentage({ scrollTop, scrollHeight, clientHeight });
         const visibleCount = Math.ceil(height / itemHeight);
 
@@ -214,7 +218,7 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
             itemElementHeights: this.itemElementHeights,
             scrollPtg,
             clientHeight,
-            getItemKey: this.getItemKey,
+            getItemKey: this.getIndexKey,
           });
 
           const compareItemTop = getCompareItemRelativeTop({
@@ -223,7 +227,7 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
             compareItemIndex: originCompareItemIndex, // Same as origin index
             startIndex,
             endIndex,
-            getItemKey: this.getItemKey,
+            getItemKey: this.getIndexKey,
             itemElementHeights: this.itemElementHeights,
           });
 
@@ -295,8 +299,9 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
     });
   };
 
-  public getItemKey = (index: number, props?: ListProps<T>) => {
-    const { dataSource, itemKey } = props || this.props;
+  public getIndexKey = (index: number, props?: ListProps<T>) => {
+    const mergedProps = props || this.props;
+    const { dataSource } = mergedProps;
 
     // Return ghost key as latest index item
     if (index === dataSource.length) {
@@ -307,7 +312,13 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
     if (!item) {
       console.error('Not find index item. Please report this since it is a bug.');
     }
-    return item && itemKey ? item[itemKey] : index;
+
+    return this.getItemKey(item, mergedProps);
+  };
+
+  public getItemKey = (item: T, props?: ListProps<T>) => {
+    const { itemKey } = props || this.props;
+    return item ? item[itemKey] : null;
   };
 
   /**
@@ -318,7 +329,7 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
     list.map((item, index) => {
       const node = renderFunc(item) as React.ReactElement;
       const eleIndex = startIndex + index;
-      const eleKey = this.getItemKey(eleIndex);
+      const eleKey = this.getIndexKey(eleIndex);
 
       // Pass `key` and `ref` for internal measure
       return React.cloneElement(node, {

@@ -16,7 +16,7 @@ function genItem() {
 }
 
 const originDataSource: Item[] = [];
-for (let i = 0; i < 10000; i += 1) {
+for (let i = 0; i < 100000; i += 1) {
   originDataSource.push(genItem());
 }
 
@@ -116,6 +116,7 @@ const Demo = () => {
     <React.StrictMode>
       <div>
         <h2>Animate</h2>
+        <p>Current: {dataSource.length} records</p>
 
         <List
           dataSource={dataSource}

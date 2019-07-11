@@ -25,7 +25,7 @@ const MyItem: React.FC<Item> = ({ id }, ref) => {
 
 const ForwardMyItem = React.forwardRef(MyItem);
 
-class TestItem extends React.Component {
+class TestItem extends React.Component<{ id: number }> {
   render() {
     return <div style={{ lineHeight: '30px' }}>{this.props.id}</div>;
   }
@@ -68,6 +68,7 @@ const Demo = () => {
           dataSource={dataSource}
           height={200}
           itemHeight={30}
+          itemKey="id"
           style={{
             border: '1px solid red',
             boxSizing: 'border-box',
