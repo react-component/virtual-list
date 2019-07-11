@@ -112,7 +112,7 @@ export function getItemRelativeTop({
   const locatedItemHeight = itemElementHeights[getItemKey(itemIndex)] || 0;
   const locatedItemTop = scrollPtg * clientHeight;
   const locatedItemOffset = itemOffsetPtg * locatedItemHeight;
-  return locatedItemTop - locatedItemOffset;
+  return Math.floor(locatedItemTop - locatedItemOffset);
 }
 
 /**
