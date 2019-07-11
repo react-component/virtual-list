@@ -99,22 +99,71 @@ interface ItemTopConfig {
 }
 
 /**
- * Calculate the located item top.
+ * Calculate the located item related top with current window height
  */
-export function getItemTop({
+export function getItemRelativeTop({
   itemIndex,
   itemOffsetPtg,
   itemElementHeights,
-  scrollTop,
   scrollPtg,
   clientHeight,
   getItemKey,
-}: ItemTopConfig) {
-  // Calculate top visible item top offset
+}: Omit<ItemTopConfig, 'scrollTop'>) {
   const locatedItemHeight = itemElementHeights[getItemKey(itemIndex)] || 0;
   const locatedItemTop = scrollPtg * clientHeight;
   const locatedItemOffset = itemOffsetPtg * locatedItemHeight;
-  const locatedItemMergedTop = scrollTop + locatedItemTop - locatedItemOffset;
+  return locatedItemTop - locatedItemOffset;
+}
 
-  return locatedItemMergedTop;
+/**
+ * Calculate the located item absolute top with whole scroll height
+ */
+export function getItemAbsoluteTop({ scrollTop, ...rest }: ItemTopConfig) {
+  return scrollTop + getItemRelativeTop(rest);
+}
+
+interface CompareItemConfig {
+  locatedItemRelativeTop: number;
+  locatedItemIndex: number;
+  compareItemIndex: number;
+  getItemKey: (index: number) => string;
+  startIndex: number;
+  endIndex: number;
+  itemElementHeights: { [key: string]: number };
+}
+
+export function getCompareItemRelativeTop({
+  locatedItemRelativeTop,
+  locatedItemIndex,
+  compareItemIndex,
+  startIndex,
+  endIndex,
+  getItemKey,
+  itemElementHeights,
+}: CompareItemConfig) {
+  let originCompareItemTop: number = locatedItemRelativeTop;
+  const compareItemKey = getItemKey(compareItemIndex);
+
+  if (compareItemIndex <= locatedItemIndex) {
+    for (let index = locatedItemIndex; index >= startIndex; index -= 1) {
+      const key = getItemKey(index);
+      if (key === compareItemKey) {
+        break;
+      }
+
+      const prevItemKey = getItemKey(index - 1);
+      originCompareItemTop -= itemElementHeights[prevItemKey] || 0;
+    }
+  } else {
+    for (let index = locatedItemIndex; index <= endIndex; index += 1) {
+      const key = getItemKey(index);
+      if (key === compareItemKey) {
+        break;
+      }
+
+      originCompareItemTop += itemElementHeights[key] || 0;
+    }
+  }
+
+  return originCompareItemTop;
 }

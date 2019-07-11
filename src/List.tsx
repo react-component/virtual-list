@@ -5,8 +5,10 @@ import {
   getScrollPercentage,
   getNodeHeight,
   getRangeIndex,
-  getItemTop,
+  getItemAbsoluteTop,
   GHOST_ITEM_KEY,
+  getItemRelativeTop,
+  getCompareItemRelativeTop,
 } from './util';
 
 type RenderFunc<T> = (item: T) => React.ReactNode;
@@ -115,7 +117,7 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
       }
 
       // Calculate top visible item top offset
-      const locatedItemTop = getItemTop({
+      const locatedItemTop = getItemAbsoluteTop({
         itemIndex,
         itemOffsetPtg,
         itemElementHeights: this.itemElementHeights,
@@ -133,65 +135,73 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
       this.setState({ status: 'MEASURE_DONE', startItemTop });
     }
 
-    // TODO: If is add node
-    // Re-calculate the scroll position align with the current visible item position
+    /**
+     * Re-calculate the item position since `dataSource` length changed.
+     * [IMPORTANT] We use relative position calculate here.
+     */
     if (prevProps.dataSource.length !== dataSource.length && height) {
-      /**
-       * When an item removed,
-       * we should know the item (called as compare item) before the removed item position.
-       * After loop re-calculation, we need keep the compare item position not change.
-       */
-      // Find removed item key
+      const {
+        itemIndex: originItemIndex,
+        itemOffsetPtg: originItemOffsetPtg,
+        startIndex: originStartIndex,
+        endIndex: originEndIndex,
+      } = this.state;
+
+      // 1. Get origin located item top
+      const originLocatedItemRelativeTop = getItemRelativeTop({
+        itemIndex: originItemIndex,
+        itemOffsetPtg: originItemOffsetPtg,
+        itemElementHeights: this.itemElementHeights,
+        scrollPtg: getElementScrollPercentage(this.listRef.current),
+        clientHeight: this.listRef.current.clientHeight,
+        getItemKey: (index: number) => this.getItemKey(index, prevProps),
+      });
+
+      console.log(
+        '1. Origin Located:',
+        originItemIndex,
+        originItemOffsetPtg,
+        this.getItemKey(originItemIndex, prevProps),
+        originLocatedItemRelativeTop,
+      );
+
+      // 2. Find the compare item
       const removedItemIndex: number = prevProps.dataSource.findIndex((_, index) => {
         const key = this.getItemKey(index, prevProps);
         return dataSource.every((__, nextIndex) => key !== this.getItemKey(nextIndex));
       });
-
-      // We use the item before removed item as base compare position to enhance the accuracy
-      const { startIndex: originStartIndex, itemIndex: originItemIndex } = this.state;
-
       let originCompareItemIndex = removedItemIndex - 1;
-      if (originCompareItemIndex >= originItemIndex) originCompareItemIndex = originItemIndex;
-
-      // Find compare item key & offset top
-      let compareItemIndex: number;
-      let compareItemKey: string;
-      let originCompareItemTop = this.state.startItemTop;
+      // Use next one since there are not more item before removed
       if (originCompareItemIndex < 0) {
-        // If remove item is the first one, we have compare next one
         originCompareItemIndex = 0;
-        compareItemIndex = 0;
-        compareItemKey = this.getItemKey(compareItemIndex);
-      } else {
-        // If exist compare item
-        compareItemKey = this.getItemKey(originCompareItemIndex, prevProps);
-
-        for (let index = originStartIndex; index <= originItemIndex; index += 1) {
-          const key = this.getItemKey(index, prevProps);
-          if (key === compareItemKey) {
-            break;
-          }
-
-          originCompareItemTop += this.itemElementHeights[key] || 0;
-        }
-
-        // Find current compare item index
-        compareItemIndex = dataSource.findIndex(
-          (_, index) => this.getItemKey(index) === compareItemKey,
-        );
       }
+      const compareItemKey = this.getItemKey(originCompareItemIndex, prevProps);
+      console.log('2. Compare Item:', compareItemKey);
 
-      // Loop to generate compared item top and find best one
-      const { scrollHeight, clientHeight } = this.listRef.current;
-      const maxScrollTop = scrollHeight - clientHeight;
+      // 3. Find the compare item top
+      const originCompareItemTop = getCompareItemRelativeTop({
+        locatedItemRelativeTop: originLocatedItemRelativeTop,
+        locatedItemIndex: originItemIndex,
+        compareItemIndex: originCompareItemIndex,
+        startIndex: originStartIndex,
+        endIndex: originEndIndex,
+        getItemKey: (index: number) => this.getItemKey(index, prevProps),
+        itemElementHeights: this.itemElementHeights,
+      });
 
+      console.log('3. Compare Item Top:', originCompareItemTop);
+
+      // 4. Find the best match compare item top
+      let bestSimilarity = Number.MAX_VALUE;
       let bestScrollTop: number = null;
-      let bestSimilarity: number = Number.MAX_VALUE;
-      let bestItemIndex = 0;
-      let bestItemOffsetPtg = 0;
-      let bestStartIndex = 0;
-      let bestEndIndex = 0;
+      let bestItemIndex: number = null;
+      let bestItemOffsetPtg: number = null;
+      let bestStartIndex: number = null;
+      let bestEndIndex: number = null;
 
+      const scrollHeight = dataSource.length * itemHeight;
+      const { clientHeight } = this.listRef.current;
+      const maxScrollTop = scrollHeight - clientHeight;
       for (let scrollTop = 0; scrollTop < maxScrollTop; scrollTop += 1) {
         const scrollPtg = getScrollPercentage({ scrollTop, scrollHeight, clientHeight });
         const visibleCount = Math.ceil(height / itemHeight);
@@ -202,66 +212,59 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
           visibleCount,
         );
 
-        /**
-         * No need to check if compare item out of the index
-         * to save performance.
-         */
-        if (startIndex <= compareItemIndex && compareItemIndex <= endIndex) {
-          let locatedItemTop = getItemTop({
+        // No need to check if compare item out of the index to save performance
+        if (startIndex <= originCompareItemIndex && originCompareItemIndex <= endIndex) {
+          // 4.1 Get measure located item relative top
+          const locatedItemRelativeTop = getItemRelativeTop({
             itemIndex,
             itemOffsetPtg,
             itemElementHeights: this.itemElementHeights,
-            scrollTop: this.listRef.current.scrollTop,
             scrollPtg,
-            clientHeight: this.listRef.current.clientHeight,
+            clientHeight,
             getItemKey: this.getItemKey,
           });
 
-          let newCompareItemTop: number = null;
-          if (compareItemIndex <= itemIndex) {
-            // Measure if compare item is before located item
-            for (let index = itemIndex; index >= startIndex; index -= 1) {
-              const key = this.getItemKey(index);
-              if (key === compareItemKey) {
-                newCompareItemTop = locatedItemTop;
-                break;
-              }
+          const compareItemTop = getCompareItemRelativeTop({
+            locatedItemRelativeTop,
+            locatedItemIndex: itemIndex,
+            compareItemIndex: originCompareItemIndex, // Same as origin index
+            startIndex,
+            endIndex,
+            getItemKey: this.getItemKey,
+            itemElementHeights: this.itemElementHeights,
+          });
 
-              if (index <= 0) {
-                break;
-              }
+          // console.log('4.1 ScrollTop:', scrollTop, 'CompareTop:', compareItemTop);
 
-              const prevItemKey = this.getItemKey(index - 1);
-              locatedItemTop -= this.itemElementHeights[prevItemKey] || 0;
-            }
-          } else {
-            // Measure if compare item is after located item
-            for (let index = itemIndex; index <= endIndex; index += 1) {
-              const key = this.getItemKey(index);
-              locatedItemTop += this.itemElementHeights[key] || 0;
-              if (key === compareItemKey) {
-                newCompareItemTop = locatedItemTop;
-                break;
-              }
-            }
-          }
+          // 4.2 Find best match compare item top
+          const similarity = Math.abs(compareItemTop - originCompareItemTop);
+          if (similarity < bestSimilarity) {
+            console.log('4.2 Winner:', scrollTop, compareItemTop.toFixed(2));
+            console.log('  -> ', similarity.toFixed(2), bestSimilarity.toFixed(2));
 
-          if (newCompareItemTop !== null) {
-            const similarity = Math.abs(newCompareItemTop - originCompareItemTop);
-            if (similarity < bestSimilarity) {
-              bestScrollTop = scrollTop;
-              bestSimilarity = similarity;
-              bestItemIndex = itemIndex;
-              bestItemOffsetPtg = itemOffsetPtg;
-              bestStartIndex = startIndex;
-              bestEndIndex = endIndex;
-            }
+            bestSimilarity = similarity;
+            bestScrollTop = scrollTop;
+            bestItemIndex = itemIndex;
+            bestItemOffsetPtg = itemOffsetPtg;
+            bestStartIndex = startIndex;
+            bestEndIndex = endIndex;
           }
         }
       }
 
-      // Update `scrollTop` to new calculated position
+      // 5. Re-scroll if has best scroll match
       if (bestScrollTop !== null) {
+        console.log(
+          '5. Find best match:',
+          bestScrollTop,
+          'Located:',
+          bestItemIndex,
+          bestItemOffsetPtg,
+          'Range:',
+          bestStartIndex,
+          bestEndIndex,
+        );
+
         this.lockScroll = true;
         this.listRef.current.scrollTop = bestScrollTop;
 

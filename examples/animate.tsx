@@ -123,8 +123,9 @@ const Demo = () => {
           itemHeight={30}
           itemKey="id"
           style={{
-            border: '1px solid red',
-            boxSizing: 'border-box',
+            // border: '1px solid red',
+            // boxSizing: 'border-box',
+            boxShadow: '0 0 2px red',
           }}
         >
           {item => (
