@@ -127,25 +127,6 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
         getItemKey: this.getItemKey,
       });
 
-      // TODO: REMOVE ME
-      const locatedItemRelativeTop = getItemRelativeTop({
-        itemIndex,
-        itemOffsetPtg,
-        itemElementHeights: this.itemElementHeights,
-        scrollPtg: getElementScrollPercentage(this.listRef.current),
-        clientHeight: this.listRef.current.clientHeight,
-        getItemKey: this.getItemKey,
-      });
-      console.warn('MEASURE:::', this.getItemKey(itemIndex), locatedItemRelativeTop);
-      console.warn(
-        ' ->',
-        itemIndex,
-        itemOffsetPtg,
-        this.itemElementHeights,
-        getElementScrollPercentage(this.listRef.current),
-        this.listRef.current.clientHeight,
-      );
-
       let startItemTop = locatedItemTop;
       for (let index = itemIndex - 1; index >= startIndex; index -= 1) {
         startItemTop -= this.itemElementHeights[this.getItemKey(index)] || 0;
@@ -181,26 +162,6 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
         getItemKey: (index: number) => this.getItemKey(index, prevProps),
       });
 
-      console.log(
-        '1. Origin Located:',
-        originItemIndex,
-        originItemOffsetPtg,
-        this.getItemKey(originItemIndex, prevProps),
-        originLocatedItemRelativeTop,
-      );
-      console.warn(
-        ' -> ',
-        originItemIndex,
-        originItemOffsetPtg,
-        this.itemElementHeights,
-        getScrollPercentage({
-          scrollTop: originScrollTop,
-          scrollHeight: prevProps.dataSource.length * itemHeight,
-          clientHeight: this.listRef.current.clientHeight,
-        }),
-        this.listRef.current.clientHeight,
-      );
-
       // 2. Find the compare item
       const removedItemIndex: number = prevProps.dataSource.findIndex((_, index) => {
         const key = this.getItemKey(index, prevProps);
@@ -211,8 +172,6 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
       if (originCompareItemIndex < 0) {
         originCompareItemIndex = 0;
       }
-      const compareItemKey = this.getItemKey(originCompareItemIndex, prevProps);
-      console.log('2. Compare Item:', compareItemKey);
 
       // 3. Find the compare item top
       const originCompareItemTop = getCompareItemRelativeTop({
@@ -224,8 +183,6 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
         getItemKey: (index: number) => this.getItemKey(index, prevProps),
         itemElementHeights: this.itemElementHeights,
       });
-
-      console.log('3. Compare Item Top:', originCompareItemTop);
 
       // 4. Find the best match compare item top
       let bestSimilarity = Number.MAX_VALUE;
@@ -270,14 +227,9 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
             itemElementHeights: this.itemElementHeights,
           });
 
-          // console.log('4.1 ScrollTop:', scrollTop, 'CompareTop:', compareItemTop);
-
           // 4.2 Find best match compare item top
           const similarity = Math.abs(compareItemTop - originCompareItemTop);
           if (similarity < bestSimilarity) {
-            console.log('4.2 Winner:', scrollTop, compareItemTop.toFixed(2));
-            console.log('  -> ', similarity.toFixed(2), bestSimilarity.toFixed(2));
-
             bestSimilarity = similarity;
             bestScrollTop = scrollTop;
             bestItemIndex = itemIndex;
@@ -290,17 +242,6 @@ class List<T> extends React.Component<ListProps<T>, ListState> {
 
       // 5. Re-scroll if has best scroll match
       if (bestScrollTop !== null) {
-        console.log(
-          '5. Find best match:',
-          bestScrollTop,
-          'Located:',
-          bestItemIndex,
-          bestItemOffsetPtg,
-          'Range:',
-          bestStartIndex,
-          bestEndIndex,
-        );
-
         this.lockScroll = true;
         this.listRef.current.scrollTop = bestScrollTop;
 
