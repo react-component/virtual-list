@@ -9,6 +9,7 @@ import {
   GHOST_ITEM_KEY,
   getItemRelativeTop,
   getCompareItemRelativeTop,
+  alignScrollTop,
 } from './utils/itemUtil';
 import { getIndexByStartLoc, findListDiffIndex } from './utils/algorithmUtil';
 
@@ -227,7 +228,8 @@ class List<T> extends React.Component<ListProps<T>, ListState<T>> {
   public onScroll = () => {
     const { dataSource, height, itemHeight, disabled } = this.props;
 
-    const { scrollTop } = this.listRef.current;
+    const { scrollTop: originScrollTop, clientHeight, scrollHeight } = this.listRef.current;
+    const scrollTop = alignScrollTop(originScrollTop, scrollHeight - clientHeight);
 
     // Skip if `scrollTop` not change to avoid shake
     if (scrollTop === this.state.scrollTop || this.lockScroll || disabled) {

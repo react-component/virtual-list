@@ -32,6 +32,21 @@ function getLocationItem(scrollPtg: number, total: number): LocationItemResult {
   };
 }
 
+/**
+ * Safari has the elasticity effect which provides negative `scrollTop` value.
+ * We should ignore it since will make scroll animation shake.
+ */
+export function alignScrollTop(scrollTop: number, scrollRange: number) {
+  if (scrollTop < 0) {
+    return 0;
+  }
+  if (scrollTop >= scrollRange) {
+    return scrollRange;
+  }
+
+  return scrollTop;
+}
+
 export function getScrollPercentage({
   scrollTop,
   scrollHeight,
@@ -45,7 +60,9 @@ export function getScrollPercentage({
     return 0;
   }
 
-  const scrollTopPtg = scrollTop / (scrollHeight - clientHeight);
+  const scrollRange = scrollHeight - clientHeight;
+  const alignedScrollTop = alignScrollTop(scrollTop, scrollRange);
+  const scrollTopPtg = alignedScrollTop / scrollRange;
   return scrollTopPtg;
 }
 
