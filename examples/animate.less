@@ -1,0 +1,27 @@
+.motion {
+  transition: all .3s;
+}
+
+.item {
+  display: inline-block;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0 16px;
+  overflow: hidden;
+  line-height: 31px;
+  position: relative;
+
+  &::after {
+    content: '';
+    border-bottom: 1px solid gray;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+  }
+
+  button {
+    vertical-align: text-top;
+    margin-right: 8px;
+  }
+}
