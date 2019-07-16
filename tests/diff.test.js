@@ -1,7 +1,6 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import List from '../src';
-import Filler from '../src/Filler';
 import { spyElementPrototypes } from './utils/domHook';
 
 function genData(count) {
