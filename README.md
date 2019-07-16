@@ -1,6 +1,6 @@
 # rc-virtual-list
 
-React Virtual List Component which worked with `rc-animation`.
+React Virtual List Component which worked with animation.
 
 [![NPM version][npm-image]][npm-url] [![build status][circleci-image]][circleci-url] [![Test coverage][coveralls-image]][coveralls-url] [![node version][node-image]][node-url] [![npm download][download-image]][download-url]
 
@@ -14,3 +14,45 @@ React Virtual List Component which worked with `rc-animation`.
 [node-url]: http://nodejs.org/download/
 [download-image]: https://img.shields.io/npm/dm/rc-virtual-list.svg?style=flat-square
 [download-url]: https://npmjs.org/package/rc-virtual-list
+
+## Development
+
+```bash
+npm install
+npm start
+open http://localhost:9001/
+```
+
+## Feature
+
+- Support react.js
+- Support animation
+- Support IE11+
+
+## Install
+
+[![rc-virtual-list](https://nodei.co/npm/rc-virtual-list.png)](https://npmjs.org/package/rc-virtual-list)
+
+## Usage
+
+```js
+import List from 'rc-virtual-list';
+
+<List data={[0, 1, 2]} height={200} itemHeight={30} itemKey="id">
+  {index => <div>{index}</div>}
+</List>;
+```
+
+# API
+
+## List
+
+| Prop       | Description                                             | Type                 | Default |
+| ---------- | ------------------------------------------------------- | -------------------- | ------- |
+| children   | Render props of item                                    | item => ReactElement | -       |
+| component  | Customize List dom element                              | string \| Component  | div     |
+| data       | Data list                                               | Array                | -       |
+| disabled   | Disable scroll check. Usually used on animation control | boolean              | false   |
+| height     | List height                                             | number               | -       |
+| itemHeight | Item minium height                                      | number               | -       |
+| itemKey    | Match key with item                                     | string               | -       |
