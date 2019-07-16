@@ -102,13 +102,19 @@ class List<T> extends React.Component<ListProps<T>, ListState<T>> {
   /**
    * Always point to the latest props if `disabled` is `false`
    */
-  cachedProps: Partial<ListProps<T>> = {};
+  cachedProps: Partial<ListProps<T>>;
 
   /**
    * Lock scroll process with `onScroll` event.
    * This is used for `data` length change and `scrollTop` restore
    */
   lockScroll: boolean = false;
+
+  constructor(props: ListProps<T>) {
+    super(props);
+
+    this.cachedProps = props;
+  }
 
   /**
    * Phase 1: Initial should sync with default scroll top
@@ -211,7 +217,7 @@ class List<T> extends React.Component<ListProps<T>, ListState<T>> {
         itemElementHeights: this.itemElementHeights,
       });
 
-      this.scrollTo({
+      this.internalScrollTo({
         itemIndex: originCompareItemIndex,
         relativeTop: originCompareItemTop,
       });
@@ -264,6 +270,7 @@ class List<T> extends React.Component<ListProps<T>, ListState<T>> {
 
     const item = data[index];
     if (!item) {
+      /* istanbul ignore next */
       console.error('Not find index item. Please report this since it is a bug.');
     }
 
@@ -288,106 +295,106 @@ class List<T> extends React.Component<ListProps<T>, ListState<T>> {
     }
   };
 
-  public scrollTo(arg: number | RelativeScroll): void {
-    if (typeof arg === 'number') {
-      this.listRef.current.scrollTop = arg;
-    } else if (typeof arg === 'object') {
-      const { itemIndex: compareItemIndex, relativeTop: compareItemRelativeTop } = arg;
-      const { scrollTop: originScrollTop } = this.state;
-      const { data, itemHeight, height } = this.props;
+  public scrollTo(scrollTop: number) {
+    this.listRef.current.scrollTop = scrollTop;
+  }
 
-      // 1. Find the best match compare item top
-      let bestSimilarity = Number.MAX_VALUE;
-      let bestScrollTop: number = null;
-      let bestItemIndex: number = null;
-      let bestItemOffsetPtg: number = null;
-      let bestStartIndex: number = null;
-      let bestEndIndex: number = null;
+  public internalScrollTo(relativeScroll: RelativeScroll): void {
+    const { itemIndex: compareItemIndex, relativeTop: compareItemRelativeTop } = relativeScroll;
+    const { scrollTop: originScrollTop } = this.state;
+    const { data, itemHeight, height } = this.props;
 
-      let missSimilarity = 0;
+    // 1. Find the best match compare item top
+    let bestSimilarity = Number.MAX_VALUE;
+    let bestScrollTop: number = null;
+    let bestItemIndex: number = null;
+    let bestItemOffsetPtg: number = null;
+    let bestStartIndex: number = null;
+    let bestEndIndex: number = null;
 
-      const scrollHeight = data.length * itemHeight;
-      const { clientHeight } = this.listRef.current;
-      const maxScrollTop = scrollHeight - clientHeight;
+    let missSimilarity = 0;
 
-      for (let i = 0; i < maxScrollTop; i += 1) {
-        const scrollTop = getIndexByStartLoc(0, maxScrollTop, originScrollTop, i);
+    const scrollHeight = data.length * itemHeight;
+    const { clientHeight } = this.listRef.current;
+    const maxScrollTop = scrollHeight - clientHeight;
 
-        const scrollPtg = getScrollPercentage({ scrollTop, scrollHeight, clientHeight });
-        const visibleCount = Math.ceil(height / itemHeight);
+    for (let i = 0; i < maxScrollTop; i += 1) {
+      const scrollTop = getIndexByStartLoc(0, maxScrollTop, originScrollTop, i);
 
-        const { itemIndex, itemOffsetPtg, startIndex, endIndex } = getRangeIndex(
+      const scrollPtg = getScrollPercentage({ scrollTop, scrollHeight, clientHeight });
+      const visibleCount = Math.ceil(height / itemHeight);
+
+      const { itemIndex, itemOffsetPtg, startIndex, endIndex } = getRangeIndex(
+        scrollPtg,
+        data.length,
+        visibleCount,
+      );
+
+      // No need to check if compare item out of the index to save performance
+      if (startIndex <= compareItemIndex && compareItemIndex <= endIndex) {
+        // 1.1 Get measure located item relative top
+        const locatedItemRelativeTop = getItemRelativeTop({
+          itemIndex,
+          itemOffsetPtg,
+          itemElementHeights: this.itemElementHeights,
           scrollPtg,
-          data.length,
-          visibleCount,
-        );
+          clientHeight,
+          getItemKey: this.getIndexKey,
+        });
 
-        // No need to check if compare item out of the index to save performance
-        if (startIndex <= compareItemIndex && compareItemIndex <= endIndex) {
-          // 1.1 Get measure located item relative top
-          const locatedItemRelativeTop = getItemRelativeTop({
-            itemIndex,
-            itemOffsetPtg,
-            itemElementHeights: this.itemElementHeights,
-            scrollPtg,
-            clientHeight,
-            getItemKey: this.getIndexKey,
-          });
+        const compareItemTop = getCompareItemRelativeTop({
+          locatedItemRelativeTop,
+          locatedItemIndex: itemIndex,
+          compareItemIndex, // Same as origin index
+          startIndex,
+          endIndex,
+          getItemKey: this.getIndexKey,
+          itemElementHeights: this.itemElementHeights,
+        });
 
-          const compareItemTop = getCompareItemRelativeTop({
-            locatedItemRelativeTop,
-            locatedItemIndex: itemIndex,
-            compareItemIndex, // Same as origin index
-            startIndex,
-            endIndex,
-            getItemKey: this.getIndexKey,
-            itemElementHeights: this.itemElementHeights,
-          });
+        // 1.2 Find best match compare item top
+        const similarity = Math.abs(compareItemTop - compareItemRelativeTop);
+        if (similarity < bestSimilarity) {
+          bestSimilarity = similarity;
+          bestScrollTop = scrollTop;
+          bestItemIndex = itemIndex;
+          bestItemOffsetPtg = itemOffsetPtg;
+          bestStartIndex = startIndex;
+          bestEndIndex = endIndex;
 
-          // 1.2 Find best match compare item top
-          const similarity = Math.abs(compareItemTop - compareItemRelativeTop);
-          if (similarity < bestSimilarity) {
-            bestSimilarity = similarity;
-            bestScrollTop = scrollTop;
-            bestItemIndex = itemIndex;
-            bestItemOffsetPtg = itemOffsetPtg;
-            bestStartIndex = startIndex;
-            bestEndIndex = endIndex;
-
-            missSimilarity = 0;
-          } else {
-            missSimilarity += 1;
-          }
-        }
-
-        // If keeping 10 times not match similarity,
-        // check more scrollTop is meaningless.
-        // Here boundary is set to 10.
-        if (missSimilarity > 10) {
-          break;
+          missSimilarity = 0;
+        } else {
+          missSimilarity += 1;
         }
       }
 
-      // 2. Re-scroll if has best scroll match
-      if (bestScrollTop !== null) {
-        this.lockScroll = true;
-        this.listRef.current.scrollTop = bestScrollTop;
+      // If keeping 10 times not match similarity,
+      // check more scrollTop is meaningless.
+      // Here boundary is set to 10.
+      if (missSimilarity > 10) {
+        break;
+      }
+    }
 
-        this.setState({
-          status: 'MEASURE_START',
-          scrollTop: bestScrollTop,
-          itemIndex: bestItemIndex,
-          itemOffsetPtg: bestItemOffsetPtg,
-          startIndex: bestStartIndex,
-          endIndex: bestEndIndex,
-        });
+    // 2. Re-scroll if has best scroll match
+    if (bestScrollTop !== null) {
+      this.lockScroll = true;
+      this.listRef.current.scrollTop = bestScrollTop;
 
+      this.setState({
+        status: 'MEASURE_START',
+        scrollTop: bestScrollTop,
+        itemIndex: bestItemIndex,
+        itemOffsetPtg: bestItemOffsetPtg,
+        startIndex: bestStartIndex,
+        endIndex: bestEndIndex,
+      });
+
+      requestAnimationFrame(() => {
         requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            this.lockScroll = false;
-          });
+          this.lockScroll = false;
         });
-      }
+      });
     }
   }
 
