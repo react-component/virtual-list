@@ -114,8 +114,10 @@ class List<T> extends React.Component<ListProps<T>, ListState<T>> {
    * Phase 1: Initial should sync with default scroll top
    */
   public componentDidMount() {
-    this.listRef.current.scrollTop = 0;
-    this.onScroll();
+    if (this.listRef.current) {
+      this.listRef.current.scrollTop = 0;
+      this.onScroll();
+    }
   }
 
   /**
@@ -127,7 +129,7 @@ class List<T> extends React.Component<ListProps<T>, ListState<T>> {
     const { data, height, itemHeight, disabled } = this.props;
     const prevData: T[] = this.cachedProps.data || [];
 
-    if (disabled) {
+    if (disabled || !this.listRef.current) {
       return;
     }
 
