@@ -30,7 +30,7 @@ export interface ScrollInfo {
 
 export interface ListProps<T> extends React.HTMLAttributes<any> {
   children: RenderFunc<T>;
-  dataSource: T[];
+  data: T[];
   height?: number;
   itemHeight?: number;
   itemKey: string;
@@ -50,7 +50,7 @@ interface ListState<T> {
   endIndex: number;
   /**
    * Calculated by `scrollTop`.
-   * We cache in the state since if `dataSource` length change,
+   * We cache in the state since if `data` length change,
    * we need revert back to the located item index.
    */
   startItemTop: number;
@@ -80,7 +80,7 @@ interface ListState<T> {
 class List<T> extends React.Component<ListProps<T>, ListState<T>> {
   static defaultProps = {
     itemHeight: 15,
-    dataSource: [],
+    data: [],
   };
 
   state: ListState<T> = {
@@ -106,7 +106,7 @@ class List<T> extends React.Component<ListProps<T>, ListState<T>> {
 
   /**
    * Lock scroll process with `onScroll` event.
-   * This is used for `dataSource` length change and `scrollTop` restore
+   * This is used for `data` length change and `scrollTop` restore
    */
   lockScroll: boolean = false;
 
@@ -124,8 +124,8 @@ class List<T> extends React.Component<ListProps<T>, ListState<T>> {
    */
   public componentDidUpdate() {
     const { status } = this.state;
-    const { dataSource, height, itemHeight, disabled } = this.props;
-    const prevDataSource: T[] = this.cachedProps.dataSource || [];
+    const { data, height, itemHeight, disabled } = this.props;
+    const prevData: T[] = this.cachedProps.data || [];
 
     if (disabled) {
       return;
@@ -161,10 +161,10 @@ class List<T> extends React.Component<ListProps<T>, ListState<T>> {
     }
 
     /**
-     * Re-calculate the item position since `dataSource` length changed.
+     * Re-calculate the item position since `data` length changed.
      * [IMPORTANT] We use relative position calculate here.
      */
-    if (prevDataSource.length !== dataSource.length && height) {
+    if (prevData.length !== data.length && height) {
       const {
         itemIndex: originItemIndex,
         itemOffsetPtg: originItemOffsetPtg,
@@ -183,7 +183,7 @@ class List<T> extends React.Component<ListProps<T>, ListState<T>> {
         itemElementHeights: this.itemElementHeights,
         scrollPtg: getScrollPercentage({
           scrollTop: originScrollTop,
-          scrollHeight: prevDataSource.length * itemHeight,
+          scrollHeight: prevData.length * itemHeight,
           clientHeight: this.listRef.current.clientHeight,
         }),
         clientHeight: this.listRef.current.clientHeight,
@@ -191,11 +191,7 @@ class List<T> extends React.Component<ListProps<T>, ListState<T>> {
       });
 
       // 2. Find the compare item
-      const changedItemIndex: number = findListDiffIndex(
-        prevDataSource,
-        dataSource,
-        this.getItemKey,
-      );
+      const changedItemIndex: number = findListDiffIndex(prevData, data, this.getItemKey);
       let originCompareItemIndex = changedItemIndex - 1;
       // Use next one since there are not more item before removed
       if (originCompareItemIndex < 0) {
@@ -226,7 +222,7 @@ class List<T> extends React.Component<ListProps<T>, ListState<T>> {
    * Phase 2: Trigger render since we should re-calculate current position.
    */
   public onScroll = () => {
-    const { dataSource, height, itemHeight, disabled } = this.props;
+    const { data, height, itemHeight, disabled } = this.props;
 
     const { scrollTop: originScrollTop, clientHeight, scrollHeight } = this.listRef.current;
     const scrollTop = alignScrollTop(originScrollTop, scrollHeight - clientHeight);
@@ -241,7 +237,7 @@ class List<T> extends React.Component<ListProps<T>, ListState<T>> {
 
     const { itemIndex, itemOffsetPtg, startIndex, endIndex } = getRangeIndex(
       scrollPtg,
-      dataSource.length,
+      data.length,
       visibleCount,
     );
 
@@ -257,14 +253,14 @@ class List<T> extends React.Component<ListProps<T>, ListState<T>> {
 
   public getIndexKey = (index: number, props?: Partial<ListProps<T>>) => {
     const mergedProps = props || this.props;
-    const { dataSource = [] } = mergedProps;
+    const { data = [] } = mergedProps;
 
     // Return ghost key as latest index item
-    if (index === dataSource.length) {
+    if (index === data.length) {
       return GHOST_ITEM_KEY;
     }
 
-    const item = dataSource[index];
+    const item = data[index];
     if (!item) {
       console.error('Not find index item. Please report this since it is a bug.');
     }
@@ -296,7 +292,7 @@ class List<T> extends React.Component<ListProps<T>, ListState<T>> {
     } else if (typeof arg === 'object') {
       const { itemIndex: compareItemIndex, relativeTop: compareItemRelativeTop } = arg;
       const { scrollTop: originScrollTop } = this.state;
-      const { dataSource, itemHeight, height } = this.props;
+      const { data, itemHeight, height } = this.props;
 
       // 1. Find the best match compare item top
       let bestSimilarity = Number.MAX_VALUE;
@@ -308,7 +304,7 @@ class List<T> extends React.Component<ListProps<T>, ListState<T>> {
 
       let missSimilarity = 0;
 
-      const scrollHeight = dataSource.length * itemHeight;
+      const scrollHeight = data.length * itemHeight;
       const { clientHeight } = this.listRef.current;
       const maxScrollTop = scrollHeight - clientHeight;
 
@@ -320,7 +316,7 @@ class List<T> extends React.Component<ListProps<T>, ListState<T>> {
 
         const { itemIndex, itemOffsetPtg, startIndex, endIndex } = getRangeIndex(
           scrollPtg,
-          dataSource.length,
+          data.length,
           visibleCount,
         );
 
@@ -418,7 +414,7 @@ class List<T> extends React.Component<ListProps<T>, ListState<T>> {
       component: Component = 'div',
       height,
       itemHeight,
-      dataSource,
+      data,
       children,
       itemKey,
       ...restProps
@@ -432,21 +428,21 @@ class List<T> extends React.Component<ListProps<T>, ListState<T>> {
     };
 
     // Render pure list if not set height or height is enough for all items
-    if (height === undefined || dataSource.length * itemHeight <= height) {
+    if (height === undefined || data.length * itemHeight <= height) {
       return (
         <Component style={mergedStyle} {...restProps}>
-          <Filler height={height}>{this.renderChildren(dataSource, 0, children)}</Filler>
+          <Filler height={height}>{this.renderChildren(data, 0, children)}</Filler>
         </Component>
       );
     }
 
     const { status, startIndex, endIndex, startItemTop } = this.state;
-    const contentHeight = dataSource.length * itemHeight * ITEM_SCALE_RATE;
+    const contentHeight = data.length * itemHeight * ITEM_SCALE_RATE;
 
     return (
       <Component style={mergedStyle} {...restProps} onScroll={this.onScroll} ref={this.listRef}>
         <Filler height={contentHeight} offset={status === 'MEASURE_DONE' ? startItemTop : 0}>
-          {this.renderChildren(dataSource.slice(startIndex, endIndex + 1), startIndex, children)}
+          {this.renderChildren(data.slice(startIndex, endIndex + 1), startIndex, children)}
         </Filler>
       </Component>
     );

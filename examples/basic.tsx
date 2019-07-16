@@ -31,9 +31,9 @@ class TestItem extends React.Component<{ id: number }> {
   }
 }
 
-const dataSource: Item[] = [];
+const data: Item[] = [];
 for (let i = 0; i < 100; i += 1) {
-  dataSource.push({
+  data.push({
     id: i,
   });
 }
@@ -65,7 +65,7 @@ const Demo = () => {
         ))}
 
         <List
-          dataSource={dataSource}
+          data={data}
           height={200}
           itemHeight={30}
           itemKey="id"

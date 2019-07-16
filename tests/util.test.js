@@ -38,5 +38,10 @@ describe('Util', () => {
     for (let i = 0; i < 100; i += 1) {
       test(`diff index: ${i}`, 100, i);
     }
+
+    it('same list', () => {
+      const list = [1, 2, 3, 4];
+      expect(findListDiffIndex(list, list, num => num)).toEqual(null);
+    });
   });
 });

@@ -2,7 +2,7 @@ import findDOMNode from 'rc-util/lib/Dom/findDOMNode';
 
 /**
  * Our algorithm have additional one ghost item
- * whose index as `dataSource.length` to simplify the calculation
+ * whose index as `data.length` to simplify the calculation
  */
 export const GHOST_ITEM_KEY = '__rc_ghost_item__';
 

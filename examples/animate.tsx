@@ -2,7 +2,7 @@ import * as React from 'react';
 // @ts-ignore
 import CSSMotion from 'rc-animate/lib/CSSMotion';
 import classNames from 'classnames';
-import List, { ScrollInfo } from '../src/List';
+import List from '../src/List';
 import './animate.less';
 
 let uuid = 0;
@@ -15,9 +15,9 @@ function genItem() {
   return item;
 }
 
-const originDataSource: Item[] = [];
+const originData: Item[] = [];
 for (let i = 0; i < 100000; i += 1) {
-  originDataSource.push(genItem());
+  originData.push(genItem());
 }
 
 interface Item {
@@ -100,7 +100,7 @@ const MyItem: React.FC<MyItemProps> = (
 const ForwardMyItem = React.forwardRef(MyItem);
 
 const Demo = () => {
-  const [dataSource, setDataSource] = React.useState(originDataSource);
+  const [data, setData] = React.useState(originData);
   const [closeMap, setCloseMap] = React.useState<{ [id: number]: boolean }>({});
   const [animating, setAnimating] = React.useState(false);
   const [insertIndex, setInsertIndex] = React.useState<number>();
@@ -115,8 +115,8 @@ const Demo = () => {
   };
 
   const onLeave = (id: string) => {
-    const newDataSource = dataSource.filter(item => item.id !== id);
-    setDataSource(newDataSource);
+    const newData = data.filter(item => item.id !== id);
+    setData(newData);
   };
 
   const onAppear = (...args: any[]) => {
@@ -128,17 +128,17 @@ const Demo = () => {
   }
 
   const onInsertBefore = (id: string) => {
-    const index = dataSource.findIndex(item => item.id === id);
-    const newDataSource = [...dataSource.slice(0, index), genItem(), ...dataSource.slice(index)];
+    const index = data.findIndex(item => item.id === id);
+    const newData = [...data.slice(0, index), genItem(), ...data.slice(index)];
     setInsertIndex(index);
-    setDataSource(newDataSource);
+    setData(newData);
     lockForAnimation();
   };
   const onInsertAfter = (id: string) => {
-    const index = dataSource.findIndex(item => item.id === id) + 1;
-    const newDataSource = [...dataSource.slice(0, index), genItem(), ...dataSource.slice(index)];
+    const index = data.findIndex(item => item.id === id) + 1;
+    const newData = [...data.slice(0, index), genItem(), ...data.slice(index)];
     setInsertIndex(index);
-    setDataSource(newDataSource);
+    setData(newData);
     lockForAnimation();
   };
 
@@ -146,10 +146,10 @@ const Demo = () => {
     <React.StrictMode>
       <div>
         <h2>Animate</h2>
-        <p>Current: {dataSource.length} records</p>
+        <p>Current: {data.length} records</p>
 
         <List<Item>
-          dataSource={dataSource}
+          data={data}
           data-id="list"
           height={200}
           itemHeight={30}

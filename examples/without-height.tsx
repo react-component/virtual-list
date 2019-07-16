@@ -30,7 +30,7 @@ const data: Item[] = [];
 for (let i = 0; i < 100; i += 1) {
   data.push({
     id: i,
-    height: 30 + (i % 2 ? 70 : 0),
+    height: 30 + (i % 2 ? 20 : 0),
   });
 }
 
@@ -38,11 +38,10 @@ const Demo = () => {
   return (
     <React.StrictMode>
       <div>
-        <h2>Dynamic Height</h2>
+        <h2>Without Height</h2>
 
         <List
           data={data}
-          height={500}
           itemHeight={30}
           itemKey="id"
           style={{
