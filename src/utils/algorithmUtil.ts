@@ -22,7 +22,7 @@ export function getIndexByStartLoc(min: number, max: number, start: number, inde
     if (index % 2) {
       return start + stepIndex + 1;
     }
-      return start - stepIndex;
+    return start - stepIndex;
   }
 
   // One is out of range
@@ -46,7 +46,7 @@ export function findListDiffIndex<T>(
   }
 
   let startIndex = 0;
-  let endIndex = originList.length - 1;
+  let endIndex = Math.max(originList.length, targetList.length) - 1;
   let midIndex = Math.floor((startIndex + endIndex) / 2);
 
   const keyCache: Map<T, string | { __EMPTY_ITEM__: true }> = new Map();

@@ -38,8 +38,35 @@ const Demo = () => {
   return (
     <React.StrictMode>
       <div>
-        <h2>Without Height</h2>
+        <h2>Less Count</h2>
+        <List
+          data={data.slice(0, 1)}
+          itemHeight={30}
+          height={100}
+          itemKey="id"
+          style={{
+            border: '1px solid red',
+            boxSizing: 'border-box',
+          }}
+        >
+          {item => <ForwardMyItem {...item} />}
+        </List>
 
+        <h2>Less Item Height</h2>
+        <List
+          data={data.slice(0, 10)}
+          itemHeight={1}
+          height={100}
+          itemKey="id"
+          style={{
+            border: '1px solid red',
+            boxSizing: 'border-box',
+          }}
+        >
+          {item => <ForwardMyItem {...item} />}
+        </List>
+
+        <h2>Without Height</h2>
         <List
           data={data}
           itemHeight={30}
