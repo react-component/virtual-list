@@ -25,7 +25,8 @@ const Filler: React.FC<FillerProps> = ({ height, offset, children }): React.Reac
 
     innerStyle = {
       ...innerStyle,
-      marginTop: offset,
+      transform: `translateY(${offset}px)`,
+      willChange: 'transform',
       position: 'absolute',
       left: 0,
       right: 0,
