@@ -74,7 +74,13 @@ const Demo = () => {
             boxSizing: 'border-box',
           }}
         >
-          {item => (type === 'dom' ? <ForwardMyItem {...item} /> : <TestItem {...item} />)}
+          {(item, _, props) =>
+            type === 'dom' ? (
+              <ForwardMyItem {...item} {...props} />
+            ) : (
+              <TestItem {...item} {...props} />
+            )
+          }
         </List>
       </div>
     </React.StrictMode>

@@ -13,7 +13,11 @@ import {
 } from './utils/itemUtil';
 import { getIndexByStartLoc, findListDiffIndex } from './utils/algorithmUtil';
 
-type RenderFunc<T> = (item: T, index: number) => React.ReactNode;
+type RenderFunc<T> = (
+  item: T,
+  index: number,
+  props: { style: React.CSSProperties },
+) => React.ReactNode;
 
 const ITEM_SCALE_RATE = 1;
 
@@ -401,11 +405,14 @@ class List<T> extends React.Component<ListProps<T>, ListState<T>> {
   /**
    * Phase 4: Render item and get all the visible items height
    */
-  public renderChildren = (list: T[], startIndex: number, renderFunc: RenderFunc<T>) =>
+  public renderChildren = (list: T[], startIndex: number, renderFunc: RenderFunc<T>) => {
+    const { status } = this.state;
     // We should measure rendered item height
-    list.map((item, index) => {
+    return list.map((item, index) => {
       const eleIndex = startIndex + index;
-      const node = renderFunc(item, eleIndex) as React.ReactElement;
+      const node = renderFunc(item, eleIndex, {
+        style: status === 'MEASURE_START' ? { visibility: 'hidden' } : {},
+      }) as React.ReactElement;
       const eleKey = this.getIndexKey(eleIndex);
 
       // Pass `key` and `ref` for internal measure
@@ -416,6 +423,7 @@ class List<T> extends React.Component<ListProps<T>, ListState<T>> {
         },
       });
     });
+  };
 
   public render() {
     const {
