@@ -13,6 +13,11 @@ import {
 } from './utils/itemUtil';
 import { getIndexByStartLoc, findListDiffIndex } from './utils/algorithmUtil';
 
+const ScrollStyle = {
+  overflowY: 'auto',
+  overflowAnchor: 'none',
+};
+
 type RenderFunc<T> = (
   item: T,
   index: number,
@@ -437,21 +442,21 @@ class List<T> extends React.Component<ListProps<T>, ListState<T>> {
       ...restProps
     } = this.props;
 
-    const mergedStyle = {
-      ...style,
-      height,
-      overflowY: 'auto',
-      overflowAnchor: 'none',
-    };
-
     // Render pure list if not set height or height is enough for all items
     if (height === undefined || data.length * itemHeight <= height) {
       return (
-        <Component style={mergedStyle} {...restProps}>
+        <Component style={height ? { ...style, ...ScrollStyle } : style} {...restProps}>
           <Filler height={height}>{this.renderChildren(data, 0, children)}</Filler>
         </Component>
       );
     }
+
+    // Use virtual list
+    const mergedStyle = {
+      ...style,
+      height,
+      ...ScrollStyle,
+    };
 
     const { status, startIndex, endIndex, startItemTop } = this.state;
     const contentHeight = data.length * itemHeight * ITEM_SCALE_RATE;
