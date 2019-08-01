@@ -443,7 +443,7 @@ class List<T> extends React.Component<ListProps<T>, ListState<T>> {
     } = this.props;
 
     // Render pure list if not set height or height is enough for all items
-    if (height === undefined || data.length * itemHeight <= height) {
+    if (typeof height !== 'number' || data.length * itemHeight <= height) {
       return (
         <Component style={height ? { ...style, height, ...ScrollStyle } : style} {...restProps}>
           <Filler height={height}>{this.renderChildren(data, 0, children)}</Filler>
