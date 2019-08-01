@@ -45,6 +45,9 @@ export interface ListProps<T> extends React.HTMLAttributes<any> {
   itemKey: string;
   component?: string | React.FC<any> | React.ComponentClass<any>;
   disabled?: boolean;
+
+  /** When `disabled`, trigger if changed item not render. */
+  onSkipRender?: () => void;
 }
 
 interface ListState<T> {
@@ -141,10 +144,23 @@ class List<T> extends React.Component<ListProps<T>, ListState<T>> {
    */
   public componentDidUpdate() {
     const { status } = this.state;
-    const { data, height, itemHeight, disabled } = this.props;
+    const { data, height, itemHeight, disabled, onSkipRender } = this.props;
     const prevData: T[] = this.cachedProps.data || [];
 
-    if (disabled || !this.listRef.current) {
+    if (!this.listRef.current) {
+      return;
+    }
+
+    const changedItemIndex: number =
+      prevData.length !== data.length ? findListDiffIndex(prevData, data, this.getItemKey) : null;
+
+    if (disabled) {
+      if (data.length > prevData.length) {
+        const { startIndex, endIndex } = this.state;
+        if (changedItemIndex < startIndex || endIndex < changedItemIndex) {
+          onSkipRender();
+        }
+      }
       return;
     }
 
@@ -208,7 +224,6 @@ class List<T> extends React.Component<ListProps<T>, ListState<T>> {
       });
 
       // 2. Find the compare item
-      const changedItemIndex: number = findListDiffIndex(prevData, data, this.getItemKey);
       let originCompareItemIndex = changedItemIndex - 1;
       // Use next one since there are not more item before removed
       if (originCompareItemIndex < 0) {

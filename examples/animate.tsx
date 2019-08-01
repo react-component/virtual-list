@@ -16,7 +16,7 @@ function genItem() {
 }
 
 const originData: Item[] = [];
-for (let i = 0; i < 100000; i += 1) {
+for (let i = 0; i < 11; i += 1) {
   originData.push(genItem());
 }
 
@@ -152,7 +152,7 @@ const Demo = () => {
           data={data}
           data-id="list"
           height={200}
-          itemHeight={30}
+          itemHeight={20}
           itemKey="id"
           disabled={animating}
           ref={listRef}
@@ -160,6 +160,8 @@ const Demo = () => {
             border: '1px solid red',
             boxSizing: 'border-box',
           }}
+
+          onSkipRender={onAppear}
         >
           {(item, index) => (
             <ForwardMyItem
