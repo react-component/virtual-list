@@ -184,3 +184,7 @@ export function getCompareItemRelativeTop({
 
   return originCompareItemTop;
 }
+
+export function requireVirtual(height: number, itemHeight: number, count: number) {
+  return typeof height === 'number' && count * itemHeight > height;
+}
