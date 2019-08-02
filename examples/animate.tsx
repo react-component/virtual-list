@@ -16,7 +16,7 @@ function genItem() {
 }
 
 const originData: Item[] = [];
-for (let i = 0; i < 11; i += 1) {
+for (let i = 0; i < 1000; i += 1) {
   originData.push(genItem());
 }
 
@@ -61,9 +61,6 @@ const MyItem: React.FC<MyItemProps> = (
       }}
     >
       {({ className, style }, motionRef) => {
-        // if (uuid >= 100) {
-        //   console.log('=>', id, className, style);
-        // }
         return (
           <div ref={motionRef} className={classNames('item', className)} style={style} data-id={id}>
             <div style={{ height: uuid % 2 ? 100 : undefined }}>

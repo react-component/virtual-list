@@ -10,6 +10,7 @@ import {
   getItemRelativeTop,
   getCompareItemRelativeTop,
   alignScrollTop,
+  requireVirtual,
 } from './utils/itemUtil';
 import { getIndexByStartLoc, findListDiffIndex } from './utils/algorithmUtil';
 
@@ -50,8 +51,10 @@ export interface ListProps<T> extends React.HTMLAttributes<any> {
   onSkipRender?: () => void;
 }
 
+type Status = 'NONE' | 'MEASURE_START' | 'MEASURE_DONE' | 'SWITCH_TO_VIRTUAL' | 'SWITCH_TO_RAW';
+
 interface ListState<T> {
-  status: 'NONE' | 'MEASURE_START' | 'MEASURE_DONE';
+  status: Status;
 
   scrollTop: number | null;
   /** Located item index */
@@ -66,6 +69,15 @@ interface ListState<T> {
    * we need revert back to the located item index.
    */
   startItemTop: number;
+
+  /**
+   * Tell if is using virtual scroll
+   */
+  isVirtual: boolean;
+  /**
+   * Only used when turn virtual list to raw list
+   */
+  cacheScroll?: RelativeScroll;
 }
 
 /**
@@ -95,16 +107,6 @@ class List<T> extends React.Component<ListProps<T>, ListState<T>> {
     data: [],
   };
 
-  state: ListState<T> = {
-    status: 'NONE',
-    scrollTop: null,
-    itemIndex: 0,
-    itemOffsetPtg: 0,
-    startIndex: 0,
-    endIndex: 0,
-    startItemTop: 0,
-  };
-
   listRef = React.createRef<HTMLElement>();
 
   itemElements: { [index: number]: HTMLElement } = {};
@@ -126,6 +128,17 @@ class List<T> extends React.Component<ListProps<T>, ListState<T>> {
     super(props);
 
     this.cachedProps = props;
+
+    this.state = {
+      status: 'NONE',
+      scrollTop: null,
+      itemIndex: 0,
+      itemOffsetPtg: 0,
+      startIndex: 0,
+      endIndex: 0,
+      startItemTop: 0,
+      isVirtual: requireVirtual(props.height, props.itemHeight, props.data.length),
+    };
   }
 
   /**
@@ -155,13 +168,32 @@ class List<T> extends React.Component<ListProps<T>, ListState<T>> {
       prevData.length !== data.length ? findListDiffIndex(prevData, data, this.getItemKey) : null;
 
     if (disabled) {
+      // Should trigger `onSkipRender` to tell that diff component is not render in the list
       if (data.length > prevData.length) {
         const { startIndex, endIndex } = this.state;
-        if (changedItemIndex < startIndex || endIndex < changedItemIndex) {
+        if (onSkipRender && (changedItemIndex < startIndex || endIndex < changedItemIndex)) {
           onSkipRender();
         }
       }
       return;
+    }
+
+    const isVirtual = requireVirtual(height, itemHeight, data.length);
+    let nextStatus = status;
+    if (this.state.isVirtual !== isVirtual) {
+      nextStatus = isVirtual ? 'SWITCH_TO_VIRTUAL' : 'SWITCH_TO_RAW';
+      this.setState({
+        isVirtual,
+        status: nextStatus,
+      });
+
+      /**
+       * We will wait a tick to let list turn to virtual list.
+       * And then use virtual list sync logic to adjust the scroll.
+       */
+      if (nextStatus === 'SWITCH_TO_VIRTUAL') {
+        return;
+      }
     }
 
     if (status === 'MEASURE_START') {
@@ -193,13 +225,38 @@ class List<T> extends React.Component<ListProps<T>, ListState<T>> {
       });
     }
 
-    /**
-     * Re-calculate the item position since `data` length changed.
-     * [IMPORTANT] We use relative position calculate here.
-     */
-    if (prevData.length !== data.length && height) {
+    if (status === 'SWITCH_TO_RAW') {
+      /**
+       * After virtual list back to raw list,
+       * we update the `scrollTop` to real top instead of percentage top.
+       */
       const {
-        itemIndex: originItemIndex,
+        cacheScroll: { itemIndex, relativeTop },
+      } = this.state;
+      let rawTop = relativeTop;
+      for (let index = 0; index < itemIndex; index += 1) {
+        rawTop -= this.itemElementHeights[this.getIndexKey(index)] || 0;
+      }
+
+      this.lockScroll = true;
+      this.listRef.current.scrollTop = -rawTop;
+
+      this.setState({
+        status: 'MEASURE_DONE',
+      });
+
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          this.lockScroll = false;
+        });
+      });
+    } else if (prevData.length !== data.length && height) {
+      /**
+       * Re-calculate the item position since `data` length changed.
+       * [IMPORTANT] We use relative position calculate here.
+       */
+      let { itemIndex: originItemIndex } = this.state;
+      const {
         itemOffsetPtg: originItemOffsetPtg,
         startIndex: originStartIndex,
         endIndex: originEndIndex,
@@ -210,18 +267,25 @@ class List<T> extends React.Component<ListProps<T>, ListState<T>> {
       this.collectItemHeights();
 
       // 1. Get origin located item top
-      const originLocatedItemRelativeTop = getItemRelativeTop({
-        itemIndex: originItemIndex,
-        itemOffsetPtg: originItemOffsetPtg,
-        itemElementHeights: this.itemElementHeights,
-        scrollPtg: getScrollPercentage({
-          scrollTop: originScrollTop,
-          scrollHeight: prevData.length * itemHeight,
+      let originLocatedItemRelativeTop: number;
+
+      if (this.state.status === 'SWITCH_TO_VIRTUAL') {
+        originItemIndex = 0;
+        originLocatedItemRelativeTop = -this.state.scrollTop;
+      } else {
+        originLocatedItemRelativeTop = getItemRelativeTop({
+          itemIndex: originItemIndex,
+          itemOffsetPtg: originItemOffsetPtg,
+          itemElementHeights: this.itemElementHeights,
+          scrollPtg: getScrollPercentage({
+            scrollTop: originScrollTop,
+            scrollHeight: prevData.length * itemHeight,
+            clientHeight: this.listRef.current.clientHeight,
+          }),
           clientHeight: this.listRef.current.clientHeight,
-        }),
-        clientHeight: this.listRef.current.clientHeight,
-        getItemKey: (index: number) => this.getIndexKey(index, this.cachedProps),
-      });
+          getItemKey: (index: number) => this.getIndexKey(index, this.cachedProps),
+        });
+      }
 
       // 2. Find the compare item
       let originCompareItemIndex = changedItemIndex - 1;
@@ -241,10 +305,22 @@ class List<T> extends React.Component<ListProps<T>, ListState<T>> {
         itemElementHeights: this.itemElementHeights,
       });
 
-      this.internalScrollTo({
-        itemIndex: originCompareItemIndex,
-        relativeTop: originCompareItemTop,
-      });
+      if (nextStatus === 'SWITCH_TO_RAW') {
+        /**
+         * We will record current measure relative item top and apply in raw list after list turned
+         */
+        this.setState({
+          cacheScroll: {
+            itemIndex: originCompareItemIndex,
+            relativeTop: originCompareItemTop,
+          },
+        });
+      } else {
+        this.internalScrollTo({
+          itemIndex: originCompareItemIndex,
+          relativeTop: originCompareItemTop,
+        });
+      }
     }
 
     this.cachedProps = this.props;
@@ -281,6 +357,12 @@ class List<T> extends React.Component<ListProps<T>, ListState<T>> {
       startIndex,
       endIndex,
     });
+  };
+
+  public onRawScroll = () => {
+    const { scrollTop } = this.listRef.current;
+
+    this.setState({ scrollTop });
   };
 
   public getIndexKey = (index: number, props?: Partial<ListProps<T>>) => {
@@ -446,6 +528,7 @@ class List<T> extends React.Component<ListProps<T>, ListState<T>> {
   };
 
   public render() {
+    const { isVirtual } = this.state;
     const {
       style,
       component: Component = 'div',
@@ -454,13 +537,19 @@ class List<T> extends React.Component<ListProps<T>, ListState<T>> {
       data,
       children,
       itemKey,
+      onSkipRender,
       ...restProps
     } = this.props;
 
     // Render pure list if not set height or height is enough for all items
-    if (typeof height !== 'number' || data.length * itemHeight <= height) {
+    if (!isVirtual) {
       return (
-        <Component style={height ? { ...style, height, ...ScrollStyle } : style} {...restProps}>
+        <Component
+          style={height ? { ...style, height, ...ScrollStyle } : style}
+          {...restProps}
+          onScroll={this.onRawScroll}
+          ref={this.listRef}
+        >
           <Filler height={height}>{this.renderChildren(data, 0, children)}</Filler>
         </Component>
       );
