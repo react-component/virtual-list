@@ -160,10 +160,6 @@ class List<T> extends React.Component<ListProps<T>, ListState<T>> {
     const { data, height, itemHeight, disabled, onSkipRender } = this.props;
     const prevData: T[] = this.cachedProps.data || [];
 
-    if (!this.listRef.current) {
-      return;
-    }
-
     const changedItemIndex: number =
       prevData.length !== data.length ? findListDiffIndex(prevData, data, this.getItemKey) : null;
 

@@ -10,13 +10,17 @@ function genData(count) {
 
 describe('List', () => {
   function genList(props) {
-    return mount(
-      <div>
-        <List component="ul" itemKey="id" {...props}>
-          {({ id }) => <li>{id}</li>}
-        </List>
-      </div>,
+    let node = (
+      <List component="ul" itemKey="id" {...props}>
+        {({ id }) => <li>{id}</li>}
+      </List>
     );
+
+    if (props.ref) {
+      node = <div>{node}</div>;
+    }
+
+    return mount(node);
   }
 
   describe('raw', () => {
@@ -34,23 +38,26 @@ describe('List', () => {
 
   describe('virtual', () => {
     let scrollTop = 0;
+    let mockElement;
 
-    const mockElement = spyElementPrototypes(HTMLElement, {
-      offsetHeight: {
-        get: () => 20,
-      },
-      scrollHeight: {
-        get: () => 2000,
-      },
-      clientHeight: {
-        get: () => 100,
-      },
-      scrollTop: {
-        get: () => scrollTop,
-        set(_, val) {
-          scrollTop = val;
+    beforeAll(() => {
+      mockElement = spyElementPrototypes(HTMLElement, {
+        offsetHeight: {
+          get: () => 20,
         },
-      },
+        scrollHeight: {
+          get: () => 2000,
+        },
+        clientHeight: {
+          get: () => 100,
+        },
+        scrollTop: {
+          get: () => scrollTop,
+          set(_, val) {
+            scrollTop = val;
+          },
+        },
+      });
     });
 
     afterAll(() => {
@@ -72,6 +79,22 @@ describe('List', () => {
       expect(wrapper.find(Filler).props().height).toEqual(2000);
       expect(wrapper.find(Filler).props().offset + wrapper.find('li').length * 20).toEqual(2000);
     });
+
+    it('render out of view', () => {
+      scrollTop = 0;
+      let data = genData(20);
+      const onSkipRender = jest.fn();
+      const wrapper = genList({ itemHeight: 20, height: 100, disabled: true, data, onSkipRender });
+
+      data = [{ id: 'beforeAll' }, ...data];
+      wrapper.setProps({ data });
+      expect(onSkipRender).not.toHaveBeenCalled();
+
+      wrapper.setProps({ disabled: false });
+      data = [...data, { id: 'afterAll' }];
+      wrapper.setProps({ data, disabled: true });
+      expect(onSkipRender).toHaveBeenCalled();
+    });
   });
 
   describe('scrollTo', () => {
@@ -81,6 +104,76 @@ describe('List', () => {
     it('value scroll', () => {
       listRef.current.scrollTo(903);
       expect(wrapper.find('ul').instance().scrollTop).toEqual(903);
+    });
+  });
+
+  describe('status switch', () => {
+    let scrollTop = 0;
+    let scrollHeight = 0;
+
+    let mockLiElement;
+    let mockElement;
+
+    beforeAll(() => {
+      mockLiElement = spyElementPrototypes(HTMLLIElement, {
+        offsetHeight: {
+          get: () => 40,
+        },
+      });
+
+      mockElement = spyElementPrototypes(HTMLElement, {
+        scrollHeight: {
+          get: () => scrollHeight,
+        },
+        clientHeight: {
+          get: () => 100,
+        },
+        scrollTop: {
+          get: () => scrollTop,
+          set(_, val) {
+            scrollTop = val;
+          },
+        },
+      });
+    });
+
+    afterAll(() => {
+      mockElement.mockRestore();
+      mockLiElement.mockRestore();
+    });
+
+    it('raw to virtual', () => {
+      let data = genData(5);
+      const wrapper = genList({ itemHeight: 20, height: 100, data });
+
+      scrollHeight = 200;
+      scrollTop = 40;
+      wrapper.find('ul').simulate('scroll', {
+        scrollTop,
+      });
+
+      scrollHeight = 120;
+      data = [...data, { id: 'afterAll' }];
+      wrapper.setProps({ data });
+      expect(wrapper.find('ul').instance().scrollTop < 10).toBeTruthy();
+    });
+
+    it('virtual to raw', done => {
+      let data = genData(6);
+      const wrapper = genList({ itemHeight: 20, height: 100, data });
+
+      scrollHeight = 120;
+      scrollTop = 10;
+      wrapper.find('ul').simulate('scroll', {
+        scrollTop,
+      });
+
+      scrollHeight = 200;
+      data = data.slice(0, -1);
+      wrapper.setProps({ data });
+      expect(wrapper.find('ul').instance().scrollTop > 40).toBeTruthy();
+
+      setTimeout(done, 50);
     });
   });
 });
