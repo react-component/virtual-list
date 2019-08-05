@@ -21,7 +21,7 @@ const Filler: React.FC<FillerProps> = ({ height, offset, children }): React.Reac
   };
 
   if (offset !== undefined) {
-    outerStyle = { height, position: 'relative', overflow: 'visible' };
+    outerStyle = { height, position: 'relative', overflow: 'hidden' };
 
     innerStyle = {
       ...innerStyle,
