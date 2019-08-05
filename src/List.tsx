@@ -405,11 +405,17 @@ class List<T> extends React.Component<ListProps<T>, ListState<T>> {
    */
   public collectItemHeights = () => {
     const { startIndex, endIndex } = this.state;
+    const { data } = this.props;
 
     // Record here since measure item height will get warning in `render`
     for (let index = startIndex; index <= endIndex; index += 1) {
-      const eleKey = this.getIndexKey(index);
-      this.itemElementHeights[eleKey] = getNodeHeight(this.itemElements[eleKey]);
+      const item = data[index];
+
+      // Only collect exist item height
+      if (item) {
+        const eleKey = this.getItemKey(item);
+        this.itemElementHeights[eleKey] = getNodeHeight(this.itemElements[eleKey]);
+      }
     }
   };
 
