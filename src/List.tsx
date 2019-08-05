@@ -78,6 +78,10 @@ interface ListState<T> {
    * Only used when turn virtual list to raw list
    */
   cacheScroll?: RelativeScroll;
+  /**
+   * Cache `data.length` to use for `disabled` status.
+   */
+  itemCount: number;
 }
 
 /**
@@ -138,7 +142,18 @@ class List<T> extends React.Component<ListProps<T>, ListState<T>> {
       endIndex: 0,
       startItemTop: 0,
       isVirtual: requireVirtual(props.height, props.itemHeight, props.data.length),
+      itemCount: props.data.length,
     };
+  }
+
+  static getDerivedStateFromProps(nextProps: ListProps<any>) {
+    if (!nextProps.disabled) {
+      return {
+        itemCount: nextProps.data.length,
+      };
+    }
+
+    return null;
   }
 
   /**
@@ -524,7 +539,7 @@ class List<T> extends React.Component<ListProps<T>, ListState<T>> {
   };
 
   public render() {
-    const { isVirtual } = this.state;
+    const { isVirtual, itemCount } = this.state;
     const {
       style,
       component: Component = 'div',
@@ -559,7 +574,7 @@ class List<T> extends React.Component<ListProps<T>, ListState<T>> {
     };
 
     const { status, startIndex, endIndex, startItemTop } = this.state;
-    const contentHeight = data.length * itemHeight * ITEM_SCALE_RATE;
+    const contentHeight = itemCount * itemHeight * ITEM_SCALE_RATE;
 
     return (
       <Component style={mergedStyle} {...restProps} onScroll={this.onScroll} ref={this.listRef}>
