@@ -43,7 +43,7 @@ export interface ListProps<T> extends React.HTMLAttributes<any> {
   data: T[];
   height?: number;
   itemHeight?: number;
-  itemKey: string;
+  itemKey: string | ((item: T) => string);
   component?: string | React.FC<any> | React.ComponentClass<any>;
   disabled?: boolean;
 
@@ -396,7 +396,8 @@ class List<T> extends React.Component<ListProps<T>, ListState<T>> {
 
   public getItemKey = (item: T, props?: Partial<ListProps<T>>) => {
     const { itemKey } = props || this.props;
-    return item ? item[itemKey] : null;
+
+    return typeof itemKey === 'function' ? itemKey(item) : item[itemKey];
   };
 
   /**
