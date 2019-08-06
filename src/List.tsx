@@ -19,7 +19,7 @@ const ScrollStyle = {
   overflowAnchor: 'none',
 };
 
-type RenderFunc<T> = (
+export type RenderFunc<T> = (
   item: T,
   index: number,
   props: { style: React.CSSProperties },
