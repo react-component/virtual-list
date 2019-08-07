@@ -3,6 +3,10 @@ import OriginList from './List';
 import Filler from './Filler';
 
 class List<T> extends OriginList<T> {
+  componentDidUpdate() {
+    // Do nothing since this is a mock!
+  }
+
   render() {
     const {
       style,
