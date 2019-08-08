@@ -30,4 +30,14 @@ describe('Props', () => {
         .key(),
     ).toBe('1128');
   });
+
+  it('prefixCls', () => {
+    const wrapper = mount(
+      <List data={[0]} itemKey={id => id} prefixCls="prefix">
+        {id => <div>{id}</div>}
+      </List>,
+    );
+
+    expect(wrapper.find('.prefix-holder-inner').length).toBeTruthy();
+  });
 });

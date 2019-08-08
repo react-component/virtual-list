@@ -1,6 +1,8 @@
 import * as React from 'react';
+import classNames from 'classnames';
 
 interface FillerProps {
+  prefixCls?: string;
   /** Virtual filler height. Should be `count * itemMinHeight` */
   height: number;
   /** Set offset of visible items. Should be the top of start item position */
@@ -12,7 +14,12 @@ interface FillerProps {
 /**
  * Fill component to provided the scroll content real height.
  */
-const Filler: React.FC<FillerProps> = ({ height, offset, children }): React.ReactElement => {
+const Filler: React.FC<FillerProps> = ({
+  height,
+  offset,
+  children,
+  prefixCls,
+}): React.ReactElement => {
   let outerStyle: React.CSSProperties = {};
 
   let innerStyle: React.CSSProperties = {
@@ -36,7 +43,14 @@ const Filler: React.FC<FillerProps> = ({ height, offset, children }): React.Reac
 
   return (
     <div style={outerStyle}>
-      <div style={innerStyle}>{children}</div>
+      <div
+        style={innerStyle}
+        className={classNames({
+          [`${prefixCls}-holder-inner`]: prefixCls,
+        })}
+      >
+        {children}
+      </div>
     </div>
   );
 };

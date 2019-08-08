@@ -1,4 +1,5 @@
 import * as React from 'react';
+import classNames from 'classnames';
 import OriginList from './List';
 import Filler from './Filler';
 
@@ -9,7 +10,9 @@ class List<T> extends OriginList<T> {
 
   render() {
     const {
+      prefixCls,
       style,
+      className,
       component: Component = 'div',
       height,
       itemHeight,
@@ -20,9 +23,13 @@ class List<T> extends OriginList<T> {
       ...restProps
     } = this.props;
 
+    const mergedClassName = classNames(prefixCls, className);
+
     return (
-      <Component style={{ ...style, height }} {...restProps}>
-        <Filler height={height}>{this.renderChildren(data, 0, children)}</Filler>
+      <Component style={{ ...style, height }} className={mergedClassName} {...restProps}>
+        <Filler prefixCls={prefixCls} height={height}>
+          {this.renderChildren(data, 0, children)}
+        </Filler>
       </Component>
     );
   }

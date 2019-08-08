@@ -1,4 +1,5 @@
 import * as React from 'react';
+import classNames from 'classnames';
 import Filler from './Filler';
 import {
   getElementScrollPercentage,
@@ -39,6 +40,7 @@ export interface ScrollInfo {
 }
 
 export interface ListProps<T> extends React.HTMLAttributes<any> {
+  prefixCls?: string;
   children: RenderFunc<T>;
   data: T[];
   height?: number;
@@ -548,7 +550,9 @@ class List<T> extends React.Component<ListProps<T>, ListState<T>> {
   public render() {
     const { isVirtual, itemCount } = this.state;
     const {
+      prefixCls,
       style,
+      className,
       component: Component = 'div',
       height,
       itemHeight,
@@ -559,16 +563,21 @@ class List<T> extends React.Component<ListProps<T>, ListState<T>> {
       ...restProps
     } = this.props;
 
+    const mergedClassName = classNames(prefixCls, className);
+
     // Render pure list if not set height or height is enough for all items
     if (!isVirtual) {
       return (
         <Component
           style={height ? { ...style, height, ...ScrollStyle } : style}
+          className={mergedClassName}
           {...restProps}
           onScroll={this.onRawScroll}
           ref={this.listRef}
         >
-          <Filler height={height}>{this.renderChildren(data, 0, children)}</Filler>
+          <Filler prefixCls={prefixCls} height={height}>
+            {this.renderChildren(data, 0, children)}
+          </Filler>
         </Component>
       );
     }
@@ -584,8 +593,18 @@ class List<T> extends React.Component<ListProps<T>, ListState<T>> {
     const contentHeight = itemCount * itemHeight * ITEM_SCALE_RATE;
 
     return (
-      <Component style={mergedStyle} {...restProps} onScroll={this.onScroll} ref={this.listRef}>
-        <Filler height={contentHeight} offset={status === 'MEASURE_DONE' ? startItemTop : 0}>
+      <Component
+        style={mergedStyle}
+        className={mergedClassName}
+        {...restProps}
+        onScroll={this.onScroll}
+        ref={this.listRef}
+      >
+        <Filler
+          prefixCls={prefixCls}
+          height={contentHeight}
+          offset={status === 'MEASURE_DONE' ? startItemTop : 0}
+        >
           {this.renderChildren(data.slice(startIndex, endIndex + 1), startIndex, children)}
         </Filler>
       </Component>
