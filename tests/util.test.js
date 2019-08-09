@@ -53,7 +53,10 @@ describe('Util', () => {
             const targetList = originList.slice();
             targetList.splice(diff, 1);
 
-            expect(findListDiffIndex(originList, targetList, num => num)).toEqual(diff);
+            expect(findListDiffIndex(originList, targetList, num => num)).toEqual({
+              index: diff,
+              multiple: false,
+            });
           });
         }
 
@@ -69,7 +72,10 @@ describe('Util', () => {
             const targetList = originList.slice();
             targetList.splice(diff, 0, 'NEW_ITEM');
 
-            expect(findListDiffIndex(originList, targetList, num => num)).toEqual(diff);
+            expect(findListDiffIndex(originList, targetList, num => num)).toEqual({
+              index: diff,
+              multiple: false,
+            });
           });
         }
 
@@ -84,21 +90,57 @@ describe('Util', () => {
       });
 
       it('small list', () => {
-        expect(findListDiffIndex([0], [], num => num)).toEqual(0);
-        expect(findListDiffIndex([0, 1], [0], num => num)).toEqual(1);
-        expect(findListDiffIndex([0, 1, 2], [0], num => num)).toEqual(null);
-        expect(findListDiffIndex([], [0], num => num)).toEqual(0);
-        expect(findListDiffIndex([0], [0, 1], num => num)).toEqual(1);
+        expect(findListDiffIndex([0], [], num => num)).toEqual({
+          index: 0,
+          multiple: false,
+        });
+        expect(findListDiffIndex([0, 1], [0], num => num)).toEqual({
+          index: 1,
+          multiple: false,
+        });
+        expect(findListDiffIndex([0, 1, 2], [0], num => num)).toEqual({
+          index: 1,
+          multiple: true,
+        });
+        expect(findListDiffIndex([], [0], num => num)).toEqual({
+          index: 0,
+          multiple: false,
+        });
+        expect(findListDiffIndex([0], [0, 1], num => num)).toEqual({
+          index: 1,
+          multiple: false,
+        });
       });
 
       it('diff only 1', () => {
-        expect(findListDiffIndex([0, 1, 2], [], num => num)).toEqual(null);
-        expect(findListDiffIndex([0, 1, 2], [1, 2], num => num)).toEqual(0);
-        expect(findListDiffIndex([0, 1, 2], [0, 2], num => num)).toEqual(1);
-        expect(findListDiffIndex([0, 1, 2], [0, 1], num => num)).toEqual(2);
-        expect(findListDiffIndex([0, 1, 2], [0], num => num)).toEqual(null);
-        expect(findListDiffIndex([0, 1, 2], [1], num => num)).toEqual(null);
-        expect(findListDiffIndex([0, 1, 2], [2], num => num)).toEqual(null);
+        expect(findListDiffIndex([0, 1, 2], [], num => num)).toEqual({
+          index: 0,
+          multiple: true,
+        });
+        expect(findListDiffIndex([0, 1, 2], [1, 2], num => num)).toEqual({
+          index: 0,
+          multiple: false,
+        });
+        expect(findListDiffIndex([0, 1, 2], [0, 2], num => num)).toEqual({
+          index: 1,
+          multiple: false,
+        });
+        expect(findListDiffIndex([0, 1, 2], [0, 1], num => num)).toEqual({
+          index: 2,
+          multiple: false,
+        });
+        expect(findListDiffIndex([0, 1, 2], [0], num => num)).toEqual({
+          index: 1,
+          multiple: true,
+        });
+        expect(findListDiffIndex([0, 1, 2], [1], num => num)).toEqual({
+          index: 0,
+          multiple: true,
+        });
+        expect(findListDiffIndex([0, 1, 2], [2], num => num)).toEqual({
+          index: 0,
+          multiple: true,
+        });
       });
     });
   });

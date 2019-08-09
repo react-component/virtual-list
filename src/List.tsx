@@ -177,8 +177,11 @@ class List<T> extends React.Component<ListProps<T>, ListState<T>> {
     const { data, height, itemHeight, disabled, onSkipRender } = this.props;
     const prevData: T[] = this.cachedProps.data || [];
 
-    const changedItemIndex: number =
-      prevData.length !== data.length ? findListDiffIndex(prevData, data, this.getItemKey) : null;
+    let changedItemIndex: number = null;
+    if (prevData.length !== data.length) {
+      const diff = findListDiffIndex(prevData, data, this.getItemKey);
+      changedItemIndex = diff ? diff.index : null;
+    }
 
     if (disabled) {
       // Should trigger `onSkipRender` to tell that diff component is not render in the list

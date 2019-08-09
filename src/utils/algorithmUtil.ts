@@ -40,17 +40,16 @@ export function findListDiffIndex<T>(
   originList: T[],
   targetList: T[],
   getKey: (item: T) => string,
-): number | null {
+): { index: number; multiple: boolean } | null {
   const originLen = originList.length;
   const targetLen = targetList.length;
 
-  // Skip if more than 1 content is diff
-  if (Math.abs(originLen - targetLen) !== 1) {
-    return null;
-  }
-
   let shortList: T[];
   let longList: T[];
+
+  if (originLen === 0 && targetLen === 0) {
+    return null;
+  }
 
   if (originLen < targetLen) {
     shortList = originList;
@@ -62,23 +61,25 @@ export function findListDiffIndex<T>(
 
   const notExistKey = { __EMPTY_ITEM__: true };
   function getItemKey(item: T) {
-    if (item) {
+    if (item !== undefined) {
       return getKey(item);
     }
     return notExistKey;
   }
 
   // Loop to find diff one
-  let diffIndex = 0;
+  let diffIndex: number = null;
+  let multiple = Math.abs(originLen - targetLen) !== 1;
   for (let i = 0; i < longList.length; i += 1) {
     const shortKey = getItemKey(shortList[i]);
     const longKey = getItemKey(longList[i]);
 
     if (shortKey !== longKey) {
-      diffIndex = shortKey === getItemKey(longList[i + 1]) ? i : null;
+      diffIndex = i;
+      multiple = multiple || shortKey !== getItemKey(longList[i + 1]);
       break;
     }
   }
 
-  return diffIndex;
+  return diffIndex === null ? null : { index: diffIndex, multiple };
 }
