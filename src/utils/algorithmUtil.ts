@@ -41,42 +41,44 @@ export function findListDiffIndex<T>(
   targetList: T[],
   getKey: (item: T) => string,
 ): number | null {
-  if (originList.length === targetList.length) {
+  const originLen = originList.length;
+  const targetLen = targetList.length;
+
+  // Skip if more than 1 content is diff
+  if (Math.abs(originLen - targetLen) !== 1) {
     return null;
   }
 
-  let startIndex = 0;
-  let endIndex = Math.max(originList.length, targetList.length) - 1;
-  let midIndex = Math.floor((startIndex + endIndex) / 2);
+  let shortList: T[];
+  let longList: T[];
 
-  const keyCache: Map<T, string | { __EMPTY_ITEM__: true }> = new Map();
-
-  function getCacheKey(item: T) {
-    if (!keyCache.has(item)) {
-      keyCache.set(item, item !== undefined ? getKey(item) : { __EMPTY_ITEM__: true });
-    }
-    return keyCache.get(item);
+  if (originLen < targetLen) {
+    shortList = originList;
+    longList = targetList;
+  } else {
+    shortList = targetList;
+    longList = originList;
   }
 
-  while (startIndex !== midIndex || midIndex !== endIndex) {
-    const originMidKey = getCacheKey(originList[midIndex]);
-    const targetMidKey = getCacheKey(targetList[midIndex]);
-
-    if (originMidKey === targetMidKey) {
-      startIndex = midIndex;
-    } else {
-      endIndex = midIndex;
+  const notExistKey = { __EMPTY_ITEM__: true };
+  function getItemKey(item: T) {
+    if (item) {
+      return getKey(item);
     }
-
-    // Check if there only 2 index left
-    if (startIndex === endIndex - 1) {
-      return getCacheKey(originList[startIndex]) !== getCacheKey(targetList[startIndex])
-        ? startIndex
-        : endIndex;
-    }
-
-    midIndex = Math.floor((startIndex + endIndex) / 2);
+    return notExistKey;
   }
 
-  return midIndex;
+  // Loop to find diff one
+  let diffIndex = 0;
+  for (let i = 0; i < longList.length; i += 1) {
+    const shortKey = getItemKey(shortList[i]);
+    const longKey = getItemKey(longList[i]);
+
+    if (shortKey !== longKey) {
+      diffIndex = shortKey === getItemKey(longList[i + 1]) ? i : null;
+      break;
+    }
+  }
+
+  return diffIndex;
 }

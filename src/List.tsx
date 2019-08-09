@@ -184,7 +184,12 @@ class List<T> extends React.Component<ListProps<T>, ListState<T>> {
       // Should trigger `onSkipRender` to tell that diff component is not render in the list
       if (data.length > prevData.length) {
         const { startIndex, endIndex } = this.state;
-        if (onSkipRender && (changedItemIndex < startIndex || endIndex < changedItemIndex)) {
+        if (
+          onSkipRender &&
+          (changedItemIndex === null ||
+            changedItemIndex < startIndex ||
+            endIndex < changedItemIndex)
+        ) {
           onSkipRender();
         }
       }
@@ -263,7 +268,7 @@ class List<T> extends React.Component<ListProps<T>, ListState<T>> {
           this.lockScroll = false;
         });
       });
-    } else if (prevData.length !== data.length && height) {
+    } else if (prevData.length !== data.length && changedItemIndex !== null && height) {
       /**
        * Re-calculate the item position since `data` length changed.
        * [IMPORTANT] We use relative position calculate here.
