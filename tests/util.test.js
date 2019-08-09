@@ -86,9 +86,19 @@ describe('Util', () => {
       it('small list', () => {
         expect(findListDiffIndex([0], [], num => num)).toEqual(0);
         expect(findListDiffIndex([0, 1], [0], num => num)).toEqual(1);
-        expect(findListDiffIndex([0, 1, 2], [0], num => num)).toEqual(1);
+        expect(findListDiffIndex([0, 1, 2], [0], num => num)).toEqual(null);
         expect(findListDiffIndex([], [0], num => num)).toEqual(0);
         expect(findListDiffIndex([0], [0, 1], num => num)).toEqual(1);
+      });
+
+      it('diff only 1', () => {
+        expect(findListDiffIndex([0, 1, 2], [], num => num)).toEqual(null);
+        expect(findListDiffIndex([0, 1, 2], [1, 2], num => num)).toEqual(0);
+        expect(findListDiffIndex([0, 1, 2], [0, 2], num => num)).toEqual(1);
+        expect(findListDiffIndex([0, 1, 2], [0, 1], num => num)).toEqual(2);
+        expect(findListDiffIndex([0, 1, 2], [0], num => num)).toEqual(null);
+        expect(findListDiffIndex([0, 1, 2], [1], num => num)).toEqual(null);
+        expect(findListDiffIndex([0, 1, 2], [2], num => num)).toEqual(null);
       });
     });
   });
