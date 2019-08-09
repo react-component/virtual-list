@@ -568,6 +568,7 @@ class List<T> extends React.Component<ListProps<T>, ListState<T>> {
       children,
       itemKey,
       onSkipRender,
+      disabled,
       ...restProps
     } = this.props;
 
