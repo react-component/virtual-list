@@ -576,6 +576,12 @@ class List<T> extends React.Component<ListProps<T>, ListState<T>> {
 
     // Render pure list if not set height or height is enough for all items
     if (!isVirtual) {
+      /**
+       * Virtual list switch is works on component updated.
+       * We should double check here if need cut the content.
+       */
+      const shouldVirtual = requireVirtual(height, itemHeight, data.length);
+
       return (
         <Component
           style={height ? { ...style, height, ...ScrollStyle } : style}
@@ -585,7 +591,11 @@ class List<T> extends React.Component<ListProps<T>, ListState<T>> {
           ref={this.listRef}
         >
           <Filler prefixCls={prefixCls} height={height}>
-            {this.renderChildren(data, 0, children)}
+            {this.renderChildren(
+              shouldVirtual ? data.slice(0, Math.ceil(height / itemHeight)) : data,
+              0,
+              children,
+            )}
           </Filler>
         </Component>
       );
