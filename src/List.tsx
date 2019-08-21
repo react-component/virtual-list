@@ -107,7 +107,7 @@ interface ListState<T> {
  * # located item
  * The base position item which other items position calculate base on.
  */
-class List<T> extends React.Component<ListProps<T>, ListState<T>> {
+class List<T = any> extends React.Component<ListProps<T>, ListState<T>> {
   static defaultProps = {
     itemHeight: 15,
     data: [],
@@ -404,7 +404,7 @@ class List<T> extends React.Component<ListProps<T>, ListState<T>> {
     return this.getItemKey(item, mergedProps);
   };
 
-  public getItemKey = (item: T, props?: Partial<ListProps<T>>) => {
+  public getItemKey = (item: T, props?: Partial<ListProps<T>>): string => {
     const { itemKey } = props || this.props;
 
     return typeof itemKey === 'function' ? itemKey(item) : item[itemKey];
@@ -413,8 +413,8 @@ class List<T> extends React.Component<ListProps<T>, ListState<T>> {
   /**
    * Collect current rendered dom element item heights
    */
-  public collectItemHeights = () => {
-    const { startIndex, endIndex } = this.state;
+  public collectItemHeights = (range?: { startIndex: number; endIndex: number }) => {
+    const { startIndex, endIndex } = range || this.state;
     const { data } = this.props;
 
     // Record here since measure item height will get warning in `render`
@@ -429,8 +429,127 @@ class List<T> extends React.Component<ListProps<T>, ListState<T>> {
     }
   };
 
-  public scrollTo(scrollTop: number) {
-    this.listRef.current.scrollTop = scrollTop;
+  public scrollTo(scrollTop: number): void;
+
+  public scrollTo(config: { index: number; align?: 'top' | 'bottom' | 'auto' }): void;
+
+  public scrollTo(arg0: any) {
+    // Number top
+    if (typeof arg0 === 'object') {
+      const { isVirtual } = this.state;
+      const { height, itemHeight, data } = this.props;
+      const { index, align = 'auto' } = arg0;
+      const itemCount = Math.ceil(height / itemHeight);
+      const item = data[index];
+      if (item) {
+        const { clientHeight } = this.listRef.current;
+
+        if (isVirtual) {
+          // Calculate related data
+          const { itemIndex, itemOffsetPtg, startIndex, endIndex } = this.state;
+
+          const relativeLocatedItemTop = getItemRelativeTop({
+            itemIndex,
+            itemOffsetPtg,
+            itemElementHeights: this.itemElementHeights,
+            scrollPtg: getElementScrollPercentage(this.listRef.current),
+            clientHeight,
+            getItemKey: this.getIndexKey,
+          });
+
+          // We will force render related items to collect height for re-location
+          this.setState(
+            {
+              startIndex: Math.max(0, index - itemCount),
+              endIndex: Math.min(data.length - 1, index + itemCount),
+            },
+            () => {
+              this.collectItemHeights();
+
+              // Calculate related top
+              let relativeTop: number;
+              let mergedAlgin = align;
+
+              if (align === 'auto') {
+                let shouldChange = true;
+
+                // Check if exist in the visible range
+                if (Math.abs(itemIndex - index) < itemCount) {
+                  let itemTop = relativeLocatedItemTop;
+                  if (index < itemIndex) {
+                    for (let i = index; i < itemIndex; i += 1) {
+                      const eleKey = this.getIndexKey(i);
+                      itemTop -= this.itemElementHeights[eleKey] || 0;
+                    }
+                  } else {
+                    for (let i = itemIndex; i <= index; i += 1) {
+                      const eleKey = this.getIndexKey(i);
+                      itemTop += this.itemElementHeights[eleKey] || 0;
+                    }
+                  }
+
+                  shouldChange = itemTop <= 0 || itemTop >= clientHeight;
+                }
+
+                if (shouldChange) {
+                  // Out of range will fall back to position align
+                  mergedAlgin = index < itemIndex ? 'top' : 'bottom';
+                } else {
+                  this.setState({
+                    startIndex,
+                    endIndex,
+                  });
+                  return;
+                }
+              }
+
+              // Align with position should make scroll happen
+              if (mergedAlgin === 'top') {
+                relativeTop = 0;
+              } else if (mergedAlgin === 'bottom') {
+                const eleKey = this.getItemKey(item);
+
+                relativeTop = clientHeight - this.itemElementHeights[eleKey] || 0;
+              }
+
+              this.internalScrollTo({
+                itemIndex: index,
+                relativeTop,
+              });
+            },
+          );
+        } else {
+          // Raw list without virtual scroll set position directly
+          this.collectItemHeights({ startIndex: 0, endIndex: data.length - 1 });
+          let mergedAlgin = align;
+
+          // Collection index item position
+          const indexItemHeight = this.itemElementHeights[this.getIndexKey(index)];
+          let itemTop = 0;
+          for (let i = 0; i < index; i += 1) {
+            const eleKey = this.getIndexKey(i);
+            itemTop += this.itemElementHeights[eleKey] || 0;
+          }
+          const itemBottom = itemTop + indexItemHeight;
+
+          if (mergedAlgin === 'auto') {
+            if (itemTop < this.listRef.current.scrollTop) {
+              mergedAlgin = 'top';
+            } else if (itemBottom > this.listRef.current.scrollTop + clientHeight) {
+              mergedAlgin = 'bottom';
+            }
+          }
+
+          if (mergedAlgin === 'top') {
+            this.listRef.current.scrollTop = itemTop;
+          } else if (mergedAlgin === 'bottom') {
+            this.listRef.current.scrollTop = itemTop - (clientHeight - indexItemHeight);
+          }
+        }
+      }
+    } else {
+      this.listRef.current.scrollTop = arg0;
+    }
   }
 
   public internalScrollTo(relativeScroll: RelativeScroll): void {
