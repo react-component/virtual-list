@@ -63,10 +63,21 @@ describe('List.Scroll', () => {
     function testPlots(type, props) {
       describe(`${type} list`, () => {
         let listRef;
+        let wrapper;
+        const onScroll = jest.fn();
 
         beforeEach(() => {
+          onScroll.mockReset();
           listRef = React.createRef();
-          genList({ itemHeight: 20, height: 100, data: genData(20), ref: listRef, ...props });
+          wrapper = genList({
+            itemHeight: 20,
+            height: 100,
+            data: genData(20),
+            className: 'list',
+            ref: listRef,
+            onScroll,
+            ...props,
+          });
         });
 
         it('top', () => {
@@ -80,19 +91,31 @@ describe('List.Scroll', () => {
         describe('auto', () => {
           it('upper of', () => {
             scrollTop = 210;
-            listRef.current.onScroll();
+            wrapper
+              .find('.list')
+              .last()
+              .simulate('scroll');
+            expect(onScroll).toHaveBeenCalled();
             listRef.current.scrollTo({ index: 10, align: 'auto' });
             expect(scrollTop).toEqual(200);
           });
           it('lower of', () => {
             scrollTop = 110;
-            listRef.current.onScroll();
+            wrapper
+              .find('.list')
+              .last()
+              .simulate('scroll');
+            expect(onScroll).toHaveBeenCalled();
             listRef.current.scrollTo({ index: 10, align: 'auto' });
             expect(scrollTop).toEqual(120);
           });
           it('in range', () => {
             scrollTop = 150;
-            listRef.current.onScroll();
+            wrapper
+              .find('.list')
+              .last()
+              .simulate('scroll');
+            expect(onScroll).toHaveBeenCalled();
             listRef.current.scrollTo({ index: 10, align: 'auto' });
             expect(scrollTop).toEqual(150);
           });

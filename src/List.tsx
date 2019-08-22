@@ -51,6 +51,7 @@ export interface ListProps<T> extends React.HTMLAttributes<any> {
 
   /** When `disabled`, trigger if changed item not render. */
   onSkipRender?: () => void;
+  onScroll?: React.UIEventHandler<HTMLElement>;
 }
 
 type Status = 'NONE' | 'MEASURE_START' | 'MEASURE_DONE' | 'SWITCH_TO_VIRTUAL' | 'SWITCH_TO_RAW';
@@ -164,7 +165,7 @@ class List<T = any> extends React.Component<ListProps<T>, ListState<T>> {
   public componentDidMount() {
     if (this.listRef.current) {
       this.listRef.current.scrollTop = 0;
-      this.onScroll();
+      this.onScroll(null);
     }
   }
 
@@ -350,7 +351,7 @@ class List<T = any> extends React.Component<ListProps<T>, ListState<T>> {
   /**
    * Phase 2: Trigger render since we should re-calculate current position.
    */
-  public onScroll = () => {
+  public onScroll: React.UIEventHandler<HTMLElement> = event => {
     const { data, height, itemHeight, disabled } = this.props;
 
     const { scrollTop: originScrollTop, clientHeight, scrollHeight } = this.listRef.current;
@@ -378,12 +379,22 @@ class List<T = any> extends React.Component<ListProps<T>, ListState<T>> {
       startIndex,
       endIndex,
     });
+
+    this.triggerOnScroll(event);
   };
 
-  public onRawScroll = () => {
+  public onRawScroll: React.UIEventHandler<HTMLElement> = event => {
     const { scrollTop } = this.listRef.current;
 
     this.setState({ scrollTop });
+    this.triggerOnScroll(event);
+  };
+
+  public triggerOnScroll: React.UIEventHandler<HTMLElement> = event => {
+    const { onScroll } = this.props;
+    if (onScroll && event) {
+      onScroll(event);
+    }
   };
 
   public getIndexKey = (index: number, props?: Partial<ListProps<T>>) => {
