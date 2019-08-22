@@ -450,20 +450,22 @@ class List<T = any> extends React.Component<ListProps<T>, ListState<T>> {
       const { isVirtual } = this.state;
       const { height, itemHeight, data } = this.props;
       const { index, align = 'auto' } = arg0;
-      const itemCount = Math.ceil(height / itemHeight);
+      const visibleCount = Math.ceil(height / itemHeight);
       const item = data[index];
       if (item) {
         const { clientHeight } = this.listRef.current;
 
         if (isVirtual) {
           // Calculate related data
-          const { itemIndex, itemOffsetPtg, startIndex, endIndex } = this.state;
+          const { itemIndex, itemOffsetPtg } = this.state;
+          const { scrollTop } = this.listRef.current;
+          const scrollPtg = getElementScrollPercentage(this.listRef.current);
 
           const relativeLocatedItemTop = getItemRelativeTop({
             itemIndex,
             itemOffsetPtg,
             itemElementHeights: this.itemElementHeights,
-            scrollPtg: getElementScrollPercentage(this.listRef.current),
+            scrollPtg,
             clientHeight,
             getItemKey: this.getIndexKey,
           });
@@ -471,8 +473,8 @@ class List<T = any> extends React.Component<ListProps<T>, ListState<T>> {
           // We will force render related items to collect height for re-location
           this.setState(
             {
-              startIndex: Math.max(0, index - itemCount),
-              endIndex: Math.min(data.length - 1, index + itemCount),
+              startIndex: Math.max(0, index - visibleCount),
+              endIndex: Math.min(data.length - 1, index + visibleCount),
             },
             () => {
               this.collectItemHeights();
@@ -485,7 +487,7 @@ class List<T = any> extends React.Component<ListProps<T>, ListState<T>> {
                 let shouldChange = true;
 
                 // Check if exist in the visible range
-                if (Math.abs(itemIndex - index) < itemCount) {
+                if (Math.abs(itemIndex - index) < visibleCount) {
                   let itemTop = relativeLocatedItemTop;
                   if (index < itemIndex) {
                     for (let i = index; i < itemIndex; i += 1) {
@@ -506,7 +508,17 @@ class List<T = any> extends React.Component<ListProps<T>, ListState<T>> {
                   // Out of range will fall back to position align
                   mergedAlgin = index < itemIndex ? 'top' : 'bottom';
                 } else {
+                  const {
+                    itemIndex: nextIndex,
+                    itemOffsetPtg: newOffsetPtg,
+                    startIndex,
+                    endIndex,
+                  } = getRangeIndex(scrollPtg, data.length, visibleCount);
+
                   this.setState({
+                    scrollTop,
+                    itemIndex: nextIndex,
+                    itemOffsetPtg: newOffsetPtg,
                     startIndex,
                     endIndex,
                   });
