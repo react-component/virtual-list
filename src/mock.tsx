@@ -8,6 +8,10 @@ class List<T> extends OriginList<T> {
     // Do nothing since this is a mock!
   }
 
+  scrollTo = () => {
+    // Do nothing sine this is a mock!
+  };
+
   render() {
     const {
       prefixCls,
