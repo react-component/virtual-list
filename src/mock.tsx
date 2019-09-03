@@ -18,6 +18,7 @@ class List<T> extends OriginList<T> {
       style,
       className,
       component: Component = 'div',
+      fullHeight,
       height,
       itemHeight,
       data,
