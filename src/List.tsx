@@ -45,6 +45,8 @@ export interface ListProps<T> extends React.HTMLAttributes<any> {
   data: T[];
   height?: number;
   itemHeight?: number;
+  /** If not match virtual scroll condition, Set List still use height of container. */
+  fullHeight?: boolean;
   itemKey: string | ((item: T) => string);
   component?: string | React.FC<any> | React.ComponentClass<any>;
   disabled?: boolean;
@@ -706,6 +708,7 @@ class List<T = any> extends React.Component<ListProps<T>, ListState<T>> {
       component: Component = 'div',
       height,
       itemHeight,
+      fullHeight = true,
       data,
       children,
       itemKey,
@@ -726,7 +729,11 @@ class List<T = any> extends React.Component<ListProps<T>, ListState<T>> {
 
       return (
         <Component
-          style={height ? { ...style, height, ...ScrollStyle } : style}
+          style={
+            height
+              ? { ...style, [fullHeight ? 'height' : 'maxHeight']: height, ...ScrollStyle }
+              : style
+          }
           className={mergedClassName}
           {...restProps}
           onScroll={this.onRawScroll}

@@ -29,10 +29,25 @@ describe('List', () => {
       expect(wrapper.find(Filler).props().offset).toBeFalsy();
     });
 
-    it('height over itemHeight', () => {
-      const wrapper = genList({ data: genData(1), itemHeight: 1, height: 999 });
+    describe('height over itemHeight', () => {
+      it('full height', () => {
+        const wrapper = genList({ data: genData(1), itemHeight: 1, height: 999 });
+        expect(wrapper.find(Filler).props().offset).toBeFalsy();
+        expect(wrapper.find('ul').props().style).toEqual(expect.objectContaining({ height: 999 }));
+      });
 
-      expect(wrapper.find(Filler).props().offset).toBeFalsy();
+      it('without full height', () => {
+        const wrapper = genList({
+          data: genData(1),
+          itemHeight: 1,
+          height: 999,
+          fullHeight: false,
+        });
+        expect(wrapper.find(Filler).props().offset).toBeFalsy();
+        expect(wrapper.find('ul').props().style).toEqual(
+          expect.objectContaining({ maxHeight: 999 }),
+        );
+      });
     });
   });
 
