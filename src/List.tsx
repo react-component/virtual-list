@@ -279,6 +279,7 @@ class List<T = any> extends React.Component<ListProps<T>, ListState<T>> {
 
       this.setState({
         status: 'MEASURE_DONE',
+        itemIndex: 0,
       });
 
       requestAnimationFrame(() => {

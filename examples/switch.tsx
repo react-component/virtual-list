@@ -34,7 +34,18 @@ function getData(count: number) {
 }
 
 const Demo = () => {
-  const [data, setData] = React.useState<{ id: number }[]>(getData(1));
+  const [state, setState] = React.useState<number>(0);
+
+  const data = React.useMemo(() => {
+    switch (state) {
+      case 0:
+        return getData(1000);
+      case 1:
+        return getData(2);
+      default:
+        return getData(0);
+    }
+  }, [state]);
 
   return (
     <React.StrictMode>
@@ -55,7 +66,7 @@ const Demo = () => {
         <button
           type="button"
           onClick={() => {
-            setData(data.length === 1 ? getData(10000) : getData(1));
+            setState((state + 1) % 3);
           }}
         >
           Switch

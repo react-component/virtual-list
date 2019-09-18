@@ -174,9 +174,14 @@ describe('List', () => {
       });
 
       scrollHeight = 200;
-      data = data.slice(0, -1);
+      data = data.slice(0, 2);
       wrapper.setProps({ data });
       expect(wrapper.find('ul').instance().scrollTop > 40).toBeTruthy();
+
+      // Should not crash if data count change
+      scrollHeight = 40;
+      data = data.slice(0, 1);
+      wrapper.setProps({ data });
 
       setTimeout(done, 50);
     });
