@@ -454,11 +454,7 @@ class List<T = any> extends React.Component<ListProps<T>, ListState<T>> {
     }
   };
 
-  public scrollTo(scrollTop: number): void;
-
-  public scrollTo(config: ScrollConfig): void;
-
-  public scrollTo(arg0: any) {
+  public scrollTo = (arg0: number | ScrollConfig) => {
     // Number top
     if (typeof arg0 === 'object') {
       const { isVirtual } = this.state;
@@ -596,7 +592,7 @@ class List<T = any> extends React.Component<ListProps<T>, ListState<T>> {
     } else {
       this.listRef.current.scrollTop = arg0;
     }
-  }
+  };
 
   public internalScrollTo(relativeScroll: RelativeScroll): void {
     const { itemIndex: compareItemIndex, relativeTop: compareItemRelativeTop } = relativeScroll;
