@@ -6,6 +6,8 @@ import findDOMNode from 'rc-util/lib/Dom/findDOMNode';
  */
 export const GHOST_ITEM_KEY = '__rc_ghost_item__';
 
+export type Key = string | number;
+
 interface LocationItemResult {
   /** Located item index */
   index: number;
@@ -108,7 +110,7 @@ interface ItemTopConfig {
   scrollPtg: number;
   clientHeight: number;
 
-  getItemKey: (index: number) => string;
+  getItemKey: (index: number) => Key;
 }
 
 /**
@@ -139,7 +141,7 @@ interface CompareItemConfig {
   locatedItemRelativeTop: number;
   locatedItemIndex: number;
   compareItemIndex: number;
-  getItemKey: (index: number) => string;
+  getItemKey: (index: number) => Key;
   startIndex: number;
   endIndex: number;
   itemElementHeights: { [key: string]: number };

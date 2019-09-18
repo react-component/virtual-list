@@ -12,6 +12,7 @@ import {
   getCompareItemRelativeTop,
   alignScrollTop,
   requireVirtual,
+  Key,
 } from './utils/itemUtil';
 import { getIndexByStartLoc, findListDiffIndex } from './utils/algorithmUtil';
 
@@ -19,6 +20,17 @@ const ScrollStyle = {
   overflowY: 'auto',
   overflowAnchor: 'none',
 };
+
+type ScrollAlign = 'top' | 'bottom' | 'auto';
+type ScrollConfig =
+  | {
+      index: number;
+      align?: ScrollAlign;
+    }
+  | {
+      key: Key;
+      align?: ScrollAlign;
+    };
 
 export type RenderFunc<T> = (
   item: T,
@@ -47,7 +59,7 @@ export interface ListProps<T> extends React.HTMLAttributes<any> {
   itemHeight?: number;
   /** If not match virtual scroll condition, Set List still use height of container. */
   fullHeight?: boolean;
-  itemKey: string | ((item: T) => string);
+  itemKey: Key | ((item: T) => Key);
   component?: string | React.FC<any> | React.ComponentClass<any>;
   disabled?: boolean;
 
@@ -417,7 +429,7 @@ class List<T = any> extends React.Component<ListProps<T>, ListState<T>> {
     return this.getItemKey(item, mergedProps);
   };
 
-  public getItemKey = (item: T, props?: Partial<ListProps<T>>): string => {
+  public getItemKey = (item: T, props?: Partial<ListProps<T>>): Key => {
     const { itemKey } = props || this.props;
 
     return typeof itemKey === 'function' ? itemKey(item) : item[itemKey];
@@ -444,14 +456,23 @@ class List<T = any> extends React.Component<ListProps<T>, ListState<T>> {
 
   public scrollTo(scrollTop: number): void;
 
-  public scrollTo(config: { index: number; align?: 'top' | 'bottom' | 'auto' }): void;
+  public scrollTo(config: ScrollConfig): void;
 
   public scrollTo(arg0: any) {
     // Number top
     if (typeof arg0 === 'object') {
       const { isVirtual } = this.state;
       const { height, itemHeight, data } = this.props;
-      const { index, align = 'auto' } = arg0;
+      const { align = 'auto' } = arg0;
+
+      let index = 0;
+      if ('index' in arg0) {
+        ({ index } = arg0);
+      } else if ('key' in arg0) {
+        const { key } = arg0;
+        index = data.findIndex(item => this.getItemKey(item) === key);
+      }
+
       const visibleCount = Math.ceil(height / itemHeight);
       const item = data[index];
       if (item) {

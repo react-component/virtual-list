@@ -4,7 +4,7 @@ import List from '../src';
 import { spyElementPrototypes } from './utils/domHook';
 
 function genData(count) {
-  return new Array(count).fill(null).map((_, id) => ({ id }));
+  return new Array(count).fill(null).map((_, index) => ({ id: String(index) }));
 }
 
 describe('List.Scroll', () => {
@@ -60,7 +60,7 @@ describe('List.Scroll', () => {
       mockElement.mockRestore();
     });
 
-    function testPlots(type, props) {
+    function testPlots(type, scrollConfig, props) {
       describe(`${type} list`, () => {
         let listRef;
         let wrapper;
@@ -81,11 +81,11 @@ describe('List.Scroll', () => {
         });
 
         it('top', () => {
-          listRef.current.scrollTo({ index: 10, align: 'top' });
+          listRef.current.scrollTo({ ...scrollConfig, align: 'top' });
           expect(scrollTop).toEqual(200);
         });
         it('bottom', () => {
-          listRef.current.scrollTo({ index: 10, align: 'bottom' });
+          listRef.current.scrollTo({ ...scrollConfig, align: 'bottom' });
           expect(scrollTop).toEqual(120);
         });
         describe('auto', () => {
@@ -96,7 +96,7 @@ describe('List.Scroll', () => {
               .last()
               .simulate('scroll');
             expect(onScroll).toHaveBeenCalled();
-            listRef.current.scrollTo({ index: 10, align: 'auto' });
+            listRef.current.scrollTo({ ...scrollConfig, align: 'auto' });
             expect(scrollTop).toEqual(200);
           });
           it('lower of', () => {
@@ -106,7 +106,7 @@ describe('List.Scroll', () => {
               .last()
               .simulate('scroll');
             expect(onScroll).toHaveBeenCalled();
-            listRef.current.scrollTo({ index: 10, align: 'auto' });
+            listRef.current.scrollTo({ ...scrollConfig, align: 'auto' });
             expect(scrollTop).toEqual(120);
           });
           it('in range', () => {
@@ -116,14 +116,16 @@ describe('List.Scroll', () => {
               .last()
               .simulate('scroll');
             expect(onScroll).toHaveBeenCalled();
-            listRef.current.scrollTo({ index: 10, align: 'auto' });
+            listRef.current.scrollTo({ ...scrollConfig, align: 'auto' });
             expect(scrollTop).toEqual(150);
           });
         });
       });
     }
 
-    testPlots('virtual list');
-    testPlots('raw list', { itemHeight: null });
+    testPlots('virtual list', { index: 10 });
+    testPlots('raw list', { index: 10 }, { itemHeight: null });
+    testPlots('virtual list by key', { key: '10' });
+    testPlots('raw list by key', { key: '10' }, { itemHeight: null });
   });
 });

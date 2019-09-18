@@ -3,7 +3,7 @@ import * as React from 'react';
 import List from '../src/List';
 
 interface Item {
-  id: number;
+  id: string;
 }
 
 const MyItem: React.FC<Item> = ({ id }, ref) => (
@@ -24,7 +24,7 @@ const MyItem: React.FC<Item> = ({ id }, ref) => (
 
 const ForwardMyItem = React.forwardRef(MyItem);
 
-class TestItem extends React.Component<{ id: number }, {}> {
+class TestItem extends React.Component<Item, {}> {
   state = {};
 
   render() {
@@ -35,7 +35,7 @@ class TestItem extends React.Component<{ id: number }, {}> {
 const data: Item[] = [];
 for (let i = 0; i < 100; i += 1) {
   data.push({
-    id: i,
+    id: String(i),
   });
 }
 
@@ -126,6 +126,17 @@ const Demo = () => {
           }}
         >
           Scroll To 50 (auto)
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            listRef.current.scrollTo({
+              key: '50',
+              align: 'auto',
+            });
+          }}
+        >
+          Scroll To key 50 (auto)
         </button>
       </div>
     </React.StrictMode>
