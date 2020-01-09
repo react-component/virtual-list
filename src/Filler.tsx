@@ -33,7 +33,6 @@ const Filler: React.FC<FillerProps> = ({
     innerStyle = {
       ...innerStyle,
       transform: `translateY(${offset}px)`,
-      willChange: 'transform',
       position: 'absolute',
       left: 0,
       right: 0,
