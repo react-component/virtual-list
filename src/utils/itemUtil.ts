@@ -81,7 +81,8 @@ export function getElementScrollPercentage(element: HTMLElement | null) {
  * But if not provided, downgrade to `findDOMNode` to get the real dom element.
  */
 export function getNodeHeight(node: HTMLElement) {
-  return findDOMNode(node).offsetHeight;
+  const element = findDOMNode(node);
+  return element ? element.offsetHeight : 0;
 }
 
 /**

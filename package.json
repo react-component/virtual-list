@@ -2,6 +2,9 @@
   "name": "rc-virtual-list",
   "version": "0.0.0-rc.0",
   "description": "React Virtual List Component",
+  "engines": {
+    "node": ">=8.x"
+  },
   "keywords": [
     "react",
     "react-component",
