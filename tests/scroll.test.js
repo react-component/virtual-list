@@ -8,6 +8,14 @@ function genData(count) {
 }
 
 describe('List.Scroll', () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
   function genList(props) {
     let node = (
       <List component="ul" itemKey="id" {...props}>
@@ -28,6 +36,7 @@ describe('List.Scroll', () => {
 
     it('value scroll', () => {
       listRef.current.scrollTo(903);
+      jest.runAllTimers();
       expect(wrapper.find('ul').instance().scrollTop).toEqual(903);
     });
   });
@@ -82,10 +91,12 @@ describe('List.Scroll', () => {
 
         it('top', () => {
           listRef.current.scrollTo({ ...scrollConfig, align: 'top' });
+          jest.runAllTimers();
           expect(scrollTop).toEqual(200);
         });
         it('bottom', () => {
           listRef.current.scrollTo({ ...scrollConfig, align: 'bottom' });
+          jest.runAllTimers();
           expect(scrollTop).toEqual(120);
         });
         describe('auto', () => {
@@ -97,6 +108,7 @@ describe('List.Scroll', () => {
               .simulate('scroll');
             expect(onScroll).toHaveBeenCalled();
             listRef.current.scrollTo({ ...scrollConfig, align: 'auto' });
+            jest.runAllTimers();
             expect(scrollTop).toEqual(200);
           });
           it('lower of', () => {
@@ -107,6 +119,7 @@ describe('List.Scroll', () => {
               .simulate('scroll');
             expect(onScroll).toHaveBeenCalled();
             listRef.current.scrollTo({ ...scrollConfig, align: 'auto' });
+            jest.runAllTimers();
             expect(scrollTop).toEqual(120);
           });
           it('in range', () => {
@@ -117,6 +130,7 @@ describe('List.Scroll', () => {
               .simulate('scroll');
             expect(onScroll).toHaveBeenCalled();
             listRef.current.scrollTo({ ...scrollConfig, align: 'auto' });
+            jest.runAllTimers();
             expect(scrollTop).toEqual(150);
           });
         });
