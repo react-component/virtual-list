@@ -456,143 +456,145 @@ class List<T = any> extends React.Component<ListProps<T>, ListState<T>> {
   };
 
   public scrollTo = (arg0: number | ScrollConfig) => {
-    // Number top
-    if (typeof arg0 === 'object') {
-      const { isVirtual } = this.state;
-      const { height, itemHeight, data } = this.props;
-      const { align = 'auto' } = arg0;
+    setTimeout(() => {
+      // Number top
+      if (typeof arg0 === 'object') {
+        const { isVirtual } = this.state;
+        const { height, itemHeight, data } = this.props;
+        const { align = 'auto' } = arg0;
 
-      let index = 0;
-      if ('index' in arg0) {
-        ({ index } = arg0);
-      } else if ('key' in arg0) {
-        const { key } = arg0;
-        index = data.findIndex(item => this.getItemKey(item) === key);
-      }
+        let index = 0;
+        if ('index' in arg0) {
+          ({ index } = arg0);
+        } else if ('key' in arg0) {
+          const { key } = arg0;
+          index = data.findIndex(item => this.getItemKey(item) === key);
+        }
 
-      const visibleCount = Math.ceil(height / itemHeight);
-      const item = data[index];
-      if (item) {
-        const { clientHeight } = this.listRef.current;
+        const visibleCount = Math.ceil(height / itemHeight);
+        const item = data[index];
+        if (item) {
+          const { clientHeight } = this.listRef.current;
 
-        if (isVirtual) {
-          // Calculate related data
-          const { itemIndex, itemOffsetPtg } = this.state;
-          const { scrollTop } = this.listRef.current;
-          const scrollPtg = getElementScrollPercentage(this.listRef.current);
+          if (isVirtual) {
+            // Calculate related data
+            const { itemIndex, itemOffsetPtg } = this.state;
+            const { scrollTop } = this.listRef.current;
+            const scrollPtg = getElementScrollPercentage(this.listRef.current);
 
-          const relativeLocatedItemTop = getItemRelativeTop({
-            itemIndex,
-            itemOffsetPtg,
-            itemElementHeights: this.itemElementHeights,
-            scrollPtg,
-            clientHeight,
-            getItemKey: this.getIndexKey,
-          });
+            const relativeLocatedItemTop = getItemRelativeTop({
+              itemIndex,
+              itemOffsetPtg,
+              itemElementHeights: this.itemElementHeights,
+              scrollPtg,
+              clientHeight,
+              getItemKey: this.getIndexKey,
+            });
 
-          // We will force render related items to collect height for re-location
-          this.setState(
-            {
-              startIndex: Math.max(0, index - visibleCount),
-              endIndex: Math.min(data.length - 1, index + visibleCount),
-            },
-            () => {
-              this.collectItemHeights();
+            // We will force render related items to collect height for re-location
+            this.setState(
+              {
+                startIndex: Math.max(0, index - visibleCount),
+                endIndex: Math.min(data.length - 1, index + visibleCount),
+              },
+              () => {
+                this.collectItemHeights();
 
-              // Calculate related top
-              let relativeTop: number;
-              let mergedAlgin = align;
+                // Calculate related top
+                let relativeTop: number;
+                let mergedAlgin = align;
 
-              if (align === 'auto') {
-                let shouldChange = true;
+                if (align === 'auto') {
+                  let shouldChange = true;
 
-                // Check if exist in the visible range
-                if (Math.abs(itemIndex - index) < visibleCount) {
-                  let itemTop = relativeLocatedItemTop;
-                  if (index < itemIndex) {
-                    for (let i = index; i < itemIndex; i += 1) {
-                      const eleKey = this.getIndexKey(i);
-                      itemTop -= this.itemElementHeights[eleKey] || 0;
+                  // Check if exist in the visible range
+                  if (Math.abs(itemIndex - index) < visibleCount) {
+                    let itemTop = relativeLocatedItemTop;
+                    if (index < itemIndex) {
+                      for (let i = index; i < itemIndex; i += 1) {
+                        const eleKey = this.getIndexKey(i);
+                        itemTop -= this.itemElementHeights[eleKey] || 0;
+                      }
+                    } else {
+                      for (let i = itemIndex; i <= index; i += 1) {
+                        const eleKey = this.getIndexKey(i);
+                        itemTop += this.itemElementHeights[eleKey] || 0;
+                      }
                     }
-                  } else {
-                    for (let i = itemIndex; i <= index; i += 1) {
-                      const eleKey = this.getIndexKey(i);
-                      itemTop += this.itemElementHeights[eleKey] || 0;
-                    }
+
+                    shouldChange = itemTop <= 0 || itemTop >= clientHeight;
                   }
 
-                  shouldChange = itemTop <= 0 || itemTop >= clientHeight;
+                  if (shouldChange) {
+                    // Out of range will fall back to position align
+                    mergedAlgin = index < itemIndex ? 'top' : 'bottom';
+                  } else {
+                    const {
+                      itemIndex: nextIndex,
+                      itemOffsetPtg: newOffsetPtg,
+                      startIndex,
+                      endIndex,
+                    } = getRangeIndex(scrollPtg, data.length, visibleCount);
+
+                    this.setState({
+                      scrollTop,
+                      itemIndex: nextIndex,
+                      itemOffsetPtg: newOffsetPtg,
+                      startIndex,
+                      endIndex,
+                    });
+                    return;
+                  }
                 }
 
-                if (shouldChange) {
-                  // Out of range will fall back to position align
-                  mergedAlgin = index < itemIndex ? 'top' : 'bottom';
-                } else {
-                  const {
-                    itemIndex: nextIndex,
-                    itemOffsetPtg: newOffsetPtg,
-                    startIndex,
-                    endIndex,
-                  } = getRangeIndex(scrollPtg, data.length, visibleCount);
+                // Align with position should make scroll happen
+                if (mergedAlgin === 'top') {
+                  relativeTop = 0;
+                } else if (mergedAlgin === 'bottom') {
+                  const eleKey = this.getItemKey(item);
 
-                  this.setState({
-                    scrollTop,
-                    itemIndex: nextIndex,
-                    itemOffsetPtg: newOffsetPtg,
-                    startIndex,
-                    endIndex,
-                  });
-                  return;
+                  relativeTop = clientHeight - this.itemElementHeights[eleKey] || 0;
                 }
+
+                this.internalScrollTo({
+                  itemIndex: index,
+                  relativeTop,
+                });
+              },
+            );
+          } else {
+            // Raw list without virtual scroll set position directly
+            this.collectItemHeights({ startIndex: 0, endIndex: data.length - 1 });
+            let mergedAlgin = align;
+
+            // Collection index item position
+            const indexItemHeight = this.itemElementHeights[this.getIndexKey(index)];
+            let itemTop = 0;
+            for (let i = 0; i < index; i += 1) {
+              const eleKey = this.getIndexKey(i);
+              itemTop += this.itemElementHeights[eleKey] || 0;
+            }
+            const itemBottom = itemTop + indexItemHeight;
+
+            if (mergedAlgin === 'auto') {
+              if (itemTop < this.listRef.current.scrollTop) {
+                mergedAlgin = 'top';
+              } else if (itemBottom > this.listRef.current.scrollTop + clientHeight) {
+                mergedAlgin = 'bottom';
               }
+            }
 
-              // Align with position should make scroll happen
-              if (mergedAlgin === 'top') {
-                relativeTop = 0;
-              } else if (mergedAlgin === 'bottom') {
-                const eleKey = this.getItemKey(item);
-
-                relativeTop = clientHeight - this.itemElementHeights[eleKey] || 0;
-              }
-
-              this.internalScrollTo({
-                itemIndex: index,
-                relativeTop,
-              });
-            },
-          );
-        } else {
-          // Raw list without virtual scroll set position directly
-          this.collectItemHeights({ startIndex: 0, endIndex: data.length - 1 });
-          let mergedAlgin = align;
-
-          // Collection index item position
-          const indexItemHeight = this.itemElementHeights[this.getIndexKey(index)];
-          let itemTop = 0;
-          for (let i = 0; i < index; i += 1) {
-            const eleKey = this.getIndexKey(i);
-            itemTop += this.itemElementHeights[eleKey] || 0;
-          }
-          const itemBottom = itemTop + indexItemHeight;
-
-          if (mergedAlgin === 'auto') {
-            if (itemTop < this.listRef.current.scrollTop) {
-              mergedAlgin = 'top';
-            } else if (itemBottom > this.listRef.current.scrollTop + clientHeight) {
-              mergedAlgin = 'bottom';
+            if (mergedAlgin === 'top') {
+              this.listRef.current.scrollTop = itemTop;
+            } else if (mergedAlgin === 'bottom') {
+              this.listRef.current.scrollTop = itemTop - (clientHeight - indexItemHeight);
             }
           }
-
-          if (mergedAlgin === 'top') {
-            this.listRef.current.scrollTop = itemTop;
-          } else if (mergedAlgin === 'bottom') {
-            this.listRef.current.scrollTop = itemTop - (clientHeight - indexItemHeight);
-          }
         }
+      } else {
+        this.listRef.current.scrollTop = arg0;
       }
-    } else {
-      this.listRef.current.scrollTop = arg0;
-    }
+    });
   };
 
   public internalScrollTo(relativeScroll: RelativeScroll): void {
