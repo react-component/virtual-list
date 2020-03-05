@@ -61,7 +61,10 @@ export interface ListProps<T> extends React.HTMLAttributes<any> {
   fullHeight?: boolean;
   itemKey: Key | ((item: T) => Key);
   component?: string | React.FC<any> | React.ComponentClass<any>;
+  /** Disable scroll check. Usually used on animation control */
   disabled?: boolean;
+  /** Set `false` will always use real scroll instead of virtual one */
+  virtual?: boolean;
 
   /** When `disabled`, trigger if changed item not render. */
   onSkipRender?: () => void;
@@ -158,7 +161,7 @@ class List<T = any> extends React.Component<ListProps<T>, ListState<T>> {
       startIndex: 0,
       endIndex: 0,
       startItemTop: 0,
-      isVirtual: requireVirtual(props.height, props.itemHeight, props.data.length),
+      isVirtual: requireVirtual(props.height, props.itemHeight, props.data.length, props.virtual),
       itemCount: props.data.length,
     };
   }
@@ -189,7 +192,7 @@ class List<T = any> extends React.Component<ListProps<T>, ListState<T>> {
    */
   public componentDidUpdate() {
     const { status } = this.state;
-    const { data, height, itemHeight, disabled, onSkipRender } = this.props;
+    const { data, height, itemHeight, disabled, onSkipRender, virtual } = this.props;
     const prevData: T[] = this.cachedProps.data || [];
 
     let changedItemIndex: number = null;
@@ -214,7 +217,7 @@ class List<T = any> extends React.Component<ListProps<T>, ListState<T>> {
       return;
     }
 
-    const isVirtual = requireVirtual(height, itemHeight, data.length);
+    const isVirtual = requireVirtual(height, itemHeight, data.length, virtual);
     let nextStatus = status;
     if (this.state.isVirtual !== isVirtual) {
       nextStatus = isVirtual ? 'SWITCH_TO_VIRTUAL' : 'SWITCH_TO_RAW';
@@ -734,6 +737,7 @@ class List<T = any> extends React.Component<ListProps<T>, ListState<T>> {
       itemKey,
       onSkipRender,
       disabled,
+      virtual,
       ...restProps
     } = this.props;
 
@@ -745,7 +749,7 @@ class List<T = any> extends React.Component<ListProps<T>, ListState<T>> {
        * Virtual list switch is works on component updated.
        * We should double check here if need cut the content.
        */
-      const shouldVirtual = requireVirtual(height, itemHeight, data.length);
+      const shouldVirtual = requireVirtual(height, itemHeight, data.length, virtual);
 
       return (
         <Component

@@ -186,4 +186,9 @@ describe('List', () => {
       setTimeout(done, 50);
     });
   });
+
+  it('`virtual` is false', () => {
+    const wrapper = genList({ itemHeight: 20, height: 100, data: genData(100), virtual: false });
+    expect(wrapper.find('li')).toHaveLength(100);
+  });
 });
