@@ -21,6 +21,7 @@ class List<T> extends OriginList<T> {
       fullHeight,
       height,
       itemHeight,
+      virtual,
       data,
       children,
       itemKey,
