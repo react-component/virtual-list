@@ -34,7 +34,8 @@ function getData(count: number) {
 }
 
 const Demo = () => {
-  const [state, setState] = React.useState<number>(0);
+  const [height, setHeight] = React.useState(200);
+  const [state, setState] = React.useState<number>(1);
 
   const data = React.useMemo(() => {
     switch (state) {
@@ -51,9 +52,37 @@ const Demo = () => {
     <React.StrictMode>
       <div>
         <h2>Switch</h2>
+
+        <button
+          type="button"
+          onClick={() => {
+            setState((state + 1) % 3);
+          }}
+        >
+          Switch
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            switch (height) {
+              case 200:
+                setHeight(0);
+                break;
+              case 0:
+                setHeight(100);
+                break;
+              default:
+                setHeight(200);
+                break;
+            }
+          }}
+        >
+          Height
+        </button>
+
         <List
           data={data}
-          height={200}
+          height={height}
           itemHeight={30}
           itemKey="id"
           style={{
@@ -63,14 +92,6 @@ const Demo = () => {
         >
           {(item, _, props) => <ForwardMyItem {...item} {...props} />}
         </List>
-        <button
-          type="button"
-          onClick={() => {
-            setState((state + 1) % 3);
-          }}
-        >
-          Switch
-        </button>
       </div>
     </React.StrictMode>
   );

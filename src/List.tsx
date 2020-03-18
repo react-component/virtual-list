@@ -361,6 +361,15 @@ class List<T = any> extends React.Component<ListProps<T>, ListState<T>> {
           relativeTop: originCompareItemTop,
         });
       }
+    } else if (nextStatus === 'SWITCH_TO_RAW') {
+      // This is only trigger when height changes that all items can show in raw
+      // Let's reset back to top
+      this.setState({
+        cacheScroll: {
+          itemIndex: 0,
+          relativeTop: 0,
+        },
+      });
     }
 
     this.cachedProps = this.props;

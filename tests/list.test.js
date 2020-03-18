@@ -191,4 +191,9 @@ describe('List', () => {
     const wrapper = genList({ itemHeight: 20, height: 100, data: genData(100), virtual: false });
     expect(wrapper.find('li')).toHaveLength(100);
   });
+
+  it('Should not crash when height change makes virtual scroll to be raw scroll', () => {
+    const wrapper = genList({ itemHeight: 20, height: 40, data: genData(3) });
+    wrapper.setProps({ height: 1000 });
+  });
 });
