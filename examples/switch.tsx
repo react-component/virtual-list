@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/label-has-associated-control, jsx-a11y/label-has-for */
 import * as React from 'react';
 import List from '../src/List';
 
@@ -35,50 +36,55 @@ function getData(count: number) {
 
 const Demo = () => {
   const [height, setHeight] = React.useState(200);
-  const [state, setState] = React.useState<number>(1);
-
-  const data = React.useMemo(() => {
-    switch (state) {
-      case 0:
-        return getData(1000);
-      case 1:
-        return getData(2);
-      default:
-        return getData(0);
-    }
-  }, [state]);
+  const [data, setData] = React.useState(getData(2));
 
   return (
     <React.StrictMode>
       <div>
         <h2>Switch</h2>
-
-        <button
-          type="button"
-          onClick={() => {
-            setState((state + 1) % 3);
+        <span
+          onChange={(e: any) => {
+            setData(getData(Number(e.target.value)));
           }}
         >
-          Switch
-        </button>
-        <button
-          type="button"
-          onClick={() => {
-            switch (height) {
-              case 200:
-                setHeight(0);
-                break;
-              case 0:
-                setHeight(100);
-                break;
-              default:
-                setHeight(200);
-                break;
-            }
+          Data
+          <label>
+            <input type="radio" name="switch" value={0} />0
+          </label>
+          <label>
+            <input type="radio" name="switch" value={2} />2
+          </label>
+          <label>
+            <input type="radio" name="switch" value={100} />
+            100
+          </label>
+          <label>
+            <input type="radio" name="switch" value={200} />
+            200
+          </label>
+          <label>
+            <input type="radio" name="switch" value={1000} />
+            1000
+          </label>
+        </span>
+        <span
+          onChange={(e: any) => {
+            setHeight(Number(e.target.value));
           }}
         >
-          Height
-        </button>
+          | Height
+          <label>
+            <input type="radio" name="switch" value={0} />0
+          </label>
+          <label>
+            <input type="radio" name="switch" value={100} />
+            100
+          </label>
+          <label>
+            <input type="radio" name="switch" value={200} />
+            200
+          </label>
+        </span>
 
         <List
           data={data}
