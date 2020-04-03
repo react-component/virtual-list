@@ -1,5 +1,6 @@
 import * as React from 'react';
 import classNames from 'classnames';
+import raf from 'raf';
 import Filler from './Filler';
 import {
   getElementScrollPercentage,
@@ -468,7 +469,7 @@ class List<T = any> extends React.Component<ListProps<T>, ListState<T>> {
   };
 
   public scrollTo = (arg0: number | ScrollConfig) => {
-    setTimeout(() => {
+    raf(() => {
       // Number top
       if (typeof arg0 === 'object') {
         const { isVirtual } = this.state;
