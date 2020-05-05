@@ -110,6 +110,23 @@ describe('List', () => {
       wrapper.setProps({ data, disabled: true });
       expect(onSkipRender).toHaveBeenCalled();
     });
+
+    it('renders a limited number of elements', () => {
+      const wrapper = genList({ itemHeight: 20, height: 100, data: genData(100) });
+
+      expect(wrapper.find('li')).toHaveLength(6);
+    });
+
+    it('renders additional items when using overscanCount', () => {
+      const wrapper = genList({
+        itemHeight: 20,
+        height: 100,
+        data: genData(100),
+        overscanCount: 2,
+      });
+
+      expect(wrapper.find('li')).toHaveLength(8);
+    });
   });
 
   describe('status switch', () => {

@@ -66,6 +66,10 @@ export interface ListProps<T> extends React.HTMLAttributes<any> {
   disabled?: boolean;
   /** Set `false` will always use real scroll instead of virtual one */
   virtual?: boolean;
+  /** How many additional (non-visible) items to render on each side, for reducing blank spaces
+   * flashing
+   */
+  overscanCount?: number;
 
   /** When `disabled`, trigger if changed item not render. */
   onSkipRender?: () => void;
@@ -748,6 +752,7 @@ class List<T = any> extends React.Component<ListProps<T>, ListState<T>> {
       onSkipRender,
       disabled,
       virtual,
+      overscanCount,
       ...restProps
     } = this.props;
 
@@ -791,8 +796,10 @@ class List<T = any> extends React.Component<ListProps<T>, ListState<T>> {
       ...ScrollStyle,
     };
 
-    const { status, startIndex, endIndex, startItemTop } = this.state;
+    const { status, startItemTop } = this.state;
     const contentHeight = itemCount * itemHeight * ITEM_SCALE_RATE;
+    const startIndex = Math.max(this.state.startIndex - (overscanCount || 0), 0);
+    const endIndex = this.state.endIndex + (overscanCount || 0);
 
     return (
       <Component
