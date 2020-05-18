@@ -435,9 +435,10 @@ class List<T = any> extends React.Component<ListProps<T>, ListState<T>> {
     }
 
     const item = data[index];
-    if (!item) {
+    if (item === undefined) {
       /* istanbul ignore next */
       console.error('Not find index item. Please report this since it is a bug.');
+      return null;
     }
 
     return this.getItemKey(item, mergedProps);
