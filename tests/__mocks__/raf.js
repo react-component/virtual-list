@@ -1,3 +1,3 @@
 export default function raf(callback) {
-  setTimeout(callback);
+  return setTimeout(callback);
 }

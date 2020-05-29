@@ -1,6 +1,6 @@
 import * as React from 'react';
 import classNames from 'classnames';
-import raf from 'raf';
+import raf from 'rc-util/lib/raf';
 import Filler from './Filler';
 import {
   getElementScrollPercentage,
@@ -286,8 +286,8 @@ class List<T = any> extends React.Component<ListProps<T>, ListState<T>> {
         itemIndex: 0,
       });
 
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
+      raf(() => {
+        raf(() => {
           this.lockScroll = false;
         });
       });
@@ -702,8 +702,8 @@ class List<T = any> extends React.Component<ListProps<T>, ListState<T>> {
         endIndex: bestEndIndex,
       });
 
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
+      raf(() => {
+        raf(() => {
           this.lockScroll = false;
         });
       });

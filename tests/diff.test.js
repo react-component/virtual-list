@@ -1,5 +1,6 @@
 import React from 'react';
 import { mount } from 'enzyme';
+import raf from 'rc-util/lib/raf'
 import List from '../src';
 import { spyElementPrototypes } from './utils/domHook';
 
@@ -98,9 +99,9 @@ describe('Diff', () => {
         expect(wrapper.find(List).instance().lockScroll).toBeTruthy();
 
         // Wait 3 frame to check if scroll lock released
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
+        raf(() => {
+          raf(() => {
+            raf(() => {
               expect(wrapper.find(List).instance().lockScroll).toBeFalsy();
               resolve();
             });
