@@ -490,7 +490,7 @@ class List<T = any> extends React.Component<ListProps<T>, ListState<T>> {
         if (item) {
           const { clientHeight } = this.listRef.current;
 
-          if (isVirtual) {
+          if (isVirtual && this.listRef.current) {
             // Calculate related data
             const { itemIndex, itemOffsetPtg } = this.state;
             const { scrollTop } = this.listRef.current;
