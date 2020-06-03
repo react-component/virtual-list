@@ -132,6 +132,8 @@ class List<T = any> extends React.Component<ListProps<T>, ListState<T>> {
     data: [],
   };
 
+  rafId: number;
+
   listRef = React.createRef<HTMLElement>();
 
   itemElements: { [index: number]: HTMLElement } = {};
@@ -376,6 +378,10 @@ class List<T = any> extends React.Component<ListProps<T>, ListState<T>> {
     this.cachedProps = this.props;
   }
 
+  componentWillUnmount() {
+    raf.cancel(this.rafId);
+  }
+
   /**
    * Phase 2: Trigger render since we should re-calculate current position.
    */
@@ -435,8 +441,8 @@ class List<T = any> extends React.Component<ListProps<T>, ListState<T>> {
     }
 
     const item = data[index];
+    /* istanbul ignore next */
     if (item === undefined) {
-      /* istanbul ignore next */
       console.error('Not find index item. Please report this since it is a bug.');
       return null;
     }
@@ -470,7 +476,9 @@ class List<T = any> extends React.Component<ListProps<T>, ListState<T>> {
   };
 
   public scrollTo = (arg0: number | ScrollConfig) => {
-    raf(() => {
+    raf.cancel(this.rafId);
+
+    this.rafId = raf(() => {
       // Number top
       if (typeof arg0 === 'object') {
         const { isVirtual } = this.state;

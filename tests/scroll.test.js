@@ -89,6 +89,12 @@ describe('List.Scroll', () => {
           });
         });
 
+        it('not crash', () => {
+          listRef.current.scrollTo({ ...scrollConfig, align: 'top' });
+          wrapper.unmount();
+          jest.runAllTimers();
+        });
+
         it('top', () => {
           listRef.current.scrollTo({ ...scrollConfig, align: 'top' });
           jest.runAllTimers();

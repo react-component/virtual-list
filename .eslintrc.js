@@ -9,5 +9,6 @@ module.exports = {
     'react/no-find-dom-node': 0,
     'no-dupe-class-members': 0,
     'react/sort-comp': 0,
+    'no-confusing-arrow': 0,
   },
 };

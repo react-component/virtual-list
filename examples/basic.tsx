@@ -45,6 +45,7 @@ const TYPES = [
 ];
 
 const Demo = () => {
+  const [destroy, setDestroy] = React.useState(false);
   const [type, setType] = React.useState('dom');
   const listRef = React.useRef<List>(null);
 
@@ -65,26 +66,6 @@ const Demo = () => {
             {name}
           </label>
         ))}
-
-        <List
-          ref={listRef}
-          data={data}
-          height={200}
-          itemHeight={30}
-          itemKey="id"
-          style={{
-            border: '1px solid red',
-            boxSizing: 'border-box',
-          }}
-        >
-          {(item, _, props) =>
-            (type === 'dom' ? (
-              <ForwardMyItem {...item} {...props} />
-            ) : (
-              <TestItem {...item} {...props} />
-            ))
-          }
-        </List>
 
         <button
           type="button"
@@ -138,6 +119,41 @@ const Demo = () => {
         >
           Scroll To key 50 (auto)
         </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            listRef.current.scrollTo({
+              index: 50,
+              align: 'top',
+            });
+            setDestroy(true);
+          }}
+        >
+          Scroll To remove
+        </button>
+
+        {!destroy && (
+          <List
+            ref={listRef}
+            data={data}
+            height={200}
+            itemHeight={30}
+            itemKey="id"
+            style={{
+              border: '1px solid red',
+              boxSizing: 'border-box',
+            }}
+          >
+            {(item, _, props) =>
+              type === 'dom' ? (
+                <ForwardMyItem {...item} {...props} />
+              ) : (
+                <TestItem {...item} {...props} />
+              )
+            }
+          </List>
+        )}
       </div>
     </React.StrictMode>
   );

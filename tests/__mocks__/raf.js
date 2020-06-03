@@ -1,3 +1,9 @@
-export default function raf(callback) {
-  setTimeout(callback);
+function raf(callback) {
+  return setTimeout(callback);
 }
+
+raf.cancel = id => {
+  clearTimeout(id);
+};
+
+export default raf;
