@@ -293,7 +293,12 @@ class List<T = any> extends React.Component<ListProps<T>, ListState<T>> {
           this.lockScroll = false;
         });
       });
-    } else if (prevData.length !== data.length && changedItemIndex !== null && height) {
+    } else if (
+      prevData.length !== data.length &&
+      changedItemIndex !== null &&
+      height &&
+      virtual !== false
+    ) {
       /**
        * Re-calculate the item position since `data` length changed.
        * [IMPORTANT] We use relative position calculate here.
