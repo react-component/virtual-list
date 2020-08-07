@@ -110,6 +110,16 @@ describe('List', () => {
       wrapper.setProps({ data, disabled: true });
       expect(onSkipRender).toHaveBeenCalled();
     });
+
+    it('should rerender rows when current height > previous height', () => {
+      scrollTop = 0;
+      const data = genData(100);
+      const wrapper = genList({ itemHeight: 20, height: 100, data, virtual: true });
+
+      wrapper.setProps({ height: 200 });
+      wrapper.update();
+      expect(wrapper.find('li').length).toEqual(11);
+    });
   });
 
   describe('status switch', () => {

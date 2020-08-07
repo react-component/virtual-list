@@ -203,7 +203,17 @@ class List<T = any> extends React.Component<ListProps<T>, ListState<T>> {
       const diff = findListDiffIndex(prevData, data, this.getItemKey);
       changedItemIndex = diff ? diff.index : null;
     }
+    /** check if height changed */
+    if (this.cachedProps.height < height) {
+      const scrollPtg = getElementScrollPercentage(this.listRef.current);
+      const visibleCount = Math.ceil(height / itemHeight);
 
+      const { startIndex, endIndex } = getRangeIndex(scrollPtg, data.length, visibleCount);
+      this.setState({
+        startIndex,
+        endIndex,
+      });
+    }
     if (disabled) {
       // Should trigger `onSkipRender` to tell that diff component is not render in the list
       if (data.length > prevData.length) {
