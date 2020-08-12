@@ -64,7 +64,7 @@ function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     children,
     itemKey,
     virtual,
-    wheelInject,
+    wheelInject = true,
     component: Component = 'div',
     ...restProps
   } = props;

@@ -34,6 +34,8 @@ export default function useScrollTo<T>(
         if (times < 0) return;
 
         scrollRef.current = raf(() => {
+          if (!containerRef.current) return;
+
           // Get top & bottom
           let stackTop = 0;
           let itemTop = 0;
@@ -56,8 +58,15 @@ export default function useScrollTo<T>(
               containerRef.current.scrollTop = itemBottom - height;
               break;
 
-            default:
-            // auto
+            default: {
+              const { scrollTop } = containerRef.current;
+              const scrollBottom = scrollTop + height;
+              if (itemTop < scrollTop) {
+                containerRef.current.scrollTop = itemTop;
+              } else if (itemBottom > scrollBottom) {
+                containerRef.current.scrollTop = itemBottom - height;
+              }
+            }
           }
 
           syncScroll(times - 1);
