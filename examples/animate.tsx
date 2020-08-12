@@ -172,6 +172,7 @@ const Demo = () => {
             boxSizing: 'border-box',
           }}
           onSkipRender={onAppear}
+          // onItemRemove={onAppear}
         >
           {(item, index) => (
             <ForwardMyItem

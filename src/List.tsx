@@ -42,12 +42,10 @@ export interface ListProps<T> extends React.HTMLAttributes<any> {
   /** Set `false` will always use real scroll instead of virtual one */
   virtual?: boolean;
 
-  /** When `disabled`, trigger if changed item not render. */
-  onSkipRender?: () => void;
   onScroll?: React.UIEventHandler<HTMLElement>;
 
-  /** @private Internal usage. Do not use in production */
-  wheelInject?: boolean;
+  /** When `disabled`, trigger if changed item not render. */
+  onSkipRender?: () => void;
 }
 
 function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
@@ -62,21 +60,13 @@ function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     children,
     itemKey,
     virtual,
-    wheelInject = true,
+    onSkipRender,
     component: Component = 'div',
     ...restProps
   } = props;
 
   const mergedData = data || EMPTY_DATA;
   const componentRef = React.useRef<HTMLDivElement>();
-
-  const inVirtual =
-    virtual !== false && height && itemHeight && data && itemHeight * data.length > height;
-  const [instances, collectHeight, heights, heightUpdatedMark] = useHeights();
-
-  const [scrollTop, setScrollTop] = React.useState(0);
-
-  const mergedClassName = classNames(prefixCls, className);
 
   // =============================== Item Key ===============================
   const getKey = React.useCallback<GetKey<T>>(
@@ -92,6 +82,20 @@ function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   const sharedConfig: SharedConfig<T> = {
     getKey,
   };
+
+  // ================================= MISC =================================
+
+  const inVirtual =
+    virtual !== false && height && itemHeight && data && itemHeight * data.length > height;
+  const [getInstanceRefFunc, collectHeight, heights, heightUpdatedMark] = useHeights(
+    getKey,
+    null,
+    onSkipRender,
+  );
+
+  const [scrollTop, setScrollTop] = React.useState(0);
+
+  const mergedClassName = classNames(prefixCls, className);
 
   // ========================== Visible Calculation =========================
   const { scrollHeight, start, end, offset } = React.useMemo(() => {
@@ -170,13 +174,11 @@ function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   }
 
   React.useEffect(() => {
-    if (wheelInject) {
-      componentRef.current.addEventListener('wheel', onRawWheel);
-    }
+    componentRef.current.addEventListener('wheel', onRawWheel);
     return () => {
       componentRef.current.removeEventListener('wheel', onRawWheel);
     };
-  }, [inVirtual, wheelInject]);
+  }, [inVirtual]);
 
   // ================================= Ref ==================================
   const scrollTo = useScrollTo<T>(componentRef, mergedData, height, heights, itemHeight, getKey);
@@ -186,7 +188,14 @@ function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   }));
 
   // ================================ Render ================================
-  const listChildren = useChildren(mergedData, start, end, instances, children, sharedConfig);
+  const listChildren = useChildren(
+    mergedData,
+    start,
+    end,
+    getInstanceRefFunc,
+    children,
+    sharedConfig,
+  );
 
   return (
     <Component

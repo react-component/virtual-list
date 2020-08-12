@@ -10,5 +10,6 @@ module.exports = {
     'no-dupe-class-members': 0,
     'react/sort-comp': 0,
     'no-confusing-arrow': 0,
+    'no-unused-expressions': 0,
   },
 };

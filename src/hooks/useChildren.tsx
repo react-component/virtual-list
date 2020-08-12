@@ -5,7 +5,7 @@ export default function useChildren<T>(
   list: T[],
   startIndex: number,
   endIndex: number,
-  refs: Map<React.Key, HTMLElement>,
+  getInstanceRefFunc: (item: T) => (instance: HTMLElement) => void,
   renderFunc: RenderFunc<T>,
   { getKey }: SharedConfig<T>,
 ) {
@@ -18,9 +18,7 @@ export default function useChildren<T>(
     const key = getKey(item);
     return React.cloneElement(node, {
       key,
-      ref: (instance: HTMLElement) => {
-        refs.set(key, instance);
-      },
+      ref: getInstanceRefFunc(item),
     });
   });
 }
