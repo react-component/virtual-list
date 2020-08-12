@@ -1,4 +1,5 @@
 import * as React from 'react';
+import ResizeObserver from 'rc-resize-observer';
 import classNames from 'classnames';
 
 interface FillerProps {
@@ -9,6 +10,8 @@ interface FillerProps {
   offset?: number;
 
   children: React.ReactNode;
+
+  onInnerResize?: () => void;
 }
 
 /**
@@ -19,6 +22,7 @@ const Filler: React.FC<FillerProps> = ({
   offset,
   children,
   prefixCls,
+  onInnerResize,
 }): React.ReactElement => {
   let outerStyle: React.CSSProperties = {};
 
@@ -42,14 +46,16 @@ const Filler: React.FC<FillerProps> = ({
 
   return (
     <div style={outerStyle}>
-      <div
-        style={innerStyle}
-        className={classNames({
-          [`${prefixCls}-holder-inner`]: prefixCls,
-        })}
-      >
-        {children}
-      </div>
+      <ResizeObserver onResize={onInnerResize}>
+        <div
+          style={innerStyle}
+          className={classNames({
+            [`${prefixCls}-holder-inner`]: prefixCls,
+          })}
+        >
+          {children}
+        </div>
+      </ResizeObserver>
     </div>
   );
 };

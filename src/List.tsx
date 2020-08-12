@@ -2,9 +2,10 @@ import * as React from 'react';
 import classNames from 'classnames';
 import Filler from './Filler';
 import { RenderFunc, SharedConfig, GetKey } from './interface';
-import { useChildren } from './hooks/useChildren';
-import { useHeights } from './hooks/useHeights';
+import useChildren from './hooks/useChildren';
+import useHeights from './hooks/useHeights';
 import useInRange from './hooks/useInRange';
+import useScrollTo from './hooks/useScrollTo';
 
 const EMPTY_DATA = [];
 
@@ -23,8 +24,9 @@ export type ScrollConfig =
       key: React.Key;
       align?: ScrollAlign;
     };
+export type ScrollTo = (arg: number | ScrollConfig) => void;
 export type ListRef = {
-  scrollTo: number | ScrollConfig;
+  scrollTo: ScrollTo;
 };
 
 export interface ListProps<T> extends React.HTMLAttributes<any> {
@@ -45,9 +47,12 @@ export interface ListProps<T> extends React.HTMLAttributes<any> {
   /** When `disabled`, trigger if changed item not render. */
   onSkipRender?: () => void;
   onScroll?: React.UIEventHandler<HTMLElement>;
+
+  /** @private Internal usage. Do not use in production */
+  wheelInject?: boolean;
 }
 
-function RawList<T>(props: ListProps<T>, ref) {
+function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   const {
     prefixCls,
     className,
@@ -59,6 +64,7 @@ function RawList<T>(props: ListProps<T>, ref) {
     children,
     itemKey,
     virtual,
+    wheelInject,
     component: Component = 'div',
     ...restProps
   } = props;
@@ -68,12 +74,13 @@ function RawList<T>(props: ListProps<T>, ref) {
 
   const inVirtual =
     virtual !== false && height && itemHeight && data && itemHeight * data.length > height;
-  const [collectHeight, heights, heightUpdatedMark] = useHeights();
+  const [instances, collectHeight, heights, heightUpdatedMark] = useHeights();
 
   const [scrollTop, setScrollTop] = React.useState(0);
 
   const mergedClassName = classNames(prefixCls, className);
 
+  // =============================== Item Key ===============================
   const getKey = React.useCallback<GetKey<T>>(
     (item: T) => {
       if (typeof itemKey === 'function') {
@@ -165,14 +172,23 @@ function RawList<T>(props: ListProps<T>, ref) {
   }
 
   React.useEffect(() => {
-    componentRef.current.addEventListener('wheel', onRawWheel);
+    if (wheelInject) {
+      componentRef.current.addEventListener('wheel', onRawWheel);
+    }
     return () => {
       componentRef.current.removeEventListener('wheel', onRawWheel);
     };
-  }, [inVirtual]);
+  }, [inVirtual, wheelInject]);
+
+  // ================================= Ref ==================================
+  const scrollTo = useScrollTo<T>(componentRef, mergedData, height, heights, itemHeight, getKey);
+
+  React.useImperativeHandle(ref, () => ({
+    scrollTo,
+  }));
 
   // ================================ Render ================================
-  const listChildren = useChildren(mergedData, start, end, collectHeight, children, sharedConfig);
+  const listChildren = useChildren(mergedData, start, end, instances, children, sharedConfig);
 
   return (
     <>
@@ -188,7 +204,12 @@ function RawList<T>(props: ListProps<T>, ref) {
         ref={componentRef}
         onScroll={onRawScroll}
       >
-        <Filler prefixCls={prefixCls} height={scrollHeight} offset={offset}>
+        <Filler
+          prefixCls={prefixCls}
+          height={scrollHeight}
+          offset={offset}
+          onInnerResize={collectHeight}
+        >
           {listChildren}
         </Filler>
       </Component>

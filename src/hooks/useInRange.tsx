@@ -1,6 +1,9 @@
 import { useRef } from 'react';
 
-export default function useInRange(scrollHeight, containerHeight): (scrollTop: number) => number {
+export default function useInRange(
+  scrollHeight: number,
+  containerHeight: number,
+): (scrollTop: number) => number {
   const scrollHeightRef = useRef<number>();
   const containerHeightRef = useRef<number>();
 

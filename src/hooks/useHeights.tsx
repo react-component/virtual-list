@@ -1,25 +1,24 @@
 import * as React from 'react';
 import { useRef } from 'react';
-import raf from 'raf';
 
-export function useHeights(): [
-  (key: React.Key, height: number) => void,
+export default function useHeights(): [
+  Map<React.Key, HTMLElement>,
+  () => void,
   Map<React.Key, number>,
   number,
 ] {
   const [updatedMark, setUpdatedMark] = React.useState(0);
-  const heights = useRef(new Map<React.Key, number>());
-  const rafRef = useRef(null);
+  const instanceRef = useRef(new Map<React.Key, HTMLElement>());
+  const heightsRef = useRef(new Map<React.Key, number>());
 
-  function collectHeight(key: React.Key, height: number) {
-    heights.current.set(key, height);
-
-    // Update only once in a frame
-    raf.cancel(rafRef.current);
-    rafRef.current = raf(() => {
-      setUpdatedMark(c => c + 1);
+  function collectHeight() {
+    instanceRef.current.forEach((element, key) => {
+      if (element) {
+        heightsRef.current.set(key, element.offsetHeight);
+      }
     });
+    setUpdatedMark(c => c + 1);
   }
 
-  return [collectHeight, heights.current, updatedMark];
+  return [instanceRef.current, collectHeight, heightsRef.current, updatedMark];
 }

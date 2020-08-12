@@ -1,12 +1,11 @@
 import * as React from 'react';
-import ResizeObserver from 'rc-resize-observer';
 import { SharedConfig, RenderFunc } from '../interface';
 
-export function useChildren<T>(
+export default function useChildren<T>(
   list: T[],
   startIndex: number,
   endIndex: number,
-  onCollectHeight: (key: React.Key, height: number) => void,
+  refs: Map<React.Key, HTMLElement>,
   renderFunc: RenderFunc<T>,
   { getKey }: SharedConfig<T>,
 ) {
@@ -17,15 +16,11 @@ export function useChildren<T>(
     }) as React.ReactElement;
 
     const key = getKey(item);
-    return (
-      <ResizeObserver
-        onResize={({ offsetHeight }) => {
-          onCollectHeight(key, offsetHeight);
-        }}
-        key={key}
-      >
-        {node}
-      </ResizeObserver>
-    );
+    return React.cloneElement(node, {
+      key,
+      ref: (instance: HTMLElement) => {
+        refs.set(key, instance);
+      },
+    });
   });
 }
