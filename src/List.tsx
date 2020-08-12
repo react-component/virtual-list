@@ -39,8 +39,6 @@ export interface ListProps<T> extends React.HTMLAttributes<any> {
   fullHeight?: boolean;
   itemKey: React.Key | ((item: T) => React.Key);
   component?: string | React.FC<any> | React.ComponentClass<any>;
-  /** Disable scroll check. Usually used on animation control */
-  disabled?: boolean;
   /** Set `false` will always use real scroll instead of virtual one */
   virtual?: boolean;
 
@@ -191,29 +189,24 @@ function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   const listChildren = useChildren(mergedData, start, end, instances, children, sharedConfig);
 
   return (
-    <>
-      {start}/{end}-{scrollTop}
-      <Component
-        style={
-          height
-            ? { ...style, [fullHeight ? 'height' : 'maxHeight']: height, ...ScrollStyle }
-            : style
-        }
-        className={mergedClassName}
-        {...restProps}
-        ref={componentRef}
-        onScroll={onRawScroll}
+    <Component
+      style={
+        height ? { ...style, [fullHeight ? 'height' : 'maxHeight']: height, ...ScrollStyle } : style
+      }
+      className={mergedClassName}
+      {...restProps}
+      ref={componentRef}
+      onScroll={onRawScroll}
+    >
+      <Filler
+        prefixCls={prefixCls}
+        height={scrollHeight}
+        offset={offset}
+        onInnerResize={collectHeight}
       >
-        <Filler
-          prefixCls={prefixCls}
-          height={scrollHeight}
-          offset={offset}
-          onInnerResize={collectHeight}
-        >
-          {listChildren}
-        </Filler>
-      </Component>
-    </>
+        {listChildren}
+      </Filler>
+    </Component>
   );
 }
 
