@@ -4,6 +4,7 @@ import Filler from './Filler';
 import { RenderFunc, SharedConfig, GetKey } from './interface';
 import { useChildren } from './hooks/useChildren';
 import { useHeights } from './hooks/useHeights';
+import useInRange from './hooks/useInRange';
 
 const EMPTY_DATA = [];
 
@@ -63,7 +64,7 @@ function RawList<T>(props: ListProps<T>, ref) {
   } = props;
 
   const mergedData = data || EMPTY_DATA;
-  const componentRef = React.useRef<HTMLElement>();
+  const componentRef = React.useRef<HTMLDivElement>();
 
   const inVirtual =
     virtual !== false && height && itemHeight && data && itemHeight * data.length > height;
@@ -134,23 +135,44 @@ function RawList<T>(props: ListProps<T>, ref) {
     };
   }, [scrollTop, mergedData, heightUpdatedMark]);
 
+  // =============================== In Range ===============================
+  const keepInRange = useInRange(scrollHeight, height);
+
   // ================================ Scroll ================================
-  function onRawScroll(event: UIEvent) {
+  // Since this added in global,should use ref to keep update
+  function onRawWheel(event: MouseWheelEvent) {
     if (!inVirtual) return;
 
-    let { scrollTop: top } = event.target as HTMLElement;
-    top = Math.max(0, top);
-    top = Math.min(top, scrollHeight - height);
-    setScrollTop(top);
+    // Proxy of scroll events
+    event.preventDefault();
+
+    setScrollTop(top => {
+      const newTop = keepInRange(top + event.deltaY);
+
+      componentRef.current.scrollTop = newTop;
+      return newTop;
+    });
   }
 
-  // React.useEffect(() => {
-  //   componentRef.current.addEventListener('scroll', onRawScroll);
-  // }, []);
+  // Additional handle the scroll which not trigger by wheel
+  function onRawScroll(event: React.UIEvent) {
+    if (!inVirtual) return;
+
+    const newTop = keepInRange((event.target as HTMLDivElement).scrollTop);
+    if (newTop !== scrollTop) {
+      setScrollTop(newTop);
+    }
+  }
+
+  React.useEffect(() => {
+    componentRef.current.addEventListener('wheel', onRawWheel);
+    return () => {
+      componentRef.current.removeEventListener('wheel', onRawWheel);
+    };
+  }, [inVirtual]);
 
   // ================================ Render ================================
   const listChildren = useChildren(mergedData, start, end, collectHeight, children, sharedConfig);
-  console.log('>>>', start, end, offset, listChildren);
 
   return (
     <>
@@ -165,8 +187,6 @@ function RawList<T>(props: ListProps<T>, ref) {
         {...restProps}
         ref={componentRef}
         onScroll={onRawScroll}
-        // onScroll={this.onRawScroll}
-        // ref={this.listRef}
       >
         <Filler prefixCls={prefixCls} height={scrollHeight} offset={offset}>
           {listChildren}
