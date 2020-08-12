@@ -6,6 +6,7 @@ import useChildren from './hooks/useChildren';
 import useHeights from './hooks/useHeights';
 import useInRange from './hooks/useInRange';
 import useScrollTo from './hooks/useScrollTo';
+import useDiffItem from './hooks/useDiffItem';
 
 const EMPTY_DATA = [];
 
@@ -44,6 +45,9 @@ export interface ListProps<T> extends React.HTMLAttributes<any> {
 
   onScroll?: React.UIEventHandler<HTMLElement>;
 
+  /** @deprecated only compatible for old usage */
+  disabled?: boolean;
+
   /** When `disabled`, trigger if changed item not render. */
   onSkipRender?: () => void;
 }
@@ -60,6 +64,7 @@ function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     children,
     itemKey,
     virtual,
+    disabled,
     onSkipRender,
     component: Component = 'div',
     ...restProps
@@ -83,14 +88,22 @@ function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     getKey,
   };
 
-  // ================================= MISC =================================
+  // ================================ Legacy ================================
+  const diffItemRef = React.useRef<T>();
+  const diffItem = useDiffItem(mergedData, getKey);
+  diffItemRef.current = diffItem;
 
+  // ================================= MISC =================================
   const inVirtual =
     virtual !== false && height && itemHeight && data && itemHeight * data.length > height;
   const [getInstanceRefFunc, collectHeight, heights, heightUpdatedMark] = useHeights(
     getKey,
     null,
-    onSkipRender,
+    item => {
+      if (disabled && diffItemRef.current === item) {
+        onSkipRender?.();
+      }
+    },
   );
 
   const [scrollTop, setScrollTop] = React.useState(0);

@@ -165,7 +165,7 @@ const Demo = () => {
           height={200}
           itemHeight={20}
           itemKey="id"
-          // disabled={animating}
+          disabled={animating}
           ref={listRef}
           style={{
             border: '1px solid red',
