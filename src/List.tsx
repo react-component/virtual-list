@@ -4,6 +4,7 @@ import Filler from './Filler';
 import { RenderFunc, SharedConfig, GetKey } from './interface';
 import { useChildren } from './hooks/useChildren';
 import { useHeights } from './hooks/useHeights';
+import Holder from './Holder';
 
 const EMPTY_DATA = [];
 
@@ -92,9 +93,10 @@ function RawList<T>(props: ListProps<T>, ref) {
     setScrollTop(top);
   }
 
-  const { scrollHeight, start, end } = React.useMemo(() => {
+  const { scrollHeight, start, end, offset } = React.useMemo(() => {
     let itemTop = 0;
     let startIndex: number;
+    let startOffset: number;
     let endIndex: number;
 
     for (let i = 0; i < mergedData.length; i += 1) {
@@ -106,6 +108,7 @@ function RawList<T>(props: ListProps<T>, ref) {
       // Check item top in the range
       if (currentItemBottom >= scrollTop && startIndex === undefined) {
         startIndex = i;
+        startOffset = itemTop;
       }
 
       // Check item bottom in the range. We will render additional one item for motion usage
@@ -119,6 +122,7 @@ function RawList<T>(props: ListProps<T>, ref) {
     // Fallback to normal if not match
     if (startIndex === undefined) {
       startIndex = 0;
+      startOffset = 0;
     }
     if (endIndex === undefined) {
       endIndex = mergedData.length - 1;
@@ -128,18 +132,13 @@ function RawList<T>(props: ListProps<T>, ref) {
       scrollHeight: itemTop,
       start: startIndex,
       end: endIndex,
+      offset: startOffset,
     };
   }, [scrollTop, mergedData, heightUpdatedMark]);
 
   // ================================ Render ================================
-  const listChildren = useChildren(
-    mergedData,
-    0,
-    mergedData.length,
-    collectHeight,
-    children,
-    sharedConfig,
-  );
+  const listChildren = useChildren(mergedData, start, end, collectHeight, children, sharedConfig);
+  console.log('>>>', start, end, listChildren);
 
   return (
     <Component
@@ -152,7 +151,7 @@ function RawList<T>(props: ListProps<T>, ref) {
       // onScroll={this.onRawScroll}
       // ref={this.listRef}
     >
-      <Filler prefixCls={prefixCls} height={height}>
+      <Filler prefixCls={prefixCls} height={scrollHeight} offset={offset}>
         {listChildren}
       </Filler>
     </Component>

@@ -10,7 +10,7 @@ export function useChildren<T>(
   renderFunc: RenderFunc<T>,
   { getKey }: SharedConfig<T>,
 ) {
-  return list.slice(startIndex, endIndex).map((item, index) => {
+  return list.slice(startIndex, endIndex + 1).map((item, index) => {
     const eleIndex = startIndex + index;
     const node = renderFunc(item, eleIndex, {
       // style: status === 'MEASURE_START' ? { visibility: 'hidden' } : {},
