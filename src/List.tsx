@@ -165,7 +165,7 @@ function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
       end: endIndex,
       offset: startOffset,
     };
-  }, [inVirtual, scrollTop, mergedData, heightUpdatedMark]);
+  }, [inVirtual, scrollTop, mergedData, heightUpdatedMark, height]);
 
   // =============================== In Range ===============================
   const keepInRange = useInRange(scrollHeight, height);
