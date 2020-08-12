@@ -7,3 +7,5 @@ export type RenderFunc<T> = (
 export interface SharedConfig<T> {
   getKey: (item: T) => React.Key;
 }
+
+export type GetKey<T> = (item: T) => React.Key;

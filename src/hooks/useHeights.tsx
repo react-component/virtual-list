@@ -2,8 +2,12 @@ import * as React from 'react';
 import { useRef } from 'react';
 import raf from 'raf';
 
-export function useHeights(): [(key: React.Key, height: number) => void, Map<React.Key, number>] {
-  const [, forceUpdate] = React.useState({});
+export function useHeights(): [
+  (key: React.Key, height: number) => void,
+  Map<React.Key, number>,
+  number,
+] {
+  const [updatedMark, setUpdatedMark] = React.useState(0);
   const heights = useRef(new Map<React.Key, number>());
   const rafRef = useRef(null);
 
@@ -13,9 +17,9 @@ export function useHeights(): [(key: React.Key, height: number) => void, Map<Rea
     // Update only once in a frame
     raf.cancel(rafRef.current);
     rafRef.current = raf(() => {
-      forceUpdate({});
+      setUpdatedMark(c => c + 1);
     });
   }
 
-  return [collectHeight, heights.current];
+  return [collectHeight, heights.current, updatedMark];
 }

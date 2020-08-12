@@ -1,9 +1,11 @@
 import * as React from 'react';
 import classNames from 'classnames';
 import Filler from './Filler';
-import { RenderFunc, SharedConfig } from './interface';
+import { RenderFunc, SharedConfig, GetKey } from './interface';
 import { useChildren } from './hooks/useChildren';
 import { useHeights } from './hooks/useHeights';
+
+const EMPTY_DATA = [];
 
 const ScrollStyle = {
   overflowY: 'auto',
@@ -44,7 +46,7 @@ export interface ListProps<T> extends React.HTMLAttributes<any> {
   onScroll?: React.UIEventHandler<HTMLElement>;
 }
 
-const List = React.forwardRef<ListRef, ListProps<any>>((props, ref) => {
+function RawList<T>(props: ListProps<T>, ref) {
   const {
     prefixCls,
     className,
@@ -60,14 +62,18 @@ const List = React.forwardRef<ListRef, ListProps<any>>((props, ref) => {
     ...restProps
   } = props;
 
+  const mergedData = data || EMPTY_DATA;
+
   const inVirtual =
     virtual !== false && height && itemHeight && data && itemHeight * data.length > height;
-  const [collectHeight, heights] = useHeights();
+  const [collectHeight, heights, heightUpdatedMark] = useHeights();
+
+  const [scrollTop, setScrollTop] = React.useState(0);
 
   const mergedClassName = classNames(prefixCls, className);
 
-  const getKey = React.useCallback(
-    (item: any) => {
+  const getKey = React.useCallback<GetKey<T>>(
+    (item: T) => {
       if (typeof itemKey === 'function') {
         return itemKey(item);
       }
@@ -76,12 +82,64 @@ const List = React.forwardRef<ListRef, ListProps<any>>((props, ref) => {
     [itemKey],
   );
 
-  const myData = data;
-  const sharedConfig: SharedConfig<any> = {
+  const sharedConfig: SharedConfig<T> = {
     getKey,
   };
 
-  const listChildren = useChildren(myData, 0, myData.length, collectHeight, children, sharedConfig);
+  // ================================ Scroll ================================
+  function onRawScroll(event: React.UIEvent) {
+    const { scrollTop: top } = event.target as HTMLElement;
+    setScrollTop(top);
+  }
+
+  const { scrollHeight, start, end } = React.useMemo(() => {
+    let itemTop = 0;
+    let startIndex: number;
+    let endIndex: number;
+
+    for (let i = 0; i < mergedData.length; i += 1) {
+      const item = mergedData[i];
+      const key = getKey(item);
+
+      const currentItemBottom = itemTop + (heights.get(key) ?? itemHeight);
+
+      // Check item top in the range
+      if (currentItemBottom >= scrollTop && startIndex === undefined) {
+        startIndex = i;
+      }
+
+      // Check item bottom in the range. We will render additional one item for motion usage
+      if (currentItemBottom > scrollTop + height && endIndex === undefined) {
+        endIndex = Math.min(i + 1, mergedData.length - 1);
+      }
+
+      itemTop = currentItemBottom;
+    }
+
+    // Fallback to normal if not match
+    if (startIndex === undefined) {
+      startIndex = 0;
+    }
+    if (endIndex === undefined) {
+      endIndex = mergedData.length - 1;
+    }
+
+    return {
+      scrollHeight: itemTop,
+      start: startIndex,
+      end: endIndex,
+    };
+  }, [scrollTop, mergedData, heightUpdatedMark]);
+
+  // ================================ Render ================================
+  const listChildren = useChildren(
+    mergedData,
+    0,
+    mergedData.length,
+    collectHeight,
+    children,
+    sharedConfig,
+  );
 
   return (
     <Component
@@ -90,6 +148,7 @@ const List = React.forwardRef<ListRef, ListProps<any>>((props, ref) => {
       }
       className={mergedClassName}
       {...restProps}
+      onScroll={onRawScroll}
       // onScroll={this.onRawScroll}
       // ref={this.listRef}
     >
@@ -98,7 +157,9 @@ const List = React.forwardRef<ListRef, ListProps<any>>((props, ref) => {
       </Filler>
     </Component>
   );
-});
+}
+
+const List = React.forwardRef<ListRef, ListProps<any>>(RawList);
 
 List.displayName = 'List';
 
