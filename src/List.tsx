@@ -96,6 +96,7 @@ function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   // ================================= MISC =================================
   const inVirtual =
     virtual !== false && height && itemHeight && data && itemHeight * data.length > height;
+
   const [getInstanceRefFunc, collectHeight, heights, heightUpdatedMark] = useHeights(
     getKey,
     null,
@@ -112,6 +113,15 @@ function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
 
   // ========================== Visible Calculation =========================
   const { scrollHeight, start, end, offset } = React.useMemo(() => {
+    if (!inVirtual) {
+      return {
+        scrollHeight: undefined,
+        start: 0,
+        end: mergedData.length - 1,
+        offset: undefined,
+      };
+    }
+
     let itemTop = 0;
     let startIndex: number;
     let startOffset: number;
@@ -155,7 +165,7 @@ function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
       end: endIndex,
       offset: startOffset,
     };
-  }, [scrollTop, mergedData, heightUpdatedMark]);
+  }, [inVirtual, scrollTop, mergedData, heightUpdatedMark]);
 
   // =============================== In Range ===============================
   const keepInRange = useInRange(scrollHeight, height);
