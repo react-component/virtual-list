@@ -37,7 +37,7 @@ export default function useHeights<T>(
 
   function collectHeight() {
     instanceRef.current.forEach((element, key) => {
-      if (element) {
+      if (element && element.offsetParent) {
         const htmlElement = findDOMNode<HTMLElement>(element);
         heightsRef.current.set(key, htmlElement.offsetHeight);
       }

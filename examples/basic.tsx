@@ -50,6 +50,14 @@ const Demo = () => {
   const [type, setType] = React.useState('dom');
   const listRef = React.useRef<ListRef>(null);
 
+  React.useEffect(() => {
+    if (visible) {
+      listRef.current.scrollTo({
+        index: 50,
+      });
+    }
+  }, [visible]);
+
   return (
     <React.StrictMode>
       <div>
