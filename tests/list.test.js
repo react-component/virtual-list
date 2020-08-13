@@ -94,22 +94,6 @@ describe('List.Basic', () => {
       expect(wrapper.find(Filler).props().height).toEqual(2000);
       expect(wrapper.find(Filler).props().offset + wrapper.find('li').length * 20).toEqual(2000);
     });
-
-    it('render out of view', () => {
-      scrollTop = 0;
-      let data = genData(20);
-      const onSkipRender = jest.fn();
-      const wrapper = genList({ itemHeight: 20, height: 100, disabled: true, data, onSkipRender });
-
-      data = [{ id: 'beforeAll' }, ...data];
-      wrapper.setProps({ data });
-      expect(onSkipRender).not.toHaveBeenCalled();
-
-      wrapper.setProps({ disabled: false });
-      data = [...data, { id: 'afterAll' }];
-      wrapper.setProps({ data, disabled: true });
-      expect(onSkipRender).toHaveBeenCalled();
-    });
   });
 
   describe('status switch', () => {
