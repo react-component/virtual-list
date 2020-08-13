@@ -47,7 +47,7 @@ export interface ListProps<T> extends React.HTMLAttributes<any> {
   onScroll?: React.UIEventHandler<HTMLElement>;
 }
 
-function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
+export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   const {
     prefixCls,
     className,

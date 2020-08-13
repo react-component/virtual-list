@@ -1,9 +1,9 @@
 import * as React from 'react';
-import OriginList, { ListProps, ListRef } from './List';
+import { RawList, ListProps, ListRef } from './List';
 
-const List = React.forwardRef((props: ListProps<any>, ref: React.Ref<ListRef>) => (
-  <OriginList {...props} ref={ref} virtual={false} />
-)) as <Item = any>(
+const List = React.forwardRef((props: ListProps<any>, ref: React.Ref<ListRef>) =>
+  RawList({ ...props, virtual: false }, ref),
+) as <Item = any>(
   props: React.PropsWithChildren<ListProps<Item>> & { ref?: React.Ref<ListRef> },
 ) => React.ReactElement;
 
