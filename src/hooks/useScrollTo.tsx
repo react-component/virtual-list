@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
 import * as React from 'react';
-import raf from 'raf';
+import raf from 'rc-util/lib/raf';
 import { ScrollTo } from '../List';
 import { GetKey } from '../interface';
 
