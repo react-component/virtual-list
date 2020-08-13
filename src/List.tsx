@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useRef } from 'react';
 import classNames from 'classnames';
 import Filler from './Filler';
 import { RenderFunc, SharedConfig, GetKey } from './interface';
@@ -70,8 +71,15 @@ function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     ...restProps
   } = props;
 
+  // ================================= MISC =================================
+  const inVirtual =
+    virtual !== false && height && itemHeight && data && itemHeight * data.length > height;
+
+  const [scrollTop, setScrollTop] = React.useState(0);
+
+  const mergedClassName = classNames(prefixCls, className);
   const mergedData = data || EMPTY_DATA;
-  const componentRef = React.useRef<HTMLDivElement>();
+  const componentRef = useRef<HTMLDivElement>();
 
   // =============================== Item Key ===============================
   const getKey = React.useCallback<GetKey<T>>(
@@ -89,14 +97,18 @@ function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   };
 
   // ================================ Legacy ================================
-  const diffItemRef = React.useRef<T>();
-  const diffItem = useDiffItem(mergedData, getKey);
+  // Put ref here since the range is generate by follow
+  const rangeRef = useRef({ start: 0, end: mergedData.length });
+
+  const diffItemRef = useRef<T>();
+  const [diffItem] = useDiffItem(mergedData, getKey, diffIndex => {
+    if (disabled && (diffIndex < rangeRef.current.start || diffIndex > rangeRef.current.end)) {
+      onSkipRender?.();
+    }
+  });
   diffItemRef.current = diffItem;
 
-  // ================================= MISC =================================
-  const inVirtual =
-    virtual !== false && height && itemHeight && data && itemHeight * data.length > height;
-
+  // ================================ Height ================================
   const [getInstanceRefFunc, collectHeight, heights, heightUpdatedMark] = useHeights(
     getKey,
     null,
@@ -106,10 +118,6 @@ function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
       }
     },
   );
-
-  const [scrollTop, setScrollTop] = React.useState(0);
-
-  const mergedClassName = classNames(prefixCls, className);
 
   // ========================== Visible Calculation =========================
   const { scrollHeight, start, end, offset } = React.useMemo(() => {
@@ -167,6 +175,9 @@ function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     };
   }, [inVirtual, scrollTop, mergedData, heightUpdatedMark, height]);
 
+  rangeRef.current.start = start;
+  rangeRef.current.end = end;
+
   // =============================== In Range ===============================
   const keepInRange = useInRange(scrollHeight, height);
 
@@ -188,9 +199,8 @@ function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
 
   // Additional handle the scroll which not trigger by wheel
   function onRawScroll(event: React.UIEvent) {
-    if (!inVirtual) return;
-
-    const newTop = keepInRange((event.target as HTMLDivElement).scrollTop);
+    const newScrollTop = (event.target as HTMLDivElement).scrollTop;
+    const newTop = keepInRange(newScrollTop);
     if (newTop !== scrollTop) {
       setScrollTop(newTop);
     }

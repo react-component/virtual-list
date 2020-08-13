@@ -35,8 +35,8 @@ function getData(count: number) {
 }
 
 const Demo = () => {
-  const [height, setHeight] = React.useState(200);
-  const [data, setData] = React.useState(getData(2));
+  const [height, setHeight] = React.useState(100);
+  const [data, setData] = React.useState(getData(100));
 
   return (
     <React.StrictMode>

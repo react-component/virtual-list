@@ -12,7 +12,10 @@ export default function useInRange(
 
   return (scrollTop: number) => {
     let newTop = Math.max(scrollTop, 0);
-    newTop = Math.min(newTop, scrollHeightRef.current - containerHeightRef.current);
+    const min = scrollHeightRef.current - containerHeightRef.current;
+    if (!Number.isNaN(min)) {
+      newTop = Math.min(newTop, min);
+    }
     return newTop;
   };
 }
