@@ -176,6 +176,11 @@ describe('List.Basic', () => {
             return 20;
           },
         },
+        offsetParent: {
+          get() {
+            return this;
+          },
+        },
       });
     });
 
