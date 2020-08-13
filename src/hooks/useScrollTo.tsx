@@ -44,7 +44,8 @@ export default function useScrollTo<T>(
           for (let i = 0; i <= index; i += 1) {
             const key = getKey(data[i]);
             itemTop = stackTop;
-            itemBottom = itemTop + (heights.get(key) ?? itemHeight);
+            const cacheHeight = heights.get(key);
+            itemBottom = itemTop + (cacheHeight === undefined ? itemHeight : cacheHeight);
 
             stackTop = itemBottom;
           }

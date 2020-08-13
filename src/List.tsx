@@ -139,7 +139,8 @@ function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
       const item = mergedData[i];
       const key = getKey(item);
 
-      const currentItemBottom = itemTop + (heights.get(key) ?? itemHeight);
+      const cacheHeight = heights.get(key);
+      const currentItemBottom = itemTop + (cacheHeight === undefined ? itemHeight : cacheHeight);
 
       // Check item top in the range
       if (currentItemBottom >= scrollTop && startIndex === undefined) {
