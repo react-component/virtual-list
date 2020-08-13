@@ -1,26 +1,6 @@
-import {
-  alignScrollTop,
-  getScrollPercentage,
-  getElementScrollPercentage,
-} from '../src/utils/itemUtil';
 import { getIndexByStartLoc, findListDiffIndex } from '../src/utils/algorithmUtil';
 
 describe('Util', () => {
-  describe('Item', () => {
-    it('not throw', () => {
-      expect(getScrollPercentage({ scrollTop: 0, scrollHeight: 10, clientHeight: 20 })).toEqual(0);
-      expect(getElementScrollPercentage(null)).toEqual(0);
-    });
-
-    it('safari use elastic effect which return scrollTop as negative', () => {
-      expect(alignScrollTop(-1, 10)).toEqual(0);
-      expect(alignScrollTop(11, 10)).toEqual(10);
-
-      expect(getScrollPercentage({ scrollTop: -1, scrollHeight: 20, clientHeight: 10 })).toEqual(0);
-      expect(getScrollPercentage({ scrollTop: 11, scrollHeight: 20, clientHeight: 10 })).toEqual(1);
-    });
-  });
-
   describe('Algorithm', () => {
     describe('getIndexByStartLoc', () => {
       function test(name, min, max, start, expectList) {
