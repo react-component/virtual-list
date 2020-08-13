@@ -8,7 +8,7 @@ function genData(count) {
   return new Array(count).fill(null).map((_, id) => ({ id }));
 }
 
-describe('List', () => {
+describe('List.Basic', () => {
   function genList(props) {
     let node = (
       <List component="ul" itemKey="id" {...props}>
@@ -114,7 +114,6 @@ describe('List', () => {
 
   describe('status switch', () => {
     let scrollTop = 0;
-    let scrollHeight = 0;
 
     let mockLiElement;
     let mockElement;
@@ -127,9 +126,6 @@ describe('List', () => {
       });
 
       mockElement = spyElementPrototypes(HTMLElement, {
-        scrollHeight: {
-          get: () => scrollHeight,
-        },
         clientHeight: {
           get: () => 100,
         },
@@ -151,39 +147,26 @@ describe('List', () => {
       let data = genData(5);
       const wrapper = genList({ itemHeight: 20, height: 100, data });
 
-      scrollHeight = 200;
-      scrollTop = 40;
-      wrapper.find('ul').simulate('scroll', {
-        scrollTop,
-      });
+      expect(wrapper.find('li')).toHaveLength(5);
 
-      scrollHeight = 120;
-      data = [...data, { id: 'afterAll' }];
+      data = genData(10);
       wrapper.setProps({ data });
-      expect(wrapper.find('ul').instance().scrollTop < 10).toBeTruthy();
+      expect(wrapper.find('li').length < data.length).toBeTruthy();
     });
 
-    it('virtual to raw', done => {
-      let data = genData(6);
+    it('virtual to raw', () => {
+      let data = genData(10);
       const wrapper = genList({ itemHeight: 20, height: 100, data });
+      expect(wrapper.find('li').length < data.length).toBeTruthy();
 
-      scrollHeight = 120;
-      scrollTop = 10;
-      wrapper.find('ul').simulate('scroll', {
-        scrollTop,
-      });
-
-      scrollHeight = 200;
       data = data.slice(0, 2);
       wrapper.setProps({ data });
-      expect(wrapper.find('ul').instance().scrollTop > 40).toBeTruthy();
+      expect(wrapper.find('li')).toHaveLength(2);
 
       // Should not crash if data count change
-      scrollHeight = 40;
       data = data.slice(0, 1);
       wrapper.setProps({ data });
-
-      setTimeout(done, 50);
+      expect(wrapper.find('li')).toHaveLength(1);
     });
   });
 
@@ -195,5 +178,48 @@ describe('List', () => {
   it('Should not crash when height change makes virtual scroll to be raw scroll', () => {
     const wrapper = genList({ itemHeight: 20, height: 40, data: genData(3) });
     wrapper.setProps({ height: 1000 });
+  });
+
+  describe('should collect height', () => {
+    let mockElement;
+    let collected = false;
+
+    beforeAll(() => {
+      mockElement = spyElementPrototypes(HTMLElement, {
+        offsetHeight: {
+          get: () => {
+            collected = true;
+            return 20;
+          },
+        },
+      });
+    });
+
+    afterAll(() => {
+      mockElement.mockRestore();
+    });
+
+    it('work', () => {
+      const wrapper = genList({ itemHeight: 20, height: 40, data: genData(3) });
+      wrapper
+        .find('Filler')
+        .props()
+        .onInnerResize();
+      expect(collected).toBeTruthy();
+    });
+  });
+
+  it('legacy onSkipRender', () => {
+    const onSkipRender = jest.fn();
+    let data = genData(10);
+    const wrapper = genList({ itemHeight: 20, height: 40, data, disabled: true, onSkipRender });
+    data = [{ id: 'test' }, ...data];
+    wrapper.setProps({ data });
+    wrapper.update();
+    wrapper.find('ul').simulate('scroll', {
+      target: { scrollTop: 400 },
+    });
+    wrapper.update();
+    expect(onSkipRender).toHaveBeenCalled();
   });
 });

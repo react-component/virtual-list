@@ -1,44 +1,12 @@
 import * as React from 'react';
-import classNames from 'classnames';
-import OriginList from './List';
-import Filler from './Filler';
+import OriginList, { ListProps, ListRef } from './List';
 
-class List<T> extends OriginList<T> {
-  componentDidUpdate() {
-    // Do nothing since this is a mock!
-  }
+const List = React.forwardRef((props: ListProps<any>, ref: React.Ref<ListRef>) => (
+  <OriginList {...props} ref={ref} virtual={false} />
+)) as <Item = any>(
+  props: React.PropsWithChildren<ListProps<Item>> & { ref?: React.Ref<ListRef> },
+) => React.ReactElement;
 
-  scrollTo = () => {
-    // Do nothing sine this is a mock!
-  };
-
-  render() {
-    const {
-      prefixCls,
-      style,
-      className,
-      component: Component = 'div',
-      fullHeight,
-      height,
-      itemHeight,
-      virtual,
-      data,
-      children,
-      itemKey,
-      onSkipRender,
-      ...restProps
-    } = this.props;
-
-    const mergedClassName = classNames(prefixCls, className);
-
-    return (
-      <Component style={{ ...style, height }} className={mergedClassName} {...restProps}>
-        <Filler prefixCls={prefixCls} height={height}>
-          {this.renderChildren(data, 0, children)}
-        </Filler>
-      </Component>
-    );
-  }
-}
+(List as any).displayName = 'List';
 
 export default List;

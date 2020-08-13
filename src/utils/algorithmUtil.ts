@@ -1,5 +1,4 @@
-import { Key } from './itemUtil';
-
+import * as React from 'react';
 /**
  * Get index with specific start index one by one. e.g.
  * min: 3, max: 9, start: 6
@@ -41,7 +40,7 @@ export function getIndexByStartLoc(min: number, max: number, start: number, inde
 export function findListDiffIndex<T>(
   originList: T[],
   targetList: T[],
-  getKey: (item: T) => Key,
+  getKey: (item: T) => React.Key,
 ): { index: number; multiple: boolean } | null {
   const originLen = originList.length;
   const targetLen = targetList.length;

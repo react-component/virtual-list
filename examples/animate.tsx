@@ -1,8 +1,10 @@
+/* eslint-disable arrow-body-style */
+
 import * as React from 'react';
 // @ts-ignore
 import CSSMotion from 'rc-animate/lib/CSSMotion';
 import classNames from 'classnames';
-import List from '../src/List';
+import List, { ListRef } from '../src/List';
 import './animate.less';
 
 let uuid = 0;
@@ -41,58 +43,69 @@ const getMaxHeight = (node: HTMLElement) => {
 };
 const getCollapsedHeight = () => ({ height: 0, opacity: 0 });
 
-const MyItem: React.FC<MyItemProps> = (
-  { id, uuid, visible, onClose, onLeave, onAppear, onInsertBefore, onInsertAfter, motionAppear },
+const MyItem: React.ForwardRefRenderFunction<any, MyItemProps> = (
+  {
+    id,
+    uuid: itemUuid,
+    visible,
+    onClose,
+    onLeave,
+    onAppear,
+    onInsertBefore,
+    onInsertAfter,
+    motionAppear,
+  },
   ref,
-) => {
-  return (
-    <CSSMotion
-      visible={visible}
-      ref={ref}
-      motionName="motion"
-      motionAppear={motionAppear}
-      onAppearStart={getCollapsedHeight}
-      onAppearActive={getMaxHeight}
-      onAppearEnd={onAppear}
-      onLeaveStart={getCurrentHeight}
-      onLeaveActive={getCollapsedHeight}
-      onLeaveEnd={() => {
-        onLeave(id);
-      }}
-    >
-      {({ className, style }, motionRef) => {
-        return (
-          <div ref={motionRef} className={classNames('item', className)} style={style} data-id={id}>
-            <div style={{ height: uuid % 2 ? 100 : undefined }}>
-              <button
-                onClick={() => {
-                  onClose(id);
-                }}
-              >
-                Close
-              </button>
-              <button
-                onClick={() => {
-                  onInsertBefore(id);
-                }}
-              >
-                Insert Before
-              </button>
-              <button
-                onClick={() => {
-                  onInsertAfter(id);
-                }}
-              >
-                Insert After
-              </button>
-              {id}
-            </div>
+) => (
+  <CSSMotion
+    visible={visible}
+    ref={ref}
+    motionName="motion"
+    motionAppear={motionAppear}
+    onAppearStart={getCollapsedHeight}
+    onAppearActive={getMaxHeight}
+    onAppearEnd={onAppear}
+    onLeaveStart={getCurrentHeight}
+    onLeaveActive={getCollapsedHeight}
+    onLeaveEnd={() => {
+      onLeave(id);
+    }}
+  >
+    {({ className, style }, motionRef) => {
+      return (
+        <div ref={motionRef} className={classNames('item', className)} style={style} data-id={id}>
+          <div style={{ height: itemUuid % 2 ? 100 : undefined }}>
+            <button
+              type="button"
+              onClick={() => {
+                onClose(id);
+              }}
+            >
+              Close
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                onInsertBefore(id);
+              }}
+            >
+              Insert Before
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                onInsertAfter(id);
+              }}
+            >
+              Insert After
+            </button>
+            {id}
           </div>
-        );
-      }}
-    </CSSMotion>
-  );
-};
+        </div>
+      );
+    }}
+  </CSSMotion>
+);
 
 const ForwardMyItem = React.forwardRef(MyItem);
 
@@ -102,7 +115,7 @@ const Demo = () => {
   const [animating, setAnimating] = React.useState(false);
   const [insertIndex, setInsertIndex] = React.useState<number>();
 
-  const listRef = React.useRef<List<Item>>();
+  const listRef = React.useRef<ListRef>();
 
   const onClose = (id: string) => {
     setCloseMap({
@@ -117,6 +130,7 @@ const Demo = () => {
   };
 
   const onAppear = (...args: any[]) => {
+    console.log('Appear:', args);
     setAnimating(false);
   };
 
@@ -157,8 +171,8 @@ const Demo = () => {
             border: '1px solid red',
             boxSizing: 'border-box',
           }}
-
           onSkipRender={onAppear}
+          // onItemRemove={onAppear}
         >
           {(item, index) => (
             <ForwardMyItem

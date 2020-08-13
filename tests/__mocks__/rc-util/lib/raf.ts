@@ -1,8 +1,8 @@
-function raf(callback) {
+function raf(callback: Function) {
   return setTimeout(callback);
 }
 
-raf.cancel = id => {
+raf.cancel = (id: number) => {
   clearTimeout(id);
 };
 

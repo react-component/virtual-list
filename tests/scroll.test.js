@@ -1,13 +1,27 @@
 import React from 'react';
 import { mount } from 'enzyme';
-import List from '../src';
 import { spyElementPrototypes } from './utils/domHook';
+import List from '../src';
 
 function genData(count) {
   return new Array(count).fill(null).map((_, index) => ({ id: String(index) }));
 }
 
 describe('List.Scroll', () => {
+  let mockElement;
+
+  beforeAll(() => {
+    mockElement = spyElementPrototypes(HTMLElement, {
+      offsetHeight: {
+        get: () => 20,
+      },
+    });
+  });
+
+  afterAll(() => {
+    mockElement.mockRestore();
+  });
+
   beforeEach(() => {
     jest.useFakeTimers();
   });
@@ -41,111 +55,44 @@ describe('List.Scroll', () => {
     });
   });
 
-  describe('scrollTo item index', () => {
-    let mockElement;
-    let scrollTop = 0;
+  describe('scroll to object', () => {
+    const listRef = React.createRef();
+    const wrapper = genList({ itemHeight: 20, height: 100, data: genData(100), ref: listRef });
 
-    beforeAll(() => {
-      mockElement = spyElementPrototypes(HTMLElement, {
-        offsetHeight: {
-          get: () => 20,
-        },
-        clientHeight: {
-          get: () => 100,
-        },
-        scrollHeight: {
-          get: () => 400,
-        },
-        scrollTop: {
-          get: () => scrollTop,
-          set(_, val) {
-            scrollTop = val;
-          },
-        },
-      });
+    it('index scroll', () => {
+      listRef.current.scrollTo({ index: 30, align: 'top' });
+      jest.runAllTimers();
+      expect(wrapper.find('ul').instance().scrollTop).toEqual(600);
     });
 
-    afterAll(() => {
-      mockElement.mockRestore();
+    it('key scroll', () => {
+      listRef.current.scrollTo({ key: '30', align: 'bottom' });
+      jest.runAllTimers();
+      expect(wrapper.find('ul').instance().scrollTop).toEqual(520);
     });
 
-    function testPlots(type, scrollConfig, props) {
-      describe(`${type} list`, () => {
-        let listRef;
-        let wrapper;
-        const onScroll = jest.fn();
+    it('smart', () => {
+      listRef.current.scrollTo(0);
+      listRef.current.scrollTo({ index: 30 });
+      jest.runAllTimers();
+      expect(wrapper.find('ul').instance().scrollTop).toEqual(520);
 
-        beforeEach(() => {
-          onScroll.mockReset();
-          listRef = React.createRef();
-          wrapper = genList({
-            itemHeight: 20,
-            height: 100,
-            data: genData(20),
-            className: 'list',
-            ref: listRef,
-            onScroll,
-            ...props,
-          });
-        });
+      listRef.current.scrollTo(800);
+      listRef.current.scrollTo({ index: 30 });
+      jest.runAllTimers();
+      expect(wrapper.find('ul').instance().scrollTop).toEqual(600);
+    });
+  });
 
-        it('not crash', () => {
-          listRef.current.scrollTo({ ...scrollConfig, align: 'top' });
-          wrapper.unmount();
-          jest.runAllTimers();
-        });
+  it('inject wheel', () => {
+    const preventDefault = jest.fn();
+    const wrapper = genList({ itemHeight: 20, height: 100, data: genData(100) });
+    const ulElement = wrapper.find('ul').instance();
 
-        it('top', () => {
-          listRef.current.scrollTo({ ...scrollConfig, align: 'top' });
-          jest.runAllTimers();
-          expect(scrollTop).toEqual(200);
-        });
-        it('bottom', () => {
-          listRef.current.scrollTo({ ...scrollConfig, align: 'bottom' });
-          jest.runAllTimers();
-          expect(scrollTop).toEqual(120);
-        });
-        describe('auto', () => {
-          it('upper of', () => {
-            scrollTop = 210;
-            wrapper
-              .find('.list')
-              .last()
-              .simulate('scroll');
-            expect(onScroll).toHaveBeenCalled();
-            listRef.current.scrollTo({ ...scrollConfig, align: 'auto' });
-            jest.runAllTimers();
-            expect(scrollTop).toEqual(200);
-          });
-          it('lower of', () => {
-            scrollTop = 110;
-            wrapper
-              .find('.list')
-              .last()
-              .simulate('scroll');
-            expect(onScroll).toHaveBeenCalled();
-            listRef.current.scrollTo({ ...scrollConfig, align: 'auto' });
-            jest.runAllTimers();
-            expect(scrollTop).toEqual(120);
-          });
-          it('in range', () => {
-            scrollTop = 150;
-            wrapper
-              .find('.list')
-              .last()
-              .simulate('scroll');
-            expect(onScroll).toHaveBeenCalled();
-            listRef.current.scrollTo({ ...scrollConfig, align: 'auto' });
-            jest.runAllTimers();
-            expect(scrollTop).toEqual(150);
-          });
-        });
-      });
-    }
+    const wheelEvent = new Event('wheel');
+    wheelEvent.preventDefault = preventDefault;
+    ulElement.dispatchEvent(wheelEvent);
 
-    testPlots('virtual list', { index: 10 });
-    testPlots('raw list', { index: 10 }, { itemHeight: null });
-    testPlots('virtual list by key', { key: '10' });
-    testPlots('raw list by key', { key: '10' }, { itemHeight: null });
+    expect(preventDefault).toHaveBeenCalled();
   });
 });

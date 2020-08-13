@@ -12,7 +12,7 @@ const MyItem: React.FC<Item> = ({ id }, ref) => (
     style={{
       border: '1px solid gray',
       padding: '0 16px',
-      height: 30,
+      height: 30 + (id % 2 ? 0 : 10),
       lineHeight: '30px',
       boxSizing: 'border-box',
       display: 'inline-block',
