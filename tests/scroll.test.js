@@ -1,5 +1,6 @@
 import React from 'react';
 import { mount } from 'enzyme';
+import { spyElementPrototypes } from './utils/domHook';
 import List from '../src';
 
 function genData(count) {
@@ -7,6 +8,20 @@ function genData(count) {
 }
 
 describe('List.Scroll', () => {
+  let mockElement;
+
+  beforeAll(() => {
+    mockElement = spyElementPrototypes(HTMLElement, {
+      offsetHeight: {
+        get: () => 20,
+      },
+    });
+  });
+
+  afterAll(() => {
+    mockElement.mockRestore();
+  });
+
   beforeEach(() => {
     jest.useFakeTimers();
   });
@@ -37,6 +52,35 @@ describe('List.Scroll', () => {
       listRef.current.scrollTo(903);
       jest.runAllTimers();
       expect(wrapper.find('ul').instance().scrollTop).toEqual(903);
+    });
+  });
+
+  describe('scroll to object', () => {
+    const listRef = React.createRef();
+    const wrapper = genList({ itemHeight: 20, height: 100, data: genData(100), ref: listRef });
+
+    it('index scroll', () => {
+      listRef.current.scrollTo({ index: 30, align: 'top' });
+      jest.runAllTimers();
+      expect(wrapper.find('ul').instance().scrollTop).toEqual(600);
+    });
+
+    it('key scroll', () => {
+      listRef.current.scrollTo({ key: '30', align: 'bottom' });
+      jest.runAllTimers();
+      expect(wrapper.find('ul').instance().scrollTop).toEqual(520);
+    });
+
+    it('smart', () => {
+      listRef.current.scrollTo(0);
+      listRef.current.scrollTo({ index: 30 });
+      jest.runAllTimers();
+      expect(wrapper.find('ul').instance().scrollTop).toEqual(520);
+
+      listRef.current.scrollTo(800);
+      listRef.current.scrollTo({ index: 30 });
+      jest.runAllTimers();
+      expect(wrapper.find('ul').instance().scrollTop).toEqual(600);
     });
   });
 });

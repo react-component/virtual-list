@@ -114,7 +114,6 @@ describe('List.Basic', () => {
 
   describe('status switch', () => {
     let scrollTop = 0;
-    let scrollHeight = 0;
 
     let mockLiElement;
     let mockElement;
@@ -127,9 +126,6 @@ describe('List.Basic', () => {
       });
 
       mockElement = spyElementPrototypes(HTMLElement, {
-        scrollHeight: {
-          get: () => scrollHeight,
-        },
         clientHeight: {
           get: () => 100,
         },
