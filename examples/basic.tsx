@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/label-has-associated-control, jsx-a11y/label-has-for */
 import * as React from 'react';
-import List from '../src/List';
+import List, { ListRef } from '../src/List';
 
 interface Item {
   id: string;
@@ -46,8 +46,9 @@ const TYPES = [
 
 const Demo = () => {
   const [destroy, setDestroy] = React.useState(false);
+  const [visible, setVisible] = React.useState(true);
   const [type, setType] = React.useState('dom');
-  const listRef = React.useRef<List>(null);
+  const listRef = React.useRef<ListRef>(null);
 
   return (
     <React.StrictMode>
@@ -123,6 +124,15 @@ const Demo = () => {
         <button
           type="button"
           onClick={() => {
+            setVisible(v => !v);
+          }}
+        >
+          visible
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
             listRef.current.scrollTo({
               index: 50,
               align: 'top',
@@ -143,6 +153,7 @@ const Demo = () => {
             style={{
               border: '1px solid red',
               boxSizing: 'border-box',
+              display: visible ? null : 'none',
             }}
           >
             {(item, _, props) =>
