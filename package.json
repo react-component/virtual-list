@@ -1,6 +1,6 @@
 {
   "name": "rc-virtual-list",
-  "version": "2.1.2",
+  "version": "2.1.3",
   "description": "React Virtual List Component",
   "engines": {
     "node": ">=8.x"
