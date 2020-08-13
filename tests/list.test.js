@@ -179,4 +179,47 @@ describe('List.Basic', () => {
     const wrapper = genList({ itemHeight: 20, height: 40, data: genData(3) });
     wrapper.setProps({ height: 1000 });
   });
+
+  describe('should collect height', () => {
+    let mockElement;
+    let collected = false;
+
+    beforeAll(() => {
+      mockElement = spyElementPrototypes(HTMLElement, {
+        offsetHeight: {
+          get: () => {
+            collected = true;
+            return 20;
+          },
+        },
+      });
+    });
+
+    afterAll(() => {
+      mockElement.mockRestore();
+    });
+
+    it('work', () => {
+      const wrapper = genList({ itemHeight: 20, height: 40, data: genData(3) });
+      wrapper
+        .find('Filler')
+        .props()
+        .onInnerResize();
+      expect(collected).toBeTruthy();
+    });
+  });
+
+  it('legacy onSkipRender', () => {
+    const onSkipRender = jest.fn();
+    let data = genData(10);
+    const wrapper = genList({ itemHeight: 20, height: 40, data, disabled: true, onSkipRender });
+    data = [{ id: 'test' }, ...data];
+    wrapper.setProps({ data });
+    wrapper.update();
+    wrapper.find('ul').simulate('scroll', {
+      target: { scrollTop: 400 },
+    });
+    wrapper.update();
+    expect(onSkipRender).toHaveBeenCalled();
+  });
 });

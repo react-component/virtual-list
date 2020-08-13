@@ -83,4 +83,16 @@ describe('List.Scroll', () => {
       expect(wrapper.find('ul').instance().scrollTop).toEqual(600);
     });
   });
+
+  it('inject wheel', () => {
+    const preventDefault = jest.fn();
+    const wrapper = genList({ itemHeight: 20, height: 100, data: genData(100) });
+    const ulElement = wrapper.find('ul').instance();
+
+    const wheelEvent = new Event('wheel');
+    wheelEvent.preventDefault = preventDefault;
+    ulElement.dispatchEvent(wheelEvent);
+
+    expect(preventDefault).toHaveBeenCalled();
+  });
 });
