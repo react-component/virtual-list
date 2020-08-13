@@ -56,56 +56,70 @@ const MyItem: React.ForwardRefRenderFunction<any, MyItemProps> = (
     motionAppear,
   },
   ref,
-) => (
-  <CSSMotion
-    visible={visible}
-    ref={ref}
-    motionName="motion"
-    motionAppear={motionAppear}
-    onAppearStart={getCollapsedHeight}
-    onAppearActive={getMaxHeight}
-    onAppearEnd={onAppear}
-    onLeaveStart={getCurrentHeight}
-    onLeaveActive={getCollapsedHeight}
-    onLeaveEnd={() => {
-      onLeave(id);
-    }}
-  >
-    {({ className, style }, motionRef) => {
-      return (
-        <div ref={motionRef} className={classNames('item', className)} style={style} data-id={id}>
-          <div style={{ height: itemUuid % 2 ? 100 : undefined }}>
-            <button
-              type="button"
-              onClick={() => {
-                onClose(id);
-              }}
-            >
-              Close
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                onInsertBefore(id);
-              }}
-            >
-              Insert Before
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                onInsertAfter(id);
-              }}
-            >
-              Insert After
-            </button>
-            {id}
+) => {
+  const motionRef = React.useRef(false);
+  React.useEffect(() => {
+    return () => {
+      if (motionRef.current) {
+        onAppear();
+      }
+    };
+  }, []);
+
+  return (
+    <CSSMotion
+      visible={visible}
+      ref={ref}
+      motionName="motion"
+      motionAppear={motionAppear}
+      onAppearStart={getCollapsedHeight}
+      onAppearActive={node => {
+        motionRef.current = true;
+        return getMaxHeight(node);
+      }}
+      onAppearEnd={onAppear}
+      onLeaveStart={getCurrentHeight}
+      onLeaveActive={getCollapsedHeight}
+      onLeaveEnd={() => {
+        onLeave(id);
+      }}
+    >
+      {({ className, style }, motionRef) => {
+        return (
+          <div ref={motionRef} className={classNames('item', className)} style={style} data-id={id}>
+            <div style={{ height: itemUuid % 2 ? 100 : undefined }}>
+              <button
+                type="button"
+                onClick={() => {
+                  onClose(id);
+                }}
+              >
+                Close
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  onInsertBefore(id);
+                }}
+              >
+                Insert Before
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  onInsertAfter(id);
+                }}
+              >
+                Insert After
+              </button>
+              {id}
+            </div>
           </div>
-        </div>
-      );
-    }}
-  </CSSMotion>
-);
+        );
+      }}
+    </CSSMotion>
+  );
+};
 
 const ForwardMyItem = React.forwardRef(MyItem);
 
@@ -165,13 +179,13 @@ const Demo = () => {
           height={200}
           itemHeight={20}
           itemKey="id"
-          disabled={animating}
+          // disabled={animating}
           ref={listRef}
           style={{
             border: '1px solid red',
             boxSizing: 'border-box',
           }}
-          onSkipRender={onAppear}
+          // onSkipRender={onAppear}
           // onItemRemove={onAppear}
         >
           {(item, index) => (

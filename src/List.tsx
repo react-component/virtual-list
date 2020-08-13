@@ -45,12 +45,6 @@ export interface ListProps<T> extends React.HTMLAttributes<any> {
   virtual?: boolean;
 
   onScroll?: React.UIEventHandler<HTMLElement>;
-
-  /** @deprecated only compatible for old usage */
-  disabled?: boolean;
-
-  /** When `disabled`, trigger if changed item not render. */
-  onSkipRender?: () => void;
 }
 
 function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
@@ -65,8 +59,6 @@ function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     children,
     itemKey,
     virtual,
-    disabled,
-    onSkipRender,
     component: Component = 'div',
     ...restProps
   } = props;
@@ -101,22 +93,14 @@ function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   const rangeRef = useRef({ start: 0, end: mergedData.length });
 
   const diffItemRef = useRef<T>();
-  const [diffItem] = useDiffItem(mergedData, getKey, diffIndex => {
-    if (disabled && (diffIndex < rangeRef.current.start || diffIndex > rangeRef.current.end)) {
-      onSkipRender?.();
-    }
-  });
+  const [diffItem] = useDiffItem(mergedData, getKey);
   diffItemRef.current = diffItem;
 
   // ================================ Height ================================
   const [getInstanceRefFunc, collectHeight, heights, heightUpdatedMark] = useHeights(
     getKey,
     null,
-    item => {
-      if (disabled && diffItemRef.current === item) {
-        onSkipRender?.();
-      }
-    },
+    null,
   );
 
   // ========================== Visible Calculation =========================

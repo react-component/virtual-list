@@ -208,18 +208,4 @@ describe('List.Basic', () => {
       expect(collected).toBeTruthy();
     });
   });
-
-  it('legacy onSkipRender', () => {
-    const onSkipRender = jest.fn();
-    let data = genData(10);
-    const wrapper = genList({ itemHeight: 20, height: 40, data, disabled: true, onSkipRender });
-    data = [{ id: 'test' }, ...data];
-    wrapper.setProps({ data });
-    wrapper.update();
-    wrapper.find('ul').simulate('scroll', {
-      target: { scrollTop: 400 },
-    });
-    wrapper.update();
-    expect(onSkipRender).toHaveBeenCalled();
-  });
 });
