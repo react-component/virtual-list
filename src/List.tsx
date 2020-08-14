@@ -199,7 +199,14 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   }, [inVirtual]);
 
   // ================================= Ref ==================================
-  const scrollTo = useScrollTo<T>(componentRef, mergedData, height, heights, itemHeight, getKey);
+  const scrollTo = useScrollTo<T>(
+    componentRef,
+    mergedData,
+    heights,
+    itemHeight,
+    getKey,
+    collectHeight,
+  );
 
   React.useImperativeHandle(ref, () => ({
     scrollTo,

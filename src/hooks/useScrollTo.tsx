@@ -7,10 +7,10 @@ import { GetKey } from '../interface';
 export default function useScrollTo<T>(
   containerRef: React.RefObject<HTMLDivElement>,
   data: T[],
-  height: number,
   heights: Map<React.Key, number>,
   itemHeight: number,
   getKey: GetKey<T>,
+  collectHeight: () => void,
 ): ScrollTo {
   const scrollRef = React.useRef<number>();
 
@@ -30,13 +30,17 @@ export default function useScrollTo<T>(
       }
 
       // We will retry 3 times in case dynamic height shaking
-      const syncScroll = (times = 3) => {
+      const syncScroll = (times: number, targetAlign?: 'top' | 'bottom') => {
         if (times < 0 || !containerRef.current) return;
+
+        const height = containerRef.current.clientHeight;
+        const mergedAlign = targetAlign || align;
 
         // Get top & bottom
         let stackTop = 0;
         let itemTop = 0;
         let itemBottom = 0;
+        let needCollectHeight = false;
 
         for (let i = 0; i <= index; i += 1) {
           const key = getKey(data[i]);
@@ -45,34 +49,49 @@ export default function useScrollTo<T>(
           itemBottom = itemTop + (cacheHeight === undefined ? itemHeight : cacheHeight);
 
           stackTop = itemBottom;
+
+          if (i === index && cacheHeight === undefined) {
+            needCollectHeight = true;
+          }
         }
 
         // Scroll to
-        switch (align) {
+        let targetTop: number | null = null;
+        let newTargetAlign: 'top' | 'bottom' | null = targetAlign;
+
+        switch (mergedAlign) {
           case 'top':
-            containerRef.current.scrollTop = itemTop;
+            targetTop = itemTop;
             break;
           case 'bottom':
-            containerRef.current.scrollTop = itemBottom - height;
+            targetTop = itemBottom - height;
             break;
 
           default: {
             const { scrollTop } = containerRef.current;
             const scrollBottom = scrollTop + height;
             if (itemTop < scrollTop) {
-              containerRef.current.scrollTop = itemTop;
+              newTargetAlign = 'top';
             } else if (itemBottom > scrollBottom) {
-              containerRef.current.scrollTop = itemBottom - height;
+              newTargetAlign = 'bottom';
             }
           }
         }
 
+        if (targetTop !== null && targetTop !== containerRef.current.scrollTop) {
+          containerRef.current.scrollTop = targetTop;
+        }
+
+        // We will retry since element may not sync height as it described
         scrollRef.current = raf(() => {
-          syncScroll(times - 1);
+          if (needCollectHeight) {
+            collectHeight();
+          }
+          syncScroll(times - 1, newTargetAlign);
         });
       };
 
-      syncScroll();
+      syncScroll(3);
     }
   };
 }

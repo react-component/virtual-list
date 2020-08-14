@@ -12,7 +12,8 @@ const MyItem: React.FC<Item> = ({ id }, ref) => (
     style={{
       border: '1px solid gray',
       padding: '0 16px',
-      height: 30 + (id % 2 ? 0 : 10),
+      // height: 30 + (id % 2 ? 0 : 10),
+      height: 32,
       lineHeight: '30px',
       boxSizing: 'border-box',
       display: 'inline-block',
@@ -33,7 +34,7 @@ class TestItem extends React.Component<Item, {}> {
 }
 
 const data: Item[] = [];
-for (let i = 0; i < 100; i += 1) {
+for (let i = 0; i < 200; i += 1) {
   data.push({
     id: String(i),
   });
@@ -46,14 +47,14 @@ const TYPES = [
 
 const Demo = () => {
   const [destroy, setDestroy] = React.useState(false);
-  const [visible, setVisible] = React.useState(true);
+  const [visible, setVisible] = React.useState(false);
   const [type, setType] = React.useState('dom');
   const listRef = React.useRef<ListRef>(null);
 
   React.useEffect(() => {
     if (visible) {
       listRef.current.scrollTo({
-        index: 50,
+        index: 100,
       });
     }
   }, [visible]);
@@ -156,7 +157,7 @@ const Demo = () => {
             ref={listRef}
             data={data}
             height={200}
-            itemHeight={30}
+            itemHeight={20}
             itemKey="id"
             style={{
               border: '1px solid red',

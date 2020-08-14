@@ -15,6 +15,9 @@ describe('List.Scroll', () => {
       offsetHeight: {
         get: () => 20,
       },
+      clientHeight: {
+        get: () => 100,
+      },
     });
   });
 
