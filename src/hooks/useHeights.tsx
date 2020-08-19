@@ -42,13 +42,21 @@ export default function useHeights<T>(
   }
 
   function collectHeight() {
+    let changed = false;
+
     instanceRef.current.forEach((element, key) => {
       if (element && element.offsetParent) {
         const htmlElement = findDOMNode<HTMLElement>(element);
-        heightsRef.current.set(key, htmlElement.offsetHeight);
+        const { offsetHeight } = htmlElement;
+        if (heightsRef.current.get(key) !== offsetHeight) {
+          changed = true;
+          heightsRef.current.set(key, htmlElement.offsetHeight);
+        }
       }
     });
-    setUpdatedMark(c => c + 1);
+    if (changed) {
+      setUpdatedMark(c => c + 1);
+    }
   }
 
   return [getInstanceRefFunc, collectHeight, heightsRef.current, updatedMark];
