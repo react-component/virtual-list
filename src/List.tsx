@@ -48,6 +48,7 @@ export interface ListProps<T> extends React.HTMLAttributes<any> {
 }
 
 export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
+  console.time('render');
   const {
     prefixCls,
     className,
@@ -97,7 +98,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   diffItemRef.current = diffItem;
 
   // ================================ Height ================================
-  const [getInstanceRefFunc, collectHeight, heights, heightUpdatedMark] = useHeights(
+  const [setInstanceRef, collectHeight, heights, heightUpdatedMark] = useHeights(
     getKey,
     null,
     null,
@@ -220,11 +221,12 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     mergedData,
     start,
     end,
-    getInstanceRefFunc,
+    setInstanceRef,
     children,
     sharedConfig,
   );
 
+  console.timeEnd('render');
   return (
     <Component
       style={
