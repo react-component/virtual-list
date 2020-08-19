@@ -96,6 +96,8 @@ describe('List.Scroll', () => {
     wheelEvent.preventDefault = preventDefault;
     ulElement.dispatchEvent(wheelEvent);
 
+    jest.runAllTimers();
+
     expect(preventDefault).toHaveBeenCalled();
   });
 });
