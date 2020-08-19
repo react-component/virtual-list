@@ -192,8 +192,16 @@ describe('List.Basic', () => {
       const wrapper = genList({ itemHeight: 20, height: 40, data: genData(3) });
       wrapper
         .find('Filler')
+        .find('ResizeObserver')
         .props()
-        .onInnerResize();
+        .onResize({ offsetHeight: 0 });
+      expect(collected).toBeFalsy();
+
+      wrapper
+        .find('Filler')
+        .find('ResizeObserver')
+        .props()
+        .onResize({ offsetHeight: 100 });
       expect(collected).toBeTruthy();
     });
   });

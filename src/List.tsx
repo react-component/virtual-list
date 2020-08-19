@@ -8,6 +8,7 @@ import useHeights from './hooks/useHeights';
 import useInRange from './hooks/useInRange';
 import useScrollTo from './hooks/useScrollTo';
 import useDiffItem from './hooks/useDiffItem';
+import useFrameWheel from './hooks/useFrameWheel';
 
 const EMPTY_DATA = [];
 
@@ -97,7 +98,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   diffItemRef.current = diffItem;
 
   // ================================ Height ================================
-  const [getInstanceRefFunc, collectHeight, heights, heightUpdatedMark] = useHeights(
+  const [setInstanceRef, collectHeight, heights, heightUpdatedMark] = useHeights(
     getKey,
     null,
     null,
@@ -169,19 +170,14 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
 
   // ================================ Scroll ================================
   // Since this added in global,should use ref to keep update
-  function onRawWheel(event: MouseWheelEvent) {
-    if (!inVirtual) return;
-
-    // Proxy of scroll events
-    event.preventDefault();
-
+  const onRawWheel = useFrameWheel(inVirtual, offsetY => {
     setScrollTop(top => {
-      const newTop = keepInRange(top + event.deltaY);
+      const newTop = keepInRange(top + offsetY);
 
       componentRef.current.scrollTop = newTop;
       return newTop;
     });
-  }
+  });
 
   // Additional handle the scroll which not trigger by wheel
   function onRawScroll(event: React.UIEvent) {
@@ -214,14 +210,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   }));
 
   // ================================ Render ================================
-  const listChildren = useChildren(
-    mergedData,
-    start,
-    end,
-    getInstanceRefFunc,
-    children,
-    sharedConfig,
-  );
+  const listChildren = useChildren(mergedData, start, end, setInstanceRef, children, sharedConfig);
 
   return (
     <Component

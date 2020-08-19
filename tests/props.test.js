@@ -4,7 +4,7 @@ import List from '../src';
 
 describe('Props', () => {
   it('itemKey is a function', () => {
-    class Item extends React.Component {
+    class ItemComponent extends React.Component {
       render() {
         return this.props.children;
       }
@@ -12,20 +12,20 @@ describe('Props', () => {
 
     const wrapper = mount(
       <List data={[{ id: 903 }, { id: 1128 }]} itemKey={item => item.id}>
-        {({ id }) => <Item>{id}</Item>}
+        {({ id }) => <ItemComponent>{id}</ItemComponent>}
       </List>,
     );
 
     expect(
       wrapper
-        .find(Item)
+        .find('Item')
         .at(0)
         .key(),
     ).toBe('903');
 
     expect(
       wrapper
-        .find(Item)
+        .find('Item')
         .at(1)
         .key(),
     ).toBe('1128');

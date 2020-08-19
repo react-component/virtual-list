@@ -1,11 +1,12 @@
 import * as React from 'react';
 import { SharedConfig, RenderFunc } from '../interface';
+import { Item } from '../Item';
 
 export default function useChildren<T>(
   list: T[],
   startIndex: number,
   endIndex: number,
-  getInstanceRefFunc: (item: T) => (instance: HTMLElement) => void,
+  setNodeRef: (item: T, element: HTMLElement) => void,
   renderFunc: RenderFunc<T>,
   { getKey }: SharedConfig<T>,
 ) {
@@ -16,9 +17,10 @@ export default function useChildren<T>(
     }) as React.ReactElement;
 
     const key = getKey(item);
-    return React.cloneElement(node, {
-      key,
-      ref: getInstanceRefFunc(item),
-    });
+    return (
+      <Item key={key} setRef={ele => setNodeRef(item, ele)}>
+        {node}
+      </Item>
+    );
   });
 }
