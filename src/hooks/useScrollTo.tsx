@@ -3,11 +3,12 @@ import * as React from 'react';
 import raf from 'rc-util/lib/raf';
 import { ScrollTo } from '../List';
 import { GetKey } from '../interface';
+import CacheMap from '../utils/CacheMap';
 
 export default function useScrollTo<T>(
   containerRef: React.RefObject<HTMLDivElement>,
   data: T[],
-  heights: Map<React.Key, number>,
+  heights: CacheMap,
   itemHeight: number,
   getKey: GetKey<T>,
   collectHeight: () => void,

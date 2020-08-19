@@ -62,6 +62,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     component: Component = 'div',
     ...restProps
   } = props;
+  console.time('render');
 
   // ================================= MISC =================================
   const inVirtual =
@@ -119,7 +120,9 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     let startOffset: number;
     let endIndex: number;
 
-    for (let i = 0; i < mergedData.length; i += 1) {
+    console.time('memo-render');
+    const dataLen = mergedData.length;
+    for (let i = 0; i < dataLen; i += 1) {
       const item = mergedData[i];
       const key = getKey(item);
 
@@ -151,6 +154,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
 
     // Give cache to improve scroll experience
     endIndex = Math.min(endIndex + 1, mergedData.length);
+    console.timeEnd('memo-render');
 
     return {
       scrollHeight: itemTop,
@@ -221,6 +225,8 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     children,
     sharedConfig,
   );
+
+  console.timeEnd('render');
 
   return (
     <Component

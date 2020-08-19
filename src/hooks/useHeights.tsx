@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useRef } from 'react';
 import findDOMNode from 'rc-util/lib/Dom/findDOMNode';
 import { GetKey } from '../interface';
+import CacheMap from '../utils/CacheMap';
 
 type RefFunc = (instance: HTMLElement) => void;
 
@@ -9,10 +10,10 @@ export default function useHeights<T>(
   getKey: GetKey<T>,
   onItemAdd?: (item: T) => void,
   onItemRemove?: (item: T) => void,
-): [(item: T) => (instance: HTMLElement) => void, () => void, Map<React.Key, number>, number] {
+): [(item: T) => (instance: HTMLElement) => void, () => void, CacheMap, number] {
   const [updatedMark, setUpdatedMark] = React.useState(0);
   const instanceRef = useRef(new Map<React.Key, HTMLElement>());
-  const heightsRef = useRef(new Map<React.Key, number>());
+  const heightsRef = useRef(new CacheMap());
 
   const instanceFuncRef = useRef<Map<React.Key, RefFunc>>(new Map());
   function getInstanceRefFunc(item: T) {
