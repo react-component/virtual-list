@@ -16,10 +16,6 @@ class CacheMap {
   get(key: React.ReactText) {
     return this.maps[key];
   }
-
-  delete(key: React.ReactText) {
-    delete this.maps[key];
-  }
 }
 
 export default CacheMap;
