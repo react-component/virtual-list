@@ -38,6 +38,7 @@ const Filler: React.FC<FillerProps> = ({
       ...innerStyle,
       transform: `translateY(${offset}px)`,
       position: 'absolute',
+      // paddingTop: offset,
       left: 0,
       right: 0,
       top: 0,

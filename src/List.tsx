@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useRef } from 'react';
 import classNames from 'classnames';
 import Filler from './Filler';
+import ScrollBar from './ScrollBar';
 import { RenderFunc, SharedConfig, GetKey } from './interface';
 import useChildren from './hooks/useChildren';
 import useHeights from './hooks/useHeights';
@@ -12,7 +13,7 @@ import useFrameWheel from './hooks/useFrameWheel';
 
 const EMPTY_DATA = [];
 
-const ScrollStyle = {
+const ScrollStyle: React.CSSProperties = {
   overflowY: 'auto',
   overflowAnchor: 'none',
 };
@@ -180,20 +181,45 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   });
 
   // Additional handle the scroll which not trigger by wheel
-  function onRawScroll(event: React.UIEvent) {
-    const newScrollTop = (event.target as HTMLDivElement).scrollTop;
+  // function onRawScroll(event: React.UIEvent) {
+  //   // const newScrollTop = (event.target as HTMLDivElement).scrollTop;
+  //   // const newTop = keepInRange(newScrollTop);
+  //   // // document.getElementById('mark').innerText = [newScrollTop, newTop].join('/');
+  //   // // const listEle = document.getElementById('list');
+  //   // // console.log('>>>>>>>', newTop, listEle.scrollHeight);
+  //   // if (newTop !== scrollTop) {
+  //   //   setScrollTop(newTop);
+  //   // }
+  // }
+
+  function onScrollBar(newScrollTop: number) {
     const newTop = keepInRange(newScrollTop);
     if (newTop !== scrollTop) {
       setScrollTop(newTop);
+      componentRef.current.scrollTop = newTop;
     }
   }
 
   React.useEffect(() => {
+    function onDomScroll(event: UIEvent) {
+      const newScrollTop = (event.target as HTMLDivElement).scrollTop;
+      const newTop = keepInRange(newScrollTop);
+      document.getElementById('mark').innerText = [newScrollTop, newTop].join('/');
+      // console.log('Scroll >>>>>>', newTop);
+    }
+
     componentRef.current.addEventListener('wheel', onRawWheel);
+    // window.addEventListener('scroll', onDomScroll, true);
+    // window.addEventListener('scroll', onDomScroll, false);
+    componentRef.current.addEventListener('scroll', onDomScroll, { passive: true });
     return () => {
       componentRef.current.removeEventListener('wheel', onRawWheel);
+      // window.removeEventListener('scroll', onDomScroll, true);
+      // window.removeEventListener('scroll', onDomScroll, false);
+      componentRef.current.removeEventListener('scroll', onDomScroll);
     };
   }, [inVirtual]);
+  // console.log('render', scrollTop);
 
   // ================================= Ref ==================================
   const scrollTo = useScrollTo<T>(
@@ -212,25 +238,47 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   // ================================ Render ================================
   const listChildren = useChildren(mergedData, start, end, setInstanceRef, children, sharedConfig);
 
+  let componentStyle: React.CSSProperties = null;
+  if (height) {
+    componentStyle = { [fullHeight ? 'height' : 'maxHeight']: height, ...ScrollStyle };
+    componentStyle.overflowY = 'hidden';
+  }
+
   return (
-    <Component
-      style={
-        height ? { ...style, [fullHeight ? 'height' : 'maxHeight']: height, ...ScrollStyle } : style
-      }
-      className={mergedClassName}
-      {...restProps}
-      ref={componentRef}
-      onScroll={onRawScroll}
-    >
-      <Filler
-        prefixCls={prefixCls}
-        height={scrollHeight}
-        offset={offset}
-        onInnerResize={collectHeight}
+    <>
+      {scrollTop}
+      <Component
+        style={{
+          ...style,
+          position: 'relative',
+        }}
+        className={mergedClassName}
+        {...restProps}
       >
-        {listChildren}
-      </Filler>
-    </Component>
+        <div
+          style={componentStyle}
+          ref={componentRef}
+          // onScroll={onRawScroll}
+        >
+          <Filler
+            prefixCls={prefixCls}
+            height={scrollHeight}
+            offset={offset}
+            onInnerResize={collectHeight}
+          >
+            {listChildren}
+          </Filler>
+        </div>
+
+        <ScrollBar
+          scrollTop={scrollTop}
+          height={height}
+          scrollHeight={scrollHeight}
+          count={mergedData.length}
+          onScroll={onScrollBar}
+        />
+      </Component>
+    </>
   );
 }
 

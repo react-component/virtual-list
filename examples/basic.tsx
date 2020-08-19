@@ -34,7 +34,7 @@ class TestItem extends React.Component<Item, {}> {
 }
 
 const data: Item[] = [];
-for (let i = 0; i < 100000; i += 1) {
+for (let i = 0; i < 100; i += 1) {
   data.push({
     id: String(i),
   });
@@ -55,6 +55,7 @@ const Demo = () => {
     <React.StrictMode>
       <div>
         <h2>Basic</h2>
+        <div id="mark">2</div>
         {TYPES.map(({ name, type: nType }) => (
           <label key={nType}>
             <input
@@ -146,6 +147,7 @@ const Demo = () => {
 
         {!destroy && (
           <List
+            id="list"
             ref={listRef}
             data={data}
             height={200}
