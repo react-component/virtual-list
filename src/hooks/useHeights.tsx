@@ -21,7 +21,12 @@ export default function useHeights<T>(
     if (!instanceFuncRef.current.has(key)) {
       instanceFuncRef.current.set(key, (instance: HTMLElement) => {
         const origin = instanceRef.current.get(key);
-        instanceRef.current.set(key, instance);
+
+        if (instance) {
+          instanceRef.current.set(key, instance);
+        } else {
+          instanceRef.current.delete(key);
+        }
 
         // Instance changed
         if (!origin !== !instance) {
