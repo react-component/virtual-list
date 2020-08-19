@@ -119,7 +119,8 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     let startOffset: number;
     let endIndex: number;
 
-    for (let i = 0; i < mergedData.length; i += 1) {
+    const dataLen = mergedData.length;
+    for (let i = 0; i < dataLen; i += 1) {
       const item = mergedData[i];
       const key = getKey(item);
 

@@ -34,7 +34,7 @@ class TestItem extends React.Component<Item, {}> {
 }
 
 const data: Item[] = [];
-for (let i = 0; i < 200; i += 1) {
+for (let i = 0; i < 100000; i += 1) {
   data.push({
     id: String(i),
   });
@@ -47,17 +47,9 @@ const TYPES = [
 
 const Demo = () => {
   const [destroy, setDestroy] = React.useState(false);
-  const [visible, setVisible] = React.useState(false);
+  const [visible, setVisible] = React.useState(true);
   const [type, setType] = React.useState('dom');
   const listRef = React.useRef<ListRef>(null);
-
-  React.useEffect(() => {
-    if (visible) {
-      listRef.current.scrollTo({
-        index: 100,
-      });
-    }
-  }, [visible]);
 
   return (
     <React.StrictMode>
