@@ -49,7 +49,6 @@ export interface ListProps<T> extends React.HTMLAttributes<any> {
 }
 
 export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
-  console.time('render');
   const {
     prefixCls,
     className,
@@ -121,7 +120,6 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     let startOffset: number;
     let endIndex: number;
 
-    console.time('memo');
     const dataLen = mergedData.length;
     for (let i = 0; i < dataLen; i += 1) {
       const item = mergedData[i];
@@ -143,7 +141,6 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
 
       itemTop = currentItemBottom;
     }
-    console.timeEnd('memo');
 
     // Fallback to normal if not match
     if (startIndex === undefined) {
@@ -215,7 +212,6 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   // ================================ Render ================================
   const listChildren = useChildren(mergedData, start, end, setInstanceRef, children, sharedConfig);
 
-  console.timeEnd('render');
   return (
     <Component
       style={

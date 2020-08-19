@@ -36,7 +36,6 @@ export default function useHeights<T>(
   }
 
   function collectHeight() {
-    console.time('collect');
     let changed = false;
 
     instanceRef.current.forEach((element, key) => {
@@ -52,7 +51,6 @@ export default function useHeights<T>(
     if (changed) {
       setUpdatedMark(c => c + 1);
     }
-    console.timeEnd('collect');
   }
 
   return [setInstanceRef, collectHeight, heightsRef.current, updatedMark];
