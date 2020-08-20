@@ -90,6 +90,21 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     getKey,
   };
 
+  // ================================ Scroll ================================
+  function syncScrollTop(newTop: number | ((prev: number) => number)) {
+    setScrollTop(origin => {
+      let value: number;
+      if (typeof newTop === 'function') {
+        value = newTop(origin);
+      } else {
+        value = newTop;
+      }
+
+      componentRef.current.scrollTop = value;
+      return value;
+    });
+  }
+
   // ================================ Legacy ================================
   // Put ref here since the range is generate by follow
   const rangeRef = useRef({ start: 0, end: mergedData.length });
@@ -172,19 +187,13 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   // ================================ Scroll ================================
   // Since this added in global,should use ref to keep update
   const onRawWheel = useFrameWheel(inVirtual, offsetY => {
-    setScrollTop(top => {
-      const newTop = keepInRange(top + offsetY);
-
-      componentRef.current.scrollTop = newTop;
-      return newTop;
-    });
+    syncScrollTop(top => keepInRange(top + offsetY));
   });
 
   function onScrollBar(newScrollTop: number) {
     const newTop = keepInRange(newScrollTop);
     if (newTop !== scrollTop) {
-      setScrollTop(newTop);
-      componentRef.current.scrollTop = newTop;
+      syncScrollTop(newTop);
     }
   }
 
@@ -203,6 +212,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     itemHeight,
     getKey,
     collectHeight,
+    syncScrollTop,
   );
 
   React.useImperativeHandle(ref, () => ({
