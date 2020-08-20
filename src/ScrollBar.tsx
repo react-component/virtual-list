@@ -1,6 +1,7 @@
 import * as React from 'react';
+import raf from 'rc-util/lib/raf';
 
-const MIN_SIZE = 10;
+const MIN_SIZE = 20;
 
 export interface ScrollBarProps {
   scrollTop: number;
@@ -13,12 +14,16 @@ export interface ScrollBarProps {
 interface ScrollBarState {
   dragging: boolean;
   pageY: number;
+  startTop: number;
 }
 
 export default class ScrollBar extends React.Component<ScrollBarProps, ScrollBarState> {
+  moveRaf: number = null;
+
   state: ScrollBarState = {
     dragging: false,
     pageY: null,
+    startTop: null,
   };
 
   componentWillUnmount() {
@@ -33,31 +38,37 @@ export default class ScrollBar extends React.Component<ScrollBarProps, ScrollBar
   removeEvents = () => {
     window.removeEventListener('mousemove', this.onMouseMove);
     window.removeEventListener('mouseup', this.onMouseUp);
+    raf.cancel(this.moveRaf);
   };
 
   onMouseDown: React.MouseEventHandler = e => {
     this.setState({
       dragging: true,
       pageY: e.pageY,
+      startTop: this.getTop(),
     });
 
     this.patchEvents();
   };
 
   onMouseMove = (e: MouseEvent) => {
-    const { dragging, pageY } = this.state;
+    const { dragging, pageY, startTop } = this.state;
     const { onScroll } = this.props;
+
+    raf.cancel(this.moveRaf);
 
     if (dragging) {
       const offsetY = e.pageY - pageY;
+      const newTop = startTop + offsetY;
+
       const enableScrollRange = this.getEnableScrollRange();
       const enableHeightRange = this.getEnableHeightRange();
-      const newTop = this.getTop() + offsetY;
-      const ptg = newTop / enableHeightRange;
-      const newScrollTop = ptg * enableScrollRange;
-      onScroll(newScrollTop);
 
-      this.setState({ pageY: e.pageY });
+      const ptg = newTop / enableHeightRange;
+      const newScrollTop = Math.ceil(ptg * enableScrollRange);
+      this.moveRaf = raf(() => {
+        onScroll(newScrollTop);
+      });
     }
   };
 
@@ -118,6 +129,7 @@ export default class ScrollBar extends React.Component<ScrollBarProps, ScrollBar
             position: 'absolute',
             background: '#000',
             cursor: 'pointer',
+            userSelect: 'none',
           }}
           onMouseDown={this.onMouseDown}
         />
