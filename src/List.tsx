@@ -158,7 +158,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
       itemTop = currentItemBottom;
     }
 
-    // Fallback to normal if not match
+    // Fallback to normal if not match. This code should never reach
     if (startIndex === undefined) {
       startIndex = 0;
       startOffset = 0;
