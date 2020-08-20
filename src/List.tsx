@@ -241,6 +241,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
         </div>
 
         <ScrollBar
+          prefixCls={prefixCls}
           scrollTop={scrollTop}
           height={height}
           scrollHeight={scrollHeight}

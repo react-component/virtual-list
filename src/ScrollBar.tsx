@@ -4,6 +4,7 @@ import raf from 'rc-util/lib/raf';
 const MIN_SIZE = 20;
 
 export interface ScrollBarProps {
+  prefixCls: string;
   scrollTop: number;
   scrollHeight: number;
   height: number;
@@ -15,20 +16,40 @@ interface ScrollBarState {
   dragging: boolean;
   pageY: number;
   startTop: number;
+  visible: boolean;
 }
 
 export default class ScrollBar extends React.Component<ScrollBarProps, ScrollBarState> {
   moveRaf: number = null;
 
+  visibleTimeout: NodeJS.Timeout = null;
+
   state: ScrollBarState = {
     dragging: false,
     pageY: null,
     startTop: null,
+    visible: false,
   };
+
+  componentDidUpdate(prevProps: ScrollBarProps) {
+    if (prevProps.scrollTop !== this.props.scrollTop) {
+      this.delayHidden();
+    }
+  }
 
   componentWillUnmount() {
     this.removeEvents();
+    clearTimeout(this.visibleTimeout);
   }
+
+  delayHidden = () => {
+    clearTimeout(this.visibleTimeout);
+
+    this.setState({ visible: true });
+    this.visibleTimeout = setTimeout(() => {
+      this.setState({ visible: false });
+    }, 2000);
+  };
 
   patchEvents = () => {
     window.addEventListener('mousemove', this.onMouseMove);
@@ -49,6 +70,7 @@ export default class ScrollBar extends React.Component<ScrollBarProps, ScrollBar
     });
 
     this.patchEvents();
+    e.stopPropagation();
   };
 
   onMouseMove = (e: MouseEvent) => {
@@ -105,29 +127,34 @@ export default class ScrollBar extends React.Component<ScrollBarProps, ScrollBar
   };
 
   render() {
+    const { visible } = this.state;
+    const { prefixCls } = this.props;
     const spinHeight = this.getSpinHeight();
     const top = this.getTop();
 
     return (
       <div
+        className={`${prefixCls}-scrollbar`}
         style={{
-          width: 10,
+          width: 8,
           top: 0,
           bottom: 0,
           right: 0,
           position: 'absolute',
-          background: 'rgba(0, 0, 0, 0.1)',
-          // display: 'none',
+          display: visible ? null : 'none',
         }}
+        onMouseMove={this.delayHidden}
       >
         <div
+          className={`${prefixCls}-scrollbar-thumb`}
           style={{
-            width: 10,
+            width: '100%',
             height: spinHeight,
             top,
-            right: 0,
+            left: 0,
             position: 'absolute',
-            background: '#000',
+            background: 'rgba(0, 0, 0, 0.5)',
+            borderRadius: 99,
             cursor: 'pointer',
             userSelect: 'none',
           }}
