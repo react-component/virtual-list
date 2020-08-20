@@ -11,6 +11,8 @@ export interface ScrollBarProps {
   height: number;
   count: number;
   onScroll: (scrollTop: number) => void;
+  onStartMove: () => void;
+  onStopMove: () => void;
 }
 
 interface ScrollBarState {
@@ -69,12 +71,15 @@ export default class ScrollBar extends React.Component<ScrollBarProps, ScrollBar
   };
 
   onMouseDown: React.MouseEventHandler = e => {
+    const { onStartMove } = this.props;
+
     this.setState({
       dragging: true,
       pageY: e.pageY,
       startTop: this.getTop(),
     });
 
+    onStartMove();
     this.patchEvents();
     e.stopPropagation();
     e.preventDefault();
@@ -102,7 +107,10 @@ export default class ScrollBar extends React.Component<ScrollBarProps, ScrollBar
   };
 
   onMouseUp = () => {
+    const { onStopMove } = this.props;
     this.setState({ dragging: false });
+
+    onStopMove();
     this.removeEvents();
   };
 

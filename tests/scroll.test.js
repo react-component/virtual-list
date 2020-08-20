@@ -123,6 +123,8 @@ describe('List.Scroll', () => {
         window.dispatchEvent(mouseMoveEvent);
       });
 
+      expect(wrapper.find('.rc-virtual-list-holder').props().style.pointerEvents).toEqual('none');
+
       act(() => {
         jest.runAllTimers();
       });
@@ -141,5 +143,20 @@ describe('List.Scroll', () => {
       const wrapper = genList({ itemHeight: 20, height: 100, data: genData(5), ref: listRef });
       expect(wrapper.find('.rc-virtual-list-scrollbar-thumb')).toHaveLength(0);
     });
+  });
+
+  it('no bubble', () => {
+    const wrapper = genList({ itemHeight: 20, height: 100, data: genData(100) });
+
+    // Mouse down
+    const preventDefault = jest.fn();
+    const stopPropagation = jest.fn();
+    wrapper.find('.rc-virtual-list-scrollbar').simulate('mousedown', {
+      preventDefault,
+      stopPropagation,
+    });
+
+    expect(preventDefault).toHaveBeenCalled();
+    expect(stopPropagation).toHaveBeenCalled();
   });
 });

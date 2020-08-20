@@ -70,6 +70,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     virtual !== false && height && itemHeight && data && itemHeight * data.length > height;
 
   const [scrollTop, setScrollTop] = React.useState(0);
+  const [scrollMoving, setScrollMoving] = React.useState(false);
 
   const mergedClassName = classNames(prefixCls, className);
   const mergedData = data || EMPTY_DATA;
@@ -241,6 +242,10 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
 
     if (inVirtual) {
       componentStyle.overflowY = 'hidden';
+
+      if (scrollMoving) {
+        componentStyle.pointerEvents = 'none';
+      }
     }
   }
 
@@ -277,6 +282,12 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
           scrollHeight={scrollHeight}
           count={mergedData.length}
           onScroll={onScrollBar}
+          onStartMove={() => {
+            setScrollMoving(true);
+          }}
+          onStopMove={() => {
+            setScrollMoving(false);
+          }}
         />
       )}
     </div>

@@ -1,5 +1,5 @@
 .motion {
-  transition: all .3s;
+  transition: all 0.3s;
 }
 
 .item {
@@ -10,6 +10,10 @@
   overflow: hidden;
   line-height: 31px;
   position: relative;
+
+  &:hover {
+    background: rgba(255, 0, 0, 0.1);
+  }
 
   &::after {
     content: '';
