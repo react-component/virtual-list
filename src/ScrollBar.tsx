@@ -1,4 +1,5 @@
 import * as React from 'react';
+import classNames from 'classnames';
 import raf from 'rc-util/lib/raf';
 
 const MIN_SIZE = 20;
@@ -127,7 +128,7 @@ export default class ScrollBar extends React.Component<ScrollBarProps, ScrollBar
   };
 
   render() {
-    const { visible } = this.state;
+    const { visible, dragging } = this.state;
     const { prefixCls } = this.props;
     const spinHeight = this.getSpinHeight();
     const top = this.getTop();
@@ -146,7 +147,9 @@ export default class ScrollBar extends React.Component<ScrollBarProps, ScrollBar
         onMouseMove={this.delayHidden}
       >
         <div
-          className={`${prefixCls}-scrollbar-thumb`}
+          className={classNames(`${prefixCls}-scrollbar-thumb`, {
+            [`${prefixCls}-scrollbar-thumb-moving`]: dragging,
+          })}
           style={{
             width: '100%',
             height: spinHeight,
