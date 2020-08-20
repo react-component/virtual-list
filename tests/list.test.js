@@ -79,7 +79,7 @@ describe('List.Basic', () => {
       mockElement.mockRestore();
     });
 
-    it('scroll', () => {
+    it('scroll it', () => {
       // scroll to top
       scrollTop = 0;
       const wrapper = genList({ itemHeight: 20, height: 100, data: genData(100) });

@@ -51,7 +51,7 @@ export interface ListProps<T> extends React.HTMLAttributes<any> {
 
 export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   const {
-    prefixCls,
+    prefixCls = 'rc-virtual-list',
     className,
     height,
     itemHeight,
@@ -187,13 +187,25 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   // ================================ Scroll ================================
   // Since this added in global,should use ref to keep update
   const onRawWheel = useFrameWheel(inVirtual, offsetY => {
-    syncScrollTop(top => keepInRange(top + offsetY));
+    syncScrollTop(top => {
+      const newTop = keepInRange(top + offsetY);
+      return newTop;
+    });
   });
 
   function onScrollBar(newScrollTop: number) {
     const newTop = keepInRange(newScrollTop);
     if (newTop !== scrollTop) {
       syncScrollTop(newTop);
+    }
+  }
+
+  // This code may only trigger in test case.
+  // But we still need a sync if some special escape
+  function onFallbackScroll(e: React.UIEvent) {
+    const { scrollTop: newScrollTop } = e.currentTarget;
+    if (newScrollTop !== scrollTop) {
+      syncScrollTop(newScrollTop);
     }
   }
 
@@ -229,7 +241,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   }
 
   return (
-    <Component
+    <div
       style={{
         ...style,
         position: 'relative',
@@ -237,7 +249,12 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
       className={mergedClassName}
       {...restProps}
     >
-      <div style={componentStyle} ref={componentRef}>
+      <Component
+        className={`${prefixCls}-holder`}
+        style={componentStyle}
+        ref={componentRef}
+        onScroll={onFallbackScroll}
+      >
         <Filler
           prefixCls={prefixCls}
           height={scrollHeight}
@@ -246,7 +263,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
         >
           {listChildren}
         </Filler>
-      </div>
+      </Component>
 
       <ScrollBar
         prefixCls={prefixCls}
@@ -256,7 +273,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
         count={mergedData.length}
         onScroll={onScrollBar}
       />
-    </Component>
+    </div>
   );
 }
 
