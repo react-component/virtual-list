@@ -135,5 +135,11 @@ describe('List.Scroll', () => {
 
       expect(wrapper.find('ul').instance().scrollTop > 10).toBeTruthy();
     });
+
+    it('not show scrollbar when not match virtual', () => {
+      const listRef = React.createRef();
+      const wrapper = genList({ itemHeight: 20, height: 100, data: genData(5), ref: listRef });
+      expect(wrapper.find('.rc-virtual-list-scrollbar-thumb')).toHaveLength(0);
+    });
   });
 });

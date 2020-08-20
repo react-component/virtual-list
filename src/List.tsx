@@ -238,7 +238,10 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   let componentStyle: React.CSSProperties = null;
   if (height) {
     componentStyle = { [fullHeight ? 'height' : 'maxHeight']: height, ...ScrollStyle };
-    componentStyle.overflowY = 'hidden';
+
+    if (inVirtual) {
+      componentStyle.overflowY = 'hidden';
+    }
   }
 
   return (
@@ -266,14 +269,16 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
         </Filler>
       </Component>
 
-      <ScrollBar
-        prefixCls={prefixCls}
-        scrollTop={scrollTop}
-        height={height}
-        scrollHeight={scrollHeight}
-        count={mergedData.length}
-        onScroll={onScrollBar}
-      />
+      {inVirtual && (
+        <ScrollBar
+          prefixCls={prefixCls}
+          scrollTop={scrollTop}
+          height={height}
+          scrollHeight={scrollHeight}
+          count={mergedData.length}
+          onScroll={onScrollBar}
+        />
+      )}
     </div>
   );
 }
