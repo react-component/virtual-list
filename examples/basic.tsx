@@ -146,6 +146,7 @@ const Demo = () => {
 
         {!destroy && (
           <List
+            id="list"
             ref={listRef}
             data={data}
             height={200}

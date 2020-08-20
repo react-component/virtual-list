@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useRef } from 'react';
 import classNames from 'classnames';
 import Filler from './Filler';
+import ScrollBar from './ScrollBar';
 import { RenderFunc, SharedConfig, GetKey } from './interface';
 import useChildren from './hooks/useChildren';
 import useHeights from './hooks/useHeights';
@@ -12,7 +13,7 @@ import useFrameWheel from './hooks/useFrameWheel';
 
 const EMPTY_DATA = [];
 
-const ScrollStyle = {
+const ScrollStyle: React.CSSProperties = {
   overflowY: 'auto',
   overflowAnchor: 'none',
 };
@@ -50,7 +51,7 @@ export interface ListProps<T> extends React.HTMLAttributes<any> {
 
 export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   const {
-    prefixCls,
+    prefixCls = 'rc-virtual-list',
     className,
     height,
     itemHeight,
@@ -88,6 +89,21 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   const sharedConfig: SharedConfig<T> = {
     getKey,
   };
+
+  // ================================ Scroll ================================
+  function syncScrollTop(newTop: number | ((prev: number) => number)) {
+    setScrollTop(origin => {
+      let value: number;
+      if (typeof newTop === 'function') {
+        value = newTop(origin);
+      } else {
+        value = newTop;
+      }
+
+      componentRef.current.scrollTop = value;
+      return value;
+    });
+  }
 
   // ================================ Legacy ================================
   // Put ref here since the range is generate by follow
@@ -142,7 +158,8 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
       itemTop = currentItemBottom;
     }
 
-    // Fallback to normal if not match
+    // Fallback to normal if not match. This code should never reach
+    /* istanbul ignore next */
     if (startIndex === undefined) {
       startIndex = 0;
       startOffset = 0;
@@ -171,20 +188,25 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   // ================================ Scroll ================================
   // Since this added in global,should use ref to keep update
   const onRawWheel = useFrameWheel(inVirtual, offsetY => {
-    setScrollTop(top => {
+    syncScrollTop(top => {
       const newTop = keepInRange(top + offsetY);
-
-      componentRef.current.scrollTop = newTop;
       return newTop;
     });
   });
 
-  // Additional handle the scroll which not trigger by wheel
-  function onRawScroll(event: React.UIEvent) {
-    const newScrollTop = (event.target as HTMLDivElement).scrollTop;
+  function onScrollBar(newScrollTop: number) {
     const newTop = keepInRange(newScrollTop);
     if (newTop !== scrollTop) {
-      setScrollTop(newTop);
+      syncScrollTop(newTop);
+    }
+  }
+
+  // This code may only trigger in test case.
+  // But we still need a sync if some special escape
+  function onFallbackScroll(e: React.UIEvent) {
+    const { scrollTop: newScrollTop } = e.currentTarget;
+    if (newScrollTop !== scrollTop) {
+      syncScrollTop(newScrollTop);
     }
   }
 
@@ -203,6 +225,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     itemHeight,
     getKey,
     collectHeight,
+    syncScrollTop,
   );
 
   React.useImperativeHandle(ref, () => ({
@@ -212,25 +235,46 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   // ================================ Render ================================
   const listChildren = useChildren(mergedData, start, end, setInstanceRef, children, sharedConfig);
 
+  let componentStyle: React.CSSProperties = null;
+  if (height) {
+    componentStyle = { [fullHeight ? 'height' : 'maxHeight']: height, ...ScrollStyle };
+    componentStyle.overflowY = 'hidden';
+  }
+
   return (
-    <Component
-      style={
-        height ? { ...style, [fullHeight ? 'height' : 'maxHeight']: height, ...ScrollStyle } : style
-      }
+    <div
+      style={{
+        ...style,
+        position: 'relative',
+      }}
       className={mergedClassName}
       {...restProps}
-      ref={componentRef}
-      onScroll={onRawScroll}
     >
-      <Filler
-        prefixCls={prefixCls}
-        height={scrollHeight}
-        offset={offset}
-        onInnerResize={collectHeight}
+      <Component
+        className={`${prefixCls}-holder`}
+        style={componentStyle}
+        ref={componentRef}
+        onScroll={onFallbackScroll}
       >
-        {listChildren}
-      </Filler>
-    </Component>
+        <Filler
+          prefixCls={prefixCls}
+          height={scrollHeight}
+          offset={offset}
+          onInnerResize={collectHeight}
+        >
+          {listChildren}
+        </Filler>
+      </Component>
+
+      <ScrollBar
+        prefixCls={prefixCls}
+        scrollTop={scrollTop}
+        height={height}
+        scrollHeight={scrollHeight}
+        count={mergedData.length}
+        onScroll={onScrollBar}
+      />
+    </div>
   );
 }
 

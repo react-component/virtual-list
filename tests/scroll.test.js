@@ -1,4 +1,5 @@
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 import { mount } from 'enzyme';
 import { spyElementPrototypes } from './utils/domHook';
 import List from '../src';
@@ -48,13 +49,14 @@ describe('List.Scroll', () => {
   }
 
   describe('scrollTo number', () => {
-    const listRef = React.createRef();
-    const wrapper = genList({ itemHeight: 20, height: 100, data: genData(100), ref: listRef });
-
     it('value scroll', () => {
+      const listRef = React.createRef();
+      const wrapper = genList({ itemHeight: 20, height: 100, data: genData(100), ref: listRef });
       listRef.current.scrollTo(903);
       jest.runAllTimers();
       expect(wrapper.find('ul').instance().scrollTop).toEqual(903);
+
+      wrapper.unmount();
     });
   });
 
@@ -92,12 +94,46 @@ describe('List.Scroll', () => {
     const wrapper = genList({ itemHeight: 20, height: 100, data: genData(100) });
     const ulElement = wrapper.find('ul').instance();
 
-    const wheelEvent = new Event('wheel');
-    wheelEvent.preventDefault = preventDefault;
-    ulElement.dispatchEvent(wheelEvent);
+    act(() => {
+      const wheelEvent = new Event('wheel');
+      wheelEvent.deltaY = 3;
+      wheelEvent.preventDefault = preventDefault;
+      ulElement.dispatchEvent(wheelEvent);
 
-    jest.runAllTimers();
+      jest.runAllTimers();
+    });
 
     expect(preventDefault).toHaveBeenCalled();
+  });
+
+  describe('scrollbar', () => {
+    it('moving', () => {
+      const listRef = React.createRef();
+      const wrapper = genList({ itemHeight: 20, height: 100, data: genData(100), ref: listRef });
+
+      // Mouse down
+      wrapper.find('.rc-virtual-list-scrollbar-thumb').simulate('mousedown', {
+        pageY: 0,
+      });
+
+      // Mouse move
+      act(() => {
+        const mouseMoveEvent = new Event('mousemove');
+        mouseMoveEvent.pageY = 10;
+        window.dispatchEvent(mouseMoveEvent);
+      });
+
+      act(() => {
+        jest.runAllTimers();
+      });
+
+      // Mouse up
+      act(() => {
+        const mouseUpEvent = new Event('mouseup');
+        window.dispatchEvent(mouseUpEvent);
+      });
+
+      expect(wrapper.find('ul').instance().scrollTop > 10).toBeTruthy();
+    });
   });
 });

@@ -12,6 +12,7 @@ export default function useScrollTo<T>(
   itemHeight: number,
   getKey: GetKey<T>,
   collectHeight: () => void,
+  syncScrollTop: (newTop: number) => void,
 ): ScrollTo {
   const scrollRef = React.useRef<number>();
 
@@ -19,7 +20,7 @@ export default function useScrollTo<T>(
     raf.cancel(scrollRef.current);
 
     if (typeof arg === 'number') {
-      containerRef.current.scrollTop = arg;
+      syncScrollTop(arg);
     } else if (arg && typeof arg === 'object') {
       let index: number;
       const { align } = arg;
@@ -80,7 +81,7 @@ export default function useScrollTo<T>(
         }
 
         if (targetTop !== null && targetTop !== containerRef.current.scrollTop) {
-          containerRef.current.scrollTop = targetTop;
+          syncScrollTop(targetTop);
         }
 
         // We will retry since element may not sync height as it described
