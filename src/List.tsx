@@ -159,6 +159,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     }
 
     // Fallback to normal if not match. This code should never reach
+    /* istanbul ignore next */
     if (startIndex === undefined) {
       startIndex = 0;
       startOffset = 0;
