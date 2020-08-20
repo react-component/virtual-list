@@ -219,37 +219,34 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   }
 
   return (
-    <>
-      {scrollTop}
-      <Component
-        style={{
-          ...style,
-          position: 'relative',
-        }}
-        className={mergedClassName}
-        {...restProps}
-      >
-        <div style={componentStyle} ref={componentRef}>
-          <Filler
-            prefixCls={prefixCls}
-            height={scrollHeight}
-            offset={offset}
-            onInnerResize={collectHeight}
-          >
-            {listChildren}
-          </Filler>
-        </div>
-
-        <ScrollBar
+    <Component
+      style={{
+        ...style,
+        position: 'relative',
+      }}
+      className={mergedClassName}
+      {...restProps}
+    >
+      <div style={componentStyle} ref={componentRef}>
+        <Filler
           prefixCls={prefixCls}
-          scrollTop={scrollTop}
-          height={height}
-          scrollHeight={scrollHeight}
-          count={mergedData.length}
-          onScroll={onScrollBar}
-        />
-      </Component>
-    </>
+          height={scrollHeight}
+          offset={offset}
+          onInnerResize={collectHeight}
+        >
+          {listChildren}
+        </Filler>
+      </div>
+
+      <ScrollBar
+        prefixCls={prefixCls}
+        scrollTop={scrollTop}
+        height={height}
+        scrollHeight={scrollHeight}
+        count={mergedData.length}
+        onScroll={onScrollBar}
+      />
+    </Component>
   );
 }
 

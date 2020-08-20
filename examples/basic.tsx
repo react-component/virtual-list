@@ -55,7 +55,6 @@ const Demo = () => {
     <React.StrictMode>
       <div>
         <h2>Basic</h2>
-        <div id="mark">2</div>
         {TYPES.map(({ name, type: nType }) => (
           <label key={nType}>
             <input
