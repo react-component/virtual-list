@@ -63,6 +63,11 @@ export default class ScrollBar extends React.Component<ScrollBarProps, ScrollBar
     raf.cancel(this.moveRaf);
   };
 
+  onContainerMouseDown: React.MouseEventHandler = e => {
+    e.stopPropagation();
+    e.preventDefault();
+  };
+
   onMouseDown: React.MouseEventHandler = e => {
     this.setState({
       dragging: true,
@@ -72,6 +77,7 @@ export default class ScrollBar extends React.Component<ScrollBarProps, ScrollBar
 
     this.patchEvents();
     e.stopPropagation();
+    e.preventDefault();
   };
 
   onMouseMove = (e: MouseEvent) => {
@@ -144,6 +150,7 @@ export default class ScrollBar extends React.Component<ScrollBarProps, ScrollBar
           position: 'absolute',
           display: visible ? null : 'none',
         }}
+        onMouseDown={this.onContainerMouseDown}
         onMouseMove={this.delayHidden}
       >
         <div
