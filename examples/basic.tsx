@@ -45,6 +45,10 @@ const TYPES = [
   { name: 'ref react node', type: 'react', component: TestItem },
 ];
 
+const onScroll: React.UIEventHandler<HTMLElement> = e => {
+  console.log('scroll:', e.currentTarget.scrollTop);
+};
+
 const Demo = () => {
   const [destroy, setDestroy] = React.useState(false);
   const [visible, setVisible] = React.useState(true);
@@ -157,6 +161,7 @@ const Demo = () => {
               boxSizing: 'border-box',
               display: visible ? null : 'none',
             }}
+            onScroll={onScroll}
           >
             {(item, _, props) =>
               type === 'dom' ? (

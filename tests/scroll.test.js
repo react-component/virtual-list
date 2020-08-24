@@ -159,4 +159,21 @@ describe('List.Scroll', () => {
     expect(preventDefault).toHaveBeenCalled();
     expect(stopPropagation).toHaveBeenCalled();
   });
+
+  it('onScroll should trigger on correct target', () => {
+    // Save in tmp variable since React will clean up this
+    let currentTarget;
+    const onScroll = jest.fn(e => {
+      ({ currentTarget } = e);
+    });
+    const wrapper = genList({ itemHeight: 20, height: 100, data: genData(100), onScroll });
+    wrapper.find('.rc-virtual-list-holder').simulate('scroll');
+
+    expect(currentTarget).toBe(
+      wrapper
+        .find('.rc-virtual-list-holder')
+        .hostNodes()
+        .instance(),
+    );
+  });
 });
