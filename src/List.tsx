@@ -62,6 +62,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     itemKey,
     virtual,
     component: Component = 'div',
+    onScroll,
     ...restProps
   } = props;
 
@@ -204,11 +205,14 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
 
   // This code may only trigger in test case.
   // But we still need a sync if some special escape
-  function onFallbackScroll(e: React.UIEvent) {
+  function onFallbackScroll(e: React.UIEvent<HTMLDivElement>) {
     const { scrollTop: newScrollTop } = e.currentTarget;
     if (newScrollTop !== scrollTop) {
       syncScrollTop(newScrollTop);
     }
+
+    // Trigger origin onScroll
+    onScroll?.(e);
   }
 
   React.useEffect(() => {
