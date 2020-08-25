@@ -188,14 +188,6 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   const keepInRange = useInRange(scrollHeight, height);
 
   // ================================ Scroll ================================
-  // Since this added in global,should use ref to keep update
-  const onRawWheel = useFrameWheel(inVirtual, offsetY => {
-    syncScrollTop(top => {
-      const newTop = keepInRange(top + offsetY);
-      return newTop;
-    });
-  });
-
   function onScrollBar(newScrollTop: number) {
     const newTop = keepInRange(newScrollTop);
     if (newTop !== scrollTop) {
@@ -215,10 +207,20 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     onScroll?.(e);
   }
 
+  // Since this added in global,should use ref to keep update
+  const [onRawWheel, onFireFoxScroll] = useFrameWheel(inVirtual, offsetY => {
+    syncScrollTop(top => {
+      const newTop = keepInRange(top + offsetY);
+      return newTop;
+    });
+  });
+
   React.useEffect(() => {
     componentRef.current.addEventListener('wheel', onRawWheel);
+    componentRef.current.addEventListener('DOMMouseScroll', onFireFoxScroll as any);
     return () => {
       componentRef.current.removeEventListener('wheel', onRawWheel);
+      componentRef.current.removeEventListener('DOMMouseScroll', onFireFoxScroll as any);
     };
   }, [inVirtual]);
 
