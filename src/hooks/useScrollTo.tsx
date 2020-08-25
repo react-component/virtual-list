@@ -36,52 +36,56 @@ export default function useScrollTo<T>(
         if (times < 0 || !containerRef.current) return;
 
         const height = containerRef.current.clientHeight;
-        const mergedAlign = targetAlign || align;
-
-        // Get top & bottom
-        let stackTop = 0;
-        let itemTop = 0;
-        let itemBottom = 0;
         let needCollectHeight = false;
-
-        for (let i = 0; i <= index; i += 1) {
-          const key = getKey(data[i]);
-          itemTop = stackTop;
-          const cacheHeight = heights.get(key);
-          itemBottom = itemTop + (cacheHeight === undefined ? itemHeight : cacheHeight);
-
-          stackTop = itemBottom;
-
-          if (i === index && cacheHeight === undefined) {
-            needCollectHeight = true;
-          }
-        }
-
-        // Scroll to
-        let targetTop: number | null = null;
         let newTargetAlign: 'top' | 'bottom' | null = targetAlign;
 
-        switch (mergedAlign) {
-          case 'top':
-            targetTop = itemTop;
-            break;
-          case 'bottom':
-            targetTop = itemBottom - height;
-            break;
+        // Go to next frame if height not exist
+        if (height) {
+          const mergedAlign = targetAlign || align;
 
-          default: {
-            const { scrollTop } = containerRef.current;
-            const scrollBottom = scrollTop + height;
-            if (itemTop < scrollTop) {
-              newTargetAlign = 'top';
-            } else if (itemBottom > scrollBottom) {
-              newTargetAlign = 'bottom';
+          // Get top & bottom
+          let stackTop = 0;
+          let itemTop = 0;
+          let itemBottom = 0;
+
+          for (let i = 0; i <= index; i += 1) {
+            const key = getKey(data[i]);
+            itemTop = stackTop;
+            const cacheHeight = heights.get(key);
+            itemBottom = itemTop + (cacheHeight === undefined ? itemHeight : cacheHeight);
+
+            stackTop = itemBottom;
+
+            if (i === index && cacheHeight === undefined) {
+              needCollectHeight = true;
             }
           }
-        }
 
-        if (targetTop !== null && targetTop !== containerRef.current.scrollTop) {
-          syncScrollTop(targetTop);
+          // Scroll to
+          let targetTop: number | null = null;
+
+          switch (mergedAlign) {
+            case 'top':
+              targetTop = itemTop;
+              break;
+            case 'bottom':
+              targetTop = itemBottom - height;
+              break;
+
+            default: {
+              const { scrollTop } = containerRef.current;
+              const scrollBottom = scrollTop + height;
+              if (itemTop < scrollTop) {
+                newTargetAlign = 'top';
+              } else if (itemBottom > scrollBottom) {
+                newTargetAlign = 'bottom';
+              }
+            }
+          }
+
+          if (targetTop !== null && targetTop !== containerRef.current.scrollTop) {
+            syncScrollTop(targetTop);
+          }
         }
 
         // We will retry since element may not sync height as it described
