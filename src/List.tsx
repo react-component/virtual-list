@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import classNames from 'classnames';
 import Filler from './Filler';
 import ScrollBar from './ScrollBar';
@@ -10,6 +10,7 @@ import useInRange from './hooks/useInRange';
 import useScrollTo from './hooks/useScrollTo';
 import useDiffItem from './hooks/useDiffItem';
 import useFrameWheel from './hooks/useFrameWheel';
+import useMobileTouchMove from './hooks/useMobileTouchMove';
 
 const EMPTY_DATA = [];
 
@@ -70,8 +71,8 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   const inVirtual =
     virtual !== false && height && itemHeight && data && itemHeight * data.length > height;
 
-  const [scrollTop, setScrollTop] = React.useState(0);
-  const [scrollMoving, setScrollMoving] = React.useState(false);
+  const [scrollTop, setScrollTop] = useState(0);
+  const [scrollMoving, setScrollMoving] = useState(false);
 
   const mergedClassName = classNames(prefixCls, className);
   const mergedData = data || EMPTY_DATA;
@@ -213,6 +214,11 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
       const newTop = keepInRange(top + offsetY);
       return newTop;
     });
+  });
+
+  // Mobile touch move
+  useMobileTouchMove(componentRef, deltaY => {
+    onRawWheel({ preventDefault() {}, deltaY } as WheelEvent);
   });
 
   React.useEffect(() => {
