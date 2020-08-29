@@ -21,6 +21,7 @@ export default function useMobileTouchMove(
     if (touchedRef.current) {
       const currentY = Math.ceil(e.touches[0].pageY);
       let offsetY = touchYRef.current - currentY;
+      console.log('>>>', offsetY);
       touchYRef.current = currentY;
 
       callback(offsetY);
