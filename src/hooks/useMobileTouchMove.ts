@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useRef } from 'react';
 
-const SMOOTH_PTG = 19 / 20;
+const SMOOTH_PTG = 14 / 15;
 
 export default function useMobileTouchMove(
   listRef: React.RefObject<HTMLDivElement>,
@@ -19,7 +19,7 @@ export default function useMobileTouchMove(
 
   const onTouchMove = (e: TouchEvent) => {
     if (touchedRef.current) {
-      const currentY = Math.ceil(e.touches[0].screenY);
+      const currentY = Math.ceil(e.touches[0].pageY);
       let offsetY = touchYRef.current - currentY;
       touchYRef.current = currentY;
 
@@ -49,7 +49,7 @@ export default function useMobileTouchMove(
 
     if (e.touches.length === 1 && !touchedRef.current) {
       touchedRef.current = true;
-      touchYRef.current = Math.ceil(e.touches[0].screenY);
+      touchYRef.current = Math.ceil(e.touches[0].pageY);
       e.preventDefault();
 
       elementRef.current = e.target as HTMLElement;
