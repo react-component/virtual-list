@@ -22,8 +22,16 @@ interface ScrollBarState {
   visible: boolean;
 }
 
+function getPageY(e: React.MouseEvent | MouseEvent | TouchEvent) {
+  return 'touches' in e ? e.touches[0].pageY : e.pageY;
+}
+
 export default class ScrollBar extends React.Component<ScrollBarProps, ScrollBarState> {
   moveRaf: number = null;
+
+  scrollbarRef = React.createRef<HTMLDivElement>();
+
+  thumbRef = React.createRef<HTMLDivElement>();
 
   visibleTimeout: NodeJS.Timeout = null;
 
@@ -33,6 +41,11 @@ export default class ScrollBar extends React.Component<ScrollBarProps, ScrollBar
     startTop: null,
     visible: false,
   };
+
+  componentDidMount() {
+    this.scrollbarRef.current.addEventListener('touchstart', this.onScrollbarTouchStart);
+    this.thumbRef.current.addEventListener('touchstart', this.onMouseDown);
+  }
 
   componentDidUpdate(prevProps: ScrollBarProps) {
     if (prevProps.scrollTop !== this.props.scrollTop) {
@@ -54,15 +67,8 @@ export default class ScrollBar extends React.Component<ScrollBarProps, ScrollBar
     }, 2000);
   };
 
-  patchEvents = () => {
-    window.addEventListener('mousemove', this.onMouseMove);
-    window.addEventListener('mouseup', this.onMouseUp);
-  };
-
-  removeEvents = () => {
-    window.removeEventListener('mousemove', this.onMouseMove);
-    window.removeEventListener('mouseup', this.onMouseUp);
-    raf.cancel(this.moveRaf);
+  onScrollbarTouchStart = (e: TouchEvent) => {
+    e.preventDefault();
   };
 
   onContainerMouseDown: React.MouseEventHandler = e => {
@@ -70,12 +76,34 @@ export default class ScrollBar extends React.Component<ScrollBarProps, ScrollBar
     e.preventDefault();
   };
 
-  onMouseDown: React.MouseEventHandler = e => {
+  // ======================= Clean =======================
+  patchEvents = () => {
+    window.addEventListener('mousemove', this.onMouseMove);
+    window.addEventListener('mouseup', this.onMouseUp);
+
+    this.thumbRef.current.addEventListener('touchmove', this.onMouseMove);
+    this.thumbRef.current.addEventListener('touchend', this.onMouseUp);
+  };
+
+  removeEvents = () => {
+    window.removeEventListener('mousemove', this.onMouseMove);
+    window.removeEventListener('mouseup', this.onMouseUp);
+
+    this.scrollbarRef.current.removeEventListener('touchstart', this.onScrollbarTouchStart);
+    this.thumbRef.current.removeEventListener('touchstart', this.onMouseDown);
+    this.thumbRef.current.removeEventListener('touchmove', this.onMouseMove);
+    this.thumbRef.current.removeEventListener('touchend', this.onMouseUp);
+
+    raf.cancel(this.moveRaf);
+  };
+
+  // ======================= Thumb =======================
+  onMouseDown = (e: React.MouseEvent | TouchEvent) => {
     const { onStartMove } = this.props;
 
     this.setState({
       dragging: true,
-      pageY: e.pageY,
+      pageY: getPageY(e),
       startTop: this.getTop(),
     });
 
@@ -85,14 +113,14 @@ export default class ScrollBar extends React.Component<ScrollBarProps, ScrollBar
     e.preventDefault();
   };
 
-  onMouseMove = (e: MouseEvent) => {
+  onMouseMove = (e: MouseEvent | TouchEvent) => {
     const { dragging, pageY, startTop } = this.state;
     const { onScroll } = this.props;
 
     raf.cancel(this.moveRaf);
 
     if (dragging) {
-      const offsetY = e.pageY - pageY;
+      const offsetY = getPageY(e) - pageY;
       const newTop = startTop + offsetY;
 
       const enableScrollRange = this.getEnableScrollRange();
@@ -114,6 +142,7 @@ export default class ScrollBar extends React.Component<ScrollBarProps, ScrollBar
     this.removeEvents();
   };
 
+  // ===================== Calculate =====================
   getSpinHeight = () => {
     const { height, count } = this.props;
     let baseHeight = (height / count) * 10;
@@ -149,6 +178,7 @@ export default class ScrollBar extends React.Component<ScrollBarProps, ScrollBar
 
     return (
       <div
+        ref={this.scrollbarRef}
         className={`${prefixCls}-scrollbar`}
         style={{
           width: 8,
@@ -162,6 +192,7 @@ export default class ScrollBar extends React.Component<ScrollBarProps, ScrollBar
         onMouseMove={this.delayHidden}
       >
         <div
+          ref={this.thumbRef}
           className={classNames(`${prefixCls}-scrollbar-thumb`, {
             [`${prefixCls}-scrollbar-thumb-moving`]: dragging,
           })}
