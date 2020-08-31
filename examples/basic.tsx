@@ -6,7 +6,7 @@ interface Item {
   id: string;
 }
 
-const MyItem: React.FC<Item> = ({ id }, ref) => (
+const MyItem: React.ForwardRefRenderFunction<any, Item> = ({ id }, ref) => (
   <span
     ref={ref}
     style={{
@@ -17,6 +17,9 @@ const MyItem: React.FC<Item> = ({ id }, ref) => (
       lineHeight: '30px',
       boxSizing: 'border-box',
       display: 'inline-block',
+    }}
+    onClick={() => {
+      console.log('Click:', id);
     }}
   >
     {id}

@@ -19,6 +19,8 @@ export default function useMobileTouchMove(
 
   const onTouchMove = (e: TouchEvent) => {
     if (touchedRef.current) {
+      e.preventDefault();
+
       const currentY = Math.ceil(e.touches[0].pageY);
       let offsetY = touchYRef.current - currentY;
       touchYRef.current = currentY;
@@ -50,7 +52,6 @@ export default function useMobileTouchMove(
     if (e.touches.length === 1 && !touchedRef.current) {
       touchedRef.current = true;
       touchYRef.current = Math.ceil(e.touches[0].pageY);
-      e.preventDefault();
 
       elementRef.current = e.target as HTMLElement;
       elementRef.current.addEventListener('touchmove', onTouchMove);
