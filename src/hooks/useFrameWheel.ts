@@ -34,9 +34,7 @@ export default function useFrameWheel(
     wheelValueRef.current = deltaY;
 
     // Do nothing when scroll at the edge, Skip check when is in scroll
-    if (originScroll(deltaY)) {
-      return;
-    }
+    if (originScroll(deltaY)) return;
 
     // Proxy of scroll events
     if (!isFF) {
