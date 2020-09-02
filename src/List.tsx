@@ -10,6 +10,7 @@ import useScrollTo from './hooks/useScrollTo';
 import useDiffItem from './hooks/useDiffItem';
 import useFrameWheel from './hooks/useFrameWheel';
 import useMobileTouchMove from './hooks/useMobileTouchMove';
+import useOriginScroll from './hooks/useOriginScroll';
 
 const EMPTY_DATA = [];
 
@@ -200,6 +201,8 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   const isScrollAtTop = scrollTop <= 0;
   const isScrollAtBottom = scrollTop >= maxScrollHeight;
 
+  const originScroll = useOriginScroll(isScrollAtTop, isScrollAtBottom);
+
   // ================================ Scroll ================================
   function onScrollBar(newScrollTop: number) {
     const newTop = keepInRange(newScrollTop);
@@ -221,17 +224,27 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   }
 
   // Since this added in global,should use ref to keep update
-  const [onRawWheel, onFireFoxScroll] = useFrameWheel(inVirtual, offsetY => {
-    syncScrollTop(top => {
-      const newTop = keepInRange(top + offsetY);
+  const [onRawWheel, onFireFoxScroll] = useFrameWheel(
+    inVirtual,
+    isScrollAtTop,
+    isScrollAtBottom,
+    offsetY => {
+      syncScrollTop(top => {
+        const newTop = keepInRange(top + offsetY);
 
-      return newTop;
-    });
-  });
+        return newTop;
+      });
+    },
+  );
 
   // Mobile touch move
   useMobileTouchMove(inVirtual, componentRef, deltaY => {
+    if (originScroll(deltaY)) {
+      return false;
+    }
+
     onRawWheel({ preventDefault() {}, deltaY } as WheelEvent);
+    return true;
   });
 
   React.useEffect(() => {

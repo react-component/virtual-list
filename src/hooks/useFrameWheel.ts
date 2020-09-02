@@ -1,6 +1,7 @@
 import { useRef } from 'react';
 import raf from 'rc-util/lib/raf';
 import isFF from '../utils/isFirefox';
+import useOriginScroll from './useOriginScroll';
 
 interface FireFoxDOMMouseScrollEvent {
   detail: number;
@@ -9,6 +10,8 @@ interface FireFoxDOMMouseScrollEvent {
 
 export default function useFrameWheel(
   inVirtual: boolean,
+  isScrollAtTop: boolean,
+  isScrollAtBottom: boolean,
   onWheelDelta: (offset: number) => void,
 ): [(e: WheelEvent) => void, (e: FireFoxDOMMouseScrollEvent) => void] {
   const offsetRef = useRef(0);
@@ -18,18 +21,27 @@ export default function useFrameWheel(
   const wheelValueRef = useRef<number>(null);
   const isMouseScrollRef = useRef<boolean>(false);
 
+  // Scroll status sync
+  const originScroll = useOriginScroll(isScrollAtTop, isScrollAtBottom);
+
   function onWheel(event: WheelEvent) {
     if (!inVirtual) return;
+
+    raf.cancel(nextFrameRef.current);
+
+    const { deltaY } = event;
+    offsetRef.current += deltaY;
+    wheelValueRef.current = deltaY;
+
+    // Do nothing when scroll at the edge, Skip check when is in scroll
+    if (originScroll(deltaY)) {
+      return;
+    }
 
     // Proxy of scroll events
     if (!isFF) {
       event.preventDefault();
     }
-
-    raf.cancel(nextFrameRef.current);
-
-    offsetRef.current += event.deltaY;
-    wheelValueRef.current = event.deltaY;
 
     nextFrameRef.current = raf(() => {
       // Patch a multiple for Firefox to fix wheel number too small

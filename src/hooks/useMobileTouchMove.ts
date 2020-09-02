@@ -6,7 +6,7 @@ const SMOOTH_PTG = 14 / 15;
 export default function useMobileTouchMove(
   inVirtual: boolean,
   listRef: React.RefObject<HTMLDivElement>,
-  callback: (offsetY: number) => void,
+  callback: (offsetY: number) => boolean,
 ) {
   const touchedRef = useRef(false);
   const touchYRef = useRef(0);
@@ -20,13 +20,14 @@ export default function useMobileTouchMove(
 
   const onTouchMove = (e: TouchEvent) => {
     if (touchedRef.current) {
-      e.preventDefault();
-
       const currentY = Math.ceil(e.touches[0].pageY);
       let offsetY = touchYRef.current - currentY;
       touchYRef.current = currentY;
 
-      callback(offsetY);
+      console.log('>>>>>>', offsetY);
+      if (callback(offsetY)) {
+        e.preventDefault();
+      }
 
       // Smooth interval
       clearInterval(intervalRef.current);
