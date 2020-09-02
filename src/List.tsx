@@ -238,8 +238,8 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   );
 
   // Mobile touch move
-  useMobileTouchMove(inVirtual, componentRef, deltaY => {
-    if (originScroll(deltaY)) {
+  useMobileTouchMove(inVirtual, componentRef, (deltaY, smoothOffset) => {
+    if (originScroll(deltaY, smoothOffset)) {
       return false;
     }
 
