@@ -6,7 +6,6 @@ import ScrollBar from './ScrollBar';
 import { RenderFunc, SharedConfig, GetKey } from './interface';
 import useChildren from './hooks/useChildren';
 import useHeights from './hooks/useHeights';
-import useInRange from './hooks/useInRange';
 import useScrollTo from './hooks/useScrollTo';
 import useDiffItem from './hooks/useDiffItem';
 import useFrameWheel from './hooks/useFrameWheel';
@@ -186,7 +185,20 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   rangeRef.current.end = end;
 
   // =============================== In Range ===============================
-  const keepInRange = useInRange(scrollHeight, height);
+  const maxScrollHeight = scrollHeight - height;
+  const maxScrollHeightRef = useRef(maxScrollHeight);
+  maxScrollHeightRef.current = maxScrollHeight;
+
+  function keepInRange(newScrollTop: number) {
+    let newTop = Math.max(newScrollTop, 0);
+    if (!Number.isNaN(maxScrollHeightRef.current)) {
+      newTop = Math.min(newTop, maxScrollHeightRef.current);
+    }
+    return newTop;
+  }
+
+  const isScrollAtTop = scrollTop <= 0;
+  const isScrollAtBottom = scrollTop >= maxScrollHeight;
 
   // ================================ Scroll ================================
   function onScrollBar(newScrollTop: number) {
@@ -212,6 +224,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   const [onRawWheel, onFireFoxScroll] = useFrameWheel(inVirtual, offsetY => {
     syncScrollTop(top => {
       const newTop = keepInRange(top + offsetY);
+
       return newTop;
     });
   });
