@@ -4,6 +4,7 @@ import { useRef } from 'react';
 const SMOOTH_PTG = 14 / 15;
 
 export default function useMobileTouchMove(
+  inVirtual: boolean,
   listRef: React.RefObject<HTMLDivElement>,
   callback: (offsetY: number) => void,
 ) {
@@ -67,12 +68,14 @@ export default function useMobileTouchMove(
   };
 
   React.useEffect(() => {
-    listRef.current.addEventListener('touchstart', onTouchStart);
+    if (inVirtual) {
+      listRef.current.addEventListener('touchstart', onTouchStart);
+    }
 
     return () => {
       listRef.current.removeEventListener('touchstart', onTouchStart);
       cleanUpEvents();
       clearInterval(intervalRef.current);
     };
-  }, []);
+  }, [inVirtual]);
 }

@@ -217,7 +217,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   });
 
   // Mobile touch move
-  useMobileTouchMove(componentRef, deltaY => {
+  useMobileTouchMove(inVirtual, componentRef, deltaY => {
     onRawWheel({ preventDefault() {}, deltaY } as WheelEvent);
   });
 
