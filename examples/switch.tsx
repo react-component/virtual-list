@@ -36,11 +36,11 @@ function getData(count: number) {
 
 const Demo = () => {
   const [height, setHeight] = React.useState(100);
-  const [data, setData] = React.useState(getData(100));
+  const [data, setData] = React.useState(getData(20));
 
   return (
     <React.StrictMode>
-      <div>
+      <div style={{ height: '150vh' }}>
         <h2>Switch</h2>
         <span
           onChange={(e: any) => {

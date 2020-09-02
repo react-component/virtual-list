@@ -6,11 +6,11 @@ import ScrollBar from './ScrollBar';
 import { RenderFunc, SharedConfig, GetKey } from './interface';
 import useChildren from './hooks/useChildren';
 import useHeights from './hooks/useHeights';
-import useInRange from './hooks/useInRange';
 import useScrollTo from './hooks/useScrollTo';
 import useDiffItem from './hooks/useDiffItem';
 import useFrameWheel from './hooks/useFrameWheel';
 import useMobileTouchMove from './hooks/useMobileTouchMove';
+import useOriginScroll from './hooks/useOriginScroll';
 
 const EMPTY_DATA = [];
 
@@ -186,7 +186,22 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   rangeRef.current.end = end;
 
   // =============================== In Range ===============================
-  const keepInRange = useInRange(scrollHeight, height);
+  const maxScrollHeight = scrollHeight - height;
+  const maxScrollHeightRef = useRef(maxScrollHeight);
+  maxScrollHeightRef.current = maxScrollHeight;
+
+  function keepInRange(newScrollTop: number) {
+    let newTop = Math.max(newScrollTop, 0);
+    if (!Number.isNaN(maxScrollHeightRef.current)) {
+      newTop = Math.min(newTop, maxScrollHeightRef.current);
+    }
+    return newTop;
+  }
+
+  const isScrollAtTop = scrollTop <= 0;
+  const isScrollAtBottom = scrollTop >= maxScrollHeight;
+
+  const originScroll = useOriginScroll(isScrollAtTop, isScrollAtBottom);
 
   // ================================ Scroll ================================
   function onScrollBar(newScrollTop: number) {
@@ -209,16 +224,27 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   }
 
   // Since this added in global,should use ref to keep update
-  const [onRawWheel, onFireFoxScroll] = useFrameWheel(inVirtual, offsetY => {
-    syncScrollTop(top => {
-      const newTop = keepInRange(top + offsetY);
-      return newTop;
-    });
-  });
+  const [onRawWheel, onFireFoxScroll] = useFrameWheel(
+    inVirtual,
+    isScrollAtTop,
+    isScrollAtBottom,
+    offsetY => {
+      syncScrollTop(top => {
+        const newTop = keepInRange(top + offsetY);
+
+        return newTop;
+      });
+    },
+  );
 
   // Mobile touch move
-  useMobileTouchMove(inVirtual, componentRef, deltaY => {
+  useMobileTouchMove(inVirtual, componentRef, (deltaY, smoothOffset) => {
+    if (originScroll(deltaY, smoothOffset)) {
+      return false;
+    }
+
     onRawWheel({ preventDefault() {}, deltaY } as WheelEvent);
+    return true;
   });
 
   React.useEffect(() => {
