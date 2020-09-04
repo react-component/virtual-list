@@ -142,6 +142,29 @@ const Demo = () => {
           type="button"
           onClick={() => {
             listRef.current.scrollTo({
+              index: data.length - 2,
+              align: 'top',
+            });
+          }}
+        >
+          Scroll To Last (top)
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            listRef.current.scrollTo({
+              index: 0,
+              align: 'bottom',
+            });
+          }}
+        >
+          Scroll To First (bottom)
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            listRef.current.scrollTo({
               index: 50,
               align: 'top',
             });

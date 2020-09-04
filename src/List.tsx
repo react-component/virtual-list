@@ -103,8 +103,10 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
         value = newTop;
       }
 
-      componentRef.current.scrollTop = value;
-      return value;
+      const alignedTop = keepInRange(value);
+
+      componentRef.current.scrollTop = alignedTop;
+      return alignedTop;
     });
   }
 
@@ -205,10 +207,8 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
 
   // ================================ Scroll ================================
   function onScrollBar(newScrollTop: number) {
-    const newTop = keepInRange(newScrollTop);
-    if (newTop !== scrollTop) {
-      syncScrollTop(newTop);
-    }
+    const newTop = newScrollTop;
+    syncScrollTop(newTop);
   }
 
   // This code may only trigger in test case.
@@ -230,8 +230,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     isScrollAtBottom,
     offsetY => {
       syncScrollTop(top => {
-        const newTop = keepInRange(top + offsetY);
-
+        const newTop = top + offsetY;
         return newTop;
       });
     },
