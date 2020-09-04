@@ -70,6 +70,12 @@ describe('List.Scroll', () => {
       expect(wrapper.find('ul').instance().scrollTop).toEqual(600);
     });
 
+    it('scroll top should not out of range', () => {
+      listRef.current.scrollTo({ index: 0, align: 'bottom' });
+      jest.runAllTimers();
+      expect(wrapper.find('ul').instance().scrollTop).toEqual(0);
+    });
+
     it('key scroll', () => {
       listRef.current.scrollTo({ key: '30', align: 'bottom' });
       jest.runAllTimers();
