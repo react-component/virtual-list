@@ -48,7 +48,7 @@ const Filler: React.FC<FillerProps> = ({
     <div style={outerStyle}>
       <ResizeObserver
         onResize={({ offsetHeight }) => {
-          if (offsetHeight) {
+          if (offsetHeight && onInnerResize) {
             onInnerResize();
           }
         }}
