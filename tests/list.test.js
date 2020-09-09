@@ -1,5 +1,6 @@
 import React from 'react';
 import { mount } from 'enzyme';
+import { act } from 'react-dom/test-utils';
 import List from '../src';
 import Filler from '../src/Filler';
 import { spyElementPrototypes } from './utils/domHook';
@@ -188,7 +189,7 @@ describe('List.Basic', () => {
       mockElement.mockRestore();
     });
 
-    it('work', () => {
+    it('work', async () => {
       const wrapper = genList({ itemHeight: 20, height: 40, data: genData(3) });
       wrapper
         .find('Filler')
@@ -196,6 +197,11 @@ describe('List.Basic', () => {
         .props()
         .onResize({ offsetHeight: 0 });
       expect(collected).toBeFalsy();
+
+      // Wait for collection
+      await act(async () => {
+        await Promise.resolve();
+      });
 
       wrapper
         .find('Filler')

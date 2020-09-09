@@ -14,6 +14,33 @@ export default function useHeights<T>(
   const [updatedMark, setUpdatedMark] = React.useState(0);
   const instanceRef = useRef(new Map<React.Key, HTMLElement>());
   const heightsRef = useRef(new CacheMap());
+  const heightUpdateIdRef = useRef(0);
+
+  function collectHeight() {
+    heightUpdateIdRef.current += 1;
+    const currentId = heightUpdateIdRef.current;
+
+    Promise.resolve().then(() => {
+      // Only collect when it's latest call
+      if (currentId !== heightUpdateIdRef.current) return;
+
+      let changed = false;
+
+      instanceRef.current.forEach((element, key) => {
+        if (element && element.offsetParent) {
+          const htmlElement = findDOMNode<HTMLElement>(element);
+          const { offsetHeight } = htmlElement;
+          if (heightsRef.current.get(key) !== offsetHeight) {
+            changed = true;
+            heightsRef.current.set(key, htmlElement.offsetHeight);
+          }
+        }
+      });
+      if (changed) {
+        setUpdatedMark(c => c + 1);
+      }
+    });
+  }
 
   function setInstanceRef(item: T, instance: HTMLElement) {
     const key = getKey(item);
@@ -21,6 +48,7 @@ export default function useHeights<T>(
 
     if (instance) {
       instanceRef.current.set(key, instance);
+      collectHeight();
     } else {
       instanceRef.current.delete(key);
     }
@@ -32,24 +60,6 @@ export default function useHeights<T>(
       } else {
         onItemRemove?.(item);
       }
-    }
-  }
-
-  function collectHeight() {
-    let changed = false;
-
-    instanceRef.current.forEach((element, key) => {
-      if (element && element.offsetParent) {
-        const htmlElement = findDOMNode<HTMLElement>(element);
-        const { offsetHeight } = htmlElement;
-        if (heightsRef.current.get(key) !== offsetHeight) {
-          changed = true;
-          heightsRef.current.set(key, htmlElement.offsetHeight);
-        }
-      }
-    });
-    if (changed) {
-      setUpdatedMark(c => c + 1);
     }
   }
 
