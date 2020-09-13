@@ -1,6 +1,7 @@
 /* eslint-disable jsx-a11y/label-has-associated-control, jsx-a11y/label-has-for */
 import * as React from 'react';
 import List, { ListRef } from '../src/List';
+import './basic.less';
 
 interface Item {
   id: string;
@@ -9,15 +10,10 @@ interface Item {
 const MyItem: React.ForwardRefRenderFunction<any, Item> = ({ id }, ref) => (
   <span
     ref={ref}
-    style={{
-      border: '1px solid gray',
-      padding: '0 16px',
-      // height: 30 + (id % 2 ? 0 : 10),
-      height: 32,
-      lineHeight: '30px',
-      boxSizing: 'border-box',
-      display: 'inline-block',
-    }}
+    // style={{
+    //   // height: 30 + (id % 2 ? 0 : 10),
+    // }}
+    className="fixed-item"
     onClick={() => {
       console.log('Click:', id);
     }}
@@ -37,7 +33,7 @@ class TestItem extends React.Component<Item, {}> {
 }
 
 const data: Item[] = [];
-for (let i = 0; i < 100000; i += 1) {
+for (let i = 0; i < 1000; i += 1) {
   data.push({
     id: String(i),
   });

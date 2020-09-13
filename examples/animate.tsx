@@ -84,9 +84,14 @@ const MyItem: React.ForwardRefRenderFunction<any, MyItemProps> = (
         onLeave(id);
       }}
     >
-      {({ className, style }, motionRef) => {
+      {({ className, style }, passedMotionRef) => {
         return (
-          <div ref={motionRef} className={classNames('item', className)} style={style} data-id={id}>
+          <div
+            ref={passedMotionRef}
+            className={classNames('item', className)}
+            style={style}
+            data-id={id}
+          >
             <div style={{ height: itemUuid % 2 ? 100 : undefined }}>
               <button
                 type="button"
