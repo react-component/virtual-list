@@ -56,7 +56,7 @@ const Demo = () => {
 
   return (
     <React.StrictMode>
-      <div>
+      <div style={{ height: '200vh' }}>
         <h2>Basic</h2>
         {TYPES.map(({ name, type: nType }) => (
           <label key={nType}>

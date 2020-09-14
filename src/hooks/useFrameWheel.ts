@@ -54,9 +54,6 @@ export default function useFrameWheel(
   function onFireFoxScroll(event: FireFoxDOMMouseScrollEvent) {
     if (!inVirtual) return;
 
-    // Firefox level stop
-    event.preventDefault();
-
     isMouseScrollRef.current = event.detail === wheelValueRef.current;
   }
 

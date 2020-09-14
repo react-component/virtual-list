@@ -68,6 +68,11 @@ describe('List.Firefox-Scroll', () => {
       wheelEvent.preventDefault = wheelPreventDefault;
       ulElement.dispatchEvent(wheelEvent);
 
+      const firefoxPixelScrollEvent = new Event('MozMousePixelScroll');
+      firefoxPixelScrollEvent.detail = 6;
+      firefoxPixelScrollEvent.preventDefault = firefoxPreventDefault;
+      ulElement.dispatchEvent(firefoxPixelScrollEvent);
+
       const firefoxScrollEvent = new Event('DOMMouseScroll');
       firefoxScrollEvent.detail = 3;
       firefoxScrollEvent.preventDefault = firefoxPreventDefault;
@@ -77,6 +82,6 @@ describe('List.Firefox-Scroll', () => {
     });
 
     expect(wheelPreventDefault).not.toHaveBeenCalled();
-    expect(firefoxPreventDefault).toHaveBeenCalled();
+    expect(firefoxPreventDefault).toHaveBeenCalledTimes(1);
   });
 });
