@@ -249,7 +249,9 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   React.useEffect(() => {
     // Firefox only
     function onMozMousePixelScroll(e: Event) {
-      e.preventDefault();
+      if (inVirtual) {
+        e.preventDefault();
+      }
     }
 
     componentRef.current.addEventListener('wheel', onRawWheel);
