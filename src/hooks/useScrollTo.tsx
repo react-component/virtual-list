@@ -16,7 +16,7 @@ export default function useScrollTo<T>(
 ): ScrollTo {
   const scrollRef = React.useRef<number>();
 
-  return arg => {
+  return (arg) => {
     raf.cancel(scrollRef.current);
 
     if (typeof arg === 'number') {
@@ -28,8 +28,10 @@ export default function useScrollTo<T>(
       if ('index' in arg) {
         ({ index } = arg);
       } else {
-        index = data.findIndex(item => getKey(item) === arg.key);
+        index = data.findIndex((item) => getKey(item) === arg.key);
       }
+
+      const { offset = 0 } = arg;
 
       // We will retry 3 times in case dynamic height shaking
       const syncScroll = (times: number, targetAlign?: 'top' | 'bottom') => {
@@ -66,10 +68,10 @@ export default function useScrollTo<T>(
 
           switch (mergedAlign) {
             case 'top':
-              targetTop = itemTop;
+              targetTop = itemTop - offset;
               break;
             case 'bottom':
-              targetTop = itemBottom - height;
+              targetTop = itemBottom - height + offset;
               break;
 
             default: {

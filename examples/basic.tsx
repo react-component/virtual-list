@@ -117,6 +117,30 @@ const Demo = () => {
           type="button"
           onClick={() => {
             listRef.current.scrollTo({
+              index: 50,
+              align: 'top',
+              offset: 15,
+            });
+          }}
+        >
+          Scroll To 50 (top) + 15 offset
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            listRef.current.scrollTo({
+              index: 50,
+              align: 'bottom',
+              offset: 15,
+            });
+          }}
+        >
+          Scroll To 50 (bottom) + 15 offset
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            listRef.current.scrollTo({
               key: '50',
               align: 'auto',
             });
