@@ -24,10 +24,12 @@ export type ScrollConfig =
   | {
       index: number;
       align?: ScrollAlign;
+      offset?: number;
     }
   | {
       key: React.Key;
       align?: ScrollAlign;
+      offset?: number;
     };
 export type ScrollTo = (arg: number | ScrollConfig) => void;
 export type ListRef = {
