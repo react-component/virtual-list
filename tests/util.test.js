@@ -97,27 +97,28 @@ describe('Util', () => {
       });
 
       it('diff only 1', () => {
-        expect(findListDiffIndex([0, 1, 2], [], num => num)).toEqual({
+        const indexArray = [0, 1, 2];
+        expect(findListDiffIndex(indexArray, [], num => num)).toEqual({
           index: 0,
           multiple: true,
         });
-        expect(findListDiffIndex([0, 1, 2], [1, 2], num => num)).toEqual({
+        expect(findListDiffIndex(indexArray, [1, 2], num => num)).toEqual({
           index: 0,
           multiple: false,
         });
-        expect(findListDiffIndex([0, 1, 2], [0, 2], num => num)).toEqual({
+        expect(findListDiffIndex(indexArray, [0, 2], num => num)).toEqual({
           index: 1,
           multiple: false,
         });
-        expect(findListDiffIndex([0, 1, 2], [0, 1], num => num)).toEqual({
+        expect(findListDiffIndex(indexArray, [0, 1], num => num)).toEqual({
           index: 2,
           multiple: false,
         });
-        expect(findListDiffIndex([0, 1, 2], [0], num => num)).toEqual({
+        expect(findListDiffIndex(indexArray, [0], num => num)).toEqual({
           index: 1,
           multiple: true,
         });
-        expect(findListDiffIndex([0, 1, 2], [1], num => num)).toEqual({
+        expect(findListDiffIndex(indexArray, [1], num => num)).toEqual({
           index: 0,
           multiple: true,
         });
