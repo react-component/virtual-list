@@ -248,7 +248,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     return true;
   });
 
-  React.useEffect(() => {
+  React.useLayoutEffect(() => {
     // Firefox only
     function onMozMousePixelScroll(e: Event) {
       if (inVirtual) {
