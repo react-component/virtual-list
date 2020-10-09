@@ -56,7 +56,7 @@
     "father": "^2.13.2",
     "np": "^5.0.3",
     "rc-animate": "^2.9.1",
-    "react": "^v16.9.0-alpha.0",
+    "react": "^v16.13.1",
     "react-dom": "^v16.9.0-alpha.0",
     "typescript": "^3.5.2"
   },
