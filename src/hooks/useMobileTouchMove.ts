@@ -66,7 +66,7 @@ export default function useMobileTouchMove(
     }
   };
 
-  React.useEffect(() => {
+  React.useLayoutEffect(() => {
     if (inVirtual) {
       listRef.current.addEventListener('touchstart', onTouchStart);
     }

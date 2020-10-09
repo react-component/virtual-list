@@ -58,7 +58,7 @@ const MyItem: React.ForwardRefRenderFunction<any, MyItemProps> = (
   ref,
 ) => {
   const motionRef = React.useRef(false);
-  React.useEffect(() => {
+  React.useLayoutEffect(() => {
     return () => {
       if (motionRef.current) {
         onAppear();
