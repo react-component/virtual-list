@@ -35,7 +35,7 @@ function getData(count: number) {
 }
 
 const Demo = () => {
-  const [height, setHeight] = React.useState(100);
+  const [height, setHeight] = React.useState(200);
   const [data, setData] = React.useState(getData(20));
 
   return (
@@ -53,6 +53,10 @@ const Demo = () => {
           </label>
           <label>
             <input type="radio" name="switch" value={2} />2
+          </label>
+          <label>
+            <input type="radio" name="switch" value={20} />
+            20
           </label>
           <label>
             <input type="radio" name="switch" value={100} />
@@ -89,7 +93,7 @@ const Demo = () => {
         <List
           data={data}
           height={height}
-          itemHeight={30}
+          itemHeight={10}
           itemKey="id"
           style={{
             border: '1px solid red',
