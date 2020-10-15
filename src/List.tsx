@@ -79,6 +79,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   const mergedClassName = classNames(prefixCls, className);
   const mergedData = data || EMPTY_DATA;
   const componentRef = useRef<HTMLDivElement>();
+  const fillerInnerRef = useRef<HTMLDivElement>();
 
   // =============================== Item Key ===============================
   const getKey = React.useCallback<GetKey<T>>(
@@ -129,9 +130,19 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
 
   // ========================== Visible Calculation =========================
   const { scrollHeight, start, end, offset } = React.useMemo(() => {
-    if (!inVirtual) {
+    if (!useVirtual) {
       return {
         scrollHeight: undefined,
+        start: 0,
+        end: mergedData.length - 1,
+        offset: undefined,
+      };
+    }
+
+    // Always use virtual scroll bar in avoid shaking
+    if (!inVirtual) {
+      return {
+        scrollHeight: fillerInnerRef.current?.offsetHeight || 0,
         start: 0,
         end: mergedData.length - 1,
         offset: undefined,
@@ -184,7 +195,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
       end: endIndex,
       offset: startOffset,
     };
-  }, [inVirtual, scrollTop, mergedData, heightUpdatedMark, height]);
+  }, [inVirtual, useVirtual, scrollTop, mergedData, heightUpdatedMark, height]);
 
   rangeRef.current.start = start;
   rangeRef.current.end = end;
@@ -227,7 +238,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
 
   // Since this added in global,should use ref to keep update
   const [onRawWheel, onFireFoxScroll] = useFrameWheel(
-    inVirtual,
+    useVirtual,
     isScrollAtTop,
     isScrollAtBottom,
     offsetY => {
@@ -251,7 +262,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   React.useLayoutEffect(() => {
     // Firefox only
     function onMozMousePixelScroll(e: Event) {
-      if (inVirtual) {
+      if (useVirtual) {
         e.preventDefault();
       }
     }
@@ -265,7 +276,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
       componentRef.current.removeEventListener('DOMMouseScroll', onFireFoxScroll as any);
       componentRef.current.removeEventListener('MozMousePixelScroll', onMozMousePixelScroll as any);
     };
-  }, [inVirtual]);
+  }, [useVirtual]);
 
   // ================================= Ref ==================================
   const scrollTo = useScrollTo<T>(
@@ -289,7 +300,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   if (height) {
     componentStyle = { [fullHeight ? 'height' : 'maxHeight']: height, ...ScrollStyle };
 
-    if (inVirtual) {
+    if (useVirtual) {
       componentStyle.overflowY = 'hidden';
 
       if (scrollMoving) {
@@ -318,12 +329,13 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
           height={scrollHeight}
           offset={offset}
           onInnerResize={collectHeight}
+          ref={fillerInnerRef}
         >
           {listChildren}
         </Filler>
       </Component>
 
-      {inVirtual && (
+      {useVirtual && (
         <ScrollBar
           prefixCls={prefixCls}
           scrollTop={scrollTop}

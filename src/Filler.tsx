@@ -17,53 +17,55 @@ interface FillerProps {
 /**
  * Fill component to provided the scroll content real height.
  */
-const Filler: React.FC<FillerProps> = ({
-  height,
-  offset,
-  children,
-  prefixCls,
-  onInnerResize,
-}): React.ReactElement => {
-  let outerStyle: React.CSSProperties = {};
+const Filler = React.forwardRef(
+  (
+    { height, offset, children, prefixCls, onInnerResize }: FillerProps,
+    ref: React.Ref<HTMLDivElement>,
+  ) => {
+    let outerStyle: React.CSSProperties = {};
 
-  let innerStyle: React.CSSProperties = {
-    display: 'flex',
-    flexDirection: 'column',
-  };
-
-  if (offset !== undefined) {
-    outerStyle = { height, position: 'relative', overflow: 'hidden' };
-
-    innerStyle = {
-      ...innerStyle,
-      transform: `translateY(${offset}px)`,
-      position: 'absolute',
-      left: 0,
-      right: 0,
-      top: 0,
+    let innerStyle: React.CSSProperties = {
+      display: 'flex',
+      flexDirection: 'column',
     };
-  }
 
-  return (
-    <div style={outerStyle}>
-      <ResizeObserver
-        onResize={({ offsetHeight }) => {
-          if (offsetHeight && onInnerResize) {
-            onInnerResize();
-          }
-        }}
-      >
-        <div
-          style={innerStyle}
-          className={classNames({
-            [`${prefixCls}-holder-inner`]: prefixCls,
-          })}
+    if (offset !== undefined) {
+      outerStyle = { height, position: 'relative', overflow: 'hidden' };
+
+      innerStyle = {
+        ...innerStyle,
+        transform: `translateY(${offset}px)`,
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        top: 0,
+      };
+    }
+
+    return (
+      <div style={outerStyle}>
+        <ResizeObserver
+          onResize={({ offsetHeight }) => {
+            if (offsetHeight && onInnerResize) {
+              onInnerResize();
+            }
+          }}
         >
-          {children}
-        </div>
-      </ResizeObserver>
-    </div>
-  );
-};
+          <div
+            style={innerStyle}
+            className={classNames({
+              [`${prefixCls}-holder-inner`]: prefixCls,
+            })}
+            ref={ref}
+          >
+            {children}
+          </div>
+        </ResizeObserver>
+      </div>
+    );
+  },
+);
+
+Filler.displayName = 'Filler';
 
 export default Filler;
