@@ -170,11 +170,26 @@ export default class ScrollBar extends React.Component<ScrollBarProps, ScrollBar
     return ptg * enableHeightRange;
   };
 
+  // Not show scrollbar when height is large thane scrollHeight
+  getVisible = (): boolean => {
+    const { visible } = this.state;
+    const { height, scrollHeight } = this.props;
+
+    if (height > scrollHeight) {
+      return false;
+    }
+
+    return visible;
+  };
+
+  // ====================== Render =======================
   render() {
-    const { visible, dragging } = this.state;
+    const { dragging } = this.state;
     const { prefixCls } = this.props;
     const spinHeight = this.getSpinHeight();
     const top = this.getTop();
+
+    const visible = this.getVisible();
 
     return (
       <div

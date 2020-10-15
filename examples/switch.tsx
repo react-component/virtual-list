@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/label-has-associated-control, jsx-a11y/label-has-for */
 import * as React from 'react';
-import List from '../src/List';
+import List, { ListRef } from '../src/List';
 
 interface Item {
   id: number;
@@ -22,7 +22,7 @@ const MyItem: React.FC<Item> = ({ id }, ref) => (
   </span>
 );
 
-const ForwardMyItem = React.forwardRef(MyItem);
+const ForwardMyItem = React.forwardRef(MyItem as any);
 
 function getData(count: number) {
   const data: Item[] = [];
@@ -37,6 +37,7 @@ function getData(count: number) {
 const Demo = () => {
   const [height, setHeight] = React.useState(200);
   const [data, setData] = React.useState(getData(20));
+  const listRef = React.useRef<ListRef>();
 
   return (
     <React.StrictMode>
@@ -70,6 +71,14 @@ const Demo = () => {
             <input type="radio" name="switch" value={1000} />
             1000
           </label>
+          <button
+            type="button"
+            onClick={() => {
+              listRef.current.scrollTo(null);
+            }}
+          >
+            Show scrollbar
+          </button>
         </span>
         <span
           onChange={(e: any) => {
@@ -91,6 +100,7 @@ const Demo = () => {
         </span>
 
         <List
+          ref={listRef}
           data={data}
           height={height}
           itemHeight={10}
@@ -100,7 +110,7 @@ const Demo = () => {
             boxSizing: 'border-box',
           }}
         >
-          {(item, _, props) => <ForwardMyItem {...item} {...props} />}
+          {(item, _, props) => <ForwardMyItem {...(item as any)} {...props} />}
         </List>
       </div>
     </React.StrictMode>
