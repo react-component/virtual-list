@@ -4,6 +4,7 @@ module.exports = {
   ...base,
   rules: {
     ...base.rules,
+    'arrow-parens': 0,
     '@typescript-eslint/no-explicit-any': 0,
     'react/no-did-update-set-state': 0,
     'react/no-find-dom-node': 0,

@@ -80,6 +80,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   const mergedData = data || EMPTY_DATA;
   const componentRef = useRef<HTMLDivElement>();
   const fillerInnerRef = useRef<HTMLDivElement>();
+  const scrollBarRef = useRef<any>(); // Hack on scrollbar to enable flash call
 
   // =============================== Item Key ===============================
   const getKey = React.useCallback<GetKey<T>>(
@@ -287,6 +288,9 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     getKey,
     collectHeight,
     syncScrollTop,
+    () => {
+      scrollBarRef.current?.delayHidden();
+    },
   );
 
   React.useImperativeHandle(ref, () => ({
@@ -337,6 +341,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
 
       {useVirtual && (
         <ScrollBar
+          ref={scrollBarRef}
           prefixCls={prefixCls}
           scrollTop={scrollTop}
           height={height}
