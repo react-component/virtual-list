@@ -48,6 +48,19 @@ describe('List.Scroll', () => {
     return mount(node);
   }
 
+  it('scrollTo null will show the scrollbar', () => {
+    jest.useFakeTimers();
+    const listRef = React.createRef();
+    const wrapper = genList({ itemHeight: 20, height: 100, data: genData(100), ref: listRef });
+    jest.runAllTimers();
+
+    listRef.current.scrollTo(null);
+    expect(wrapper.find('.rc-virtual-list-scrollbar-thumb').props().style.display).not.toEqual(
+      'none',
+    );
+    jest.useRealTimers();
+  });
+
   describe('scrollTo number', () => {
     it('value scroll', () => {
       const listRef = React.createRef();
