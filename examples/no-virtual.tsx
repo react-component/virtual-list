@@ -1,3 +1,4 @@
+/* eslint-disable arrow-body-style */
 import * as React from 'react';
 import List from '../src/List';
 
@@ -24,7 +25,7 @@ const MyItem: React.FC<Item> = ({ id, height }, ref) => {
   );
 };
 
-const ForwardMyItem = React.forwardRef(MyItem);
+const ForwardMyItem = React.forwardRef(MyItem as any);
 
 const data: Item[] = [];
 for (let i = 0; i < 100; i += 1) {
@@ -38,6 +39,20 @@ const Demo = () => {
   return (
     <React.StrictMode>
       <div>
+        <h2>Not Data</h2>
+        <List
+          data={null}
+          itemHeight={30}
+          height={100}
+          itemKey="id"
+          style={{
+            border: '1px solid red',
+            boxSizing: 'border-box',
+          }}
+        >
+          {item => <ForwardMyItem {...(item as any)} />}
+        </List>
+
         <h2>Less Count</h2>
         <List
           data={data.slice(0, 1)}
@@ -49,7 +64,7 @@ const Demo = () => {
             boxSizing: 'border-box',
           }}
         >
-          {item => <ForwardMyItem {...item} />}
+          {item => <ForwardMyItem {...(item as any)} />}
         </List>
 
         <h2>Less Item Height</h2>
@@ -63,7 +78,7 @@ const Demo = () => {
             boxSizing: 'border-box',
           }}
         >
-          {item => <ForwardMyItem {...item} />}
+          {item => <ForwardMyItem {...(item as any)} />}
         </List>
 
         <h2>Without Height</h2>
@@ -76,7 +91,7 @@ const Demo = () => {
             boxSizing: 'border-box',
           }}
         >
-          {item => <ForwardMyItem {...item} />}
+          {item => <ForwardMyItem {...(item as any)} />}
         </List>
       </div>
     </React.StrictMode>

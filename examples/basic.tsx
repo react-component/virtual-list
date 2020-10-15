@@ -75,6 +75,14 @@ const Demo = () => {
         <button
           type="button"
           onClick={() => {
+            listRef.current.scrollTo(null);
+          }}
+        >
+          Show scroll bar
+        </button>
+        <button
+          type="button"
+          onClick={() => {
             listRef.current.scrollTo(500);
           }}
         >

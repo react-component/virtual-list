@@ -13,10 +13,18 @@ export default function useScrollTo<T>(
   getKey: GetKey<T>,
   collectHeight: () => void,
   syncScrollTop: (newTop: number) => void,
+  triggerFlash: () => void,
 ): ScrollTo {
   const scrollRef = React.useRef<number>();
 
-  return (arg) => {
+  return arg => {
+    // When not argument provided, we think dev may want to show the scrollbar
+    if (arg === null || arg === undefined) {
+      triggerFlash();
+      return;
+    }
+
+    // Normal scroll logic
     raf.cancel(scrollRef.current);
 
     if (typeof arg === 'number') {
@@ -28,7 +36,7 @@ export default function useScrollTo<T>(
       if ('index' in arg) {
         ({ index } = arg);
       } else {
-        index = data.findIndex((item) => getKey(item) === arg.key);
+        index = data.findIndex(item => getKey(item) === arg.key);
       }
 
       const { offset = 0 } = arg;

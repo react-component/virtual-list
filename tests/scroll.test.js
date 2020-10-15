@@ -48,6 +48,19 @@ describe('List.Scroll', () => {
     return mount(node);
   }
 
+  it('scrollTo null will show the scrollbar', () => {
+    jest.useFakeTimers();
+    const listRef = React.createRef();
+    const wrapper = genList({ itemHeight: 20, height: 100, data: genData(100), ref: listRef });
+    jest.runAllTimers();
+
+    listRef.current.scrollTo(null);
+    expect(wrapper.find('.rc-virtual-list-scrollbar-thumb').props().style.display).not.toEqual(
+      'none',
+    );
+    jest.useRealTimers();
+  });
+
   describe('scrollTo number', () => {
     it('value scroll', () => {
       const listRef = React.createRef();
@@ -144,10 +157,28 @@ describe('List.Scroll', () => {
       expect(wrapper.find('ul').instance().scrollTop > 10).toBeTruthy();
     });
 
-    it('not show scrollbar when not match virtual', () => {
-      const listRef = React.createRef();
-      const wrapper = genList({ itemHeight: 20, height: 100, data: genData(5), ref: listRef });
-      expect(wrapper.find('.rc-virtual-list-scrollbar-thumb')).toHaveLength(0);
+    describe('not show scrollbar when disabled virtual', () => {
+      [
+        { name: '!virtual', props: { virtual: false } },
+        {
+          name: '!height',
+          props: { height: null },
+        },
+        {
+          name: '!itemHeight',
+          props: { itemHeight: null },
+        },
+      ].forEach(({ name, props }) => {
+        it(name, () => {
+          const wrapper = genList({
+            itemHeight: 20,
+            height: 100,
+            data: genData(5),
+            ...props,
+          });
+          expect(wrapper.find('.rc-virtual-list-scrollbar-thumb')).toHaveLength(0);
+        });
+      });
     });
   });
 
