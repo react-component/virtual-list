@@ -24,21 +24,18 @@ export default function useHeights<T>(
       // Only collect when it's latest call
       if (currentId !== heightUpdateIdRef.current) return;
 
-      let changed = false;
-
       instanceRef.current.forEach((element, key) => {
         if (element && element.offsetParent) {
           const htmlElement = findDOMNode<HTMLElement>(element);
           const { offsetHeight } = htmlElement;
           if (heightsRef.current.get(key) !== offsetHeight) {
-            changed = true;
             heightsRef.current.set(key, htmlElement.offsetHeight);
           }
         }
       });
-      if (changed) {
-        setUpdatedMark(c => c + 1);
-      }
+
+      // Always trigger update mark to tell parent that should re-calculate heights when resized
+      setUpdatedMark(c => c + 1);
     });
   }
 
