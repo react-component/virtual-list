@@ -126,10 +126,8 @@ export default class ScrollBar extends React.Component<ScrollBarProps, ScrollBar
       const enableScrollRange = this.getEnableScrollRange();
       const enableHeightRange = this.getEnableHeightRange();
 
-      const newScrollTop =
-        enableScrollRange === 0 || enableHeightRange === 0
-          ? 0
-          : Math.ceil((newTop / enableHeightRange) * enableScrollRange);
+      const ptg = enableHeightRange ? newTop / enableHeightRange : 0;
+      const newScrollTop = Math.ceil(ptg * enableScrollRange);
       this.moveRaf = raf(() => {
         onScroll(newScrollTop);
       });
