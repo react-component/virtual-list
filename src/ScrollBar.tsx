@@ -166,6 +166,9 @@ export default class ScrollBar extends React.Component<ScrollBarProps, ScrollBar
     const { scrollTop } = this.props;
     const enableScrollRange = this.getEnableScrollRange();
     const enableHeightRange = this.getEnableHeightRange();
+    if (scrollTop === 0 || enableScrollRange === 0) {
+      return 0
+    }
     const ptg = scrollTop / enableScrollRange;
     return ptg * enableHeightRange;
   };
