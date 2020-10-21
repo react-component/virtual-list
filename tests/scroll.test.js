@@ -65,9 +65,14 @@ describe('List.Scroll', () => {
     it('value scroll', () => {
       const listRef = React.createRef();
       const wrapper = genList({ itemHeight: 20, height: 100, data: genData(100), ref: listRef });
+
       listRef.current.scrollTo(903);
       jest.runAllTimers();
       expect(wrapper.find('ul').instance().scrollTop).toEqual(903);
+
+      listRef.current.scrollTo(0);
+      jest.runAllTimers();
+      expect(wrapper.find('ul').instance().scrollTop).toEqual(0);
 
       wrapper.unmount();
     });
