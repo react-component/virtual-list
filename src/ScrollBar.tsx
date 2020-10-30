@@ -178,7 +178,7 @@ export default class ScrollBar extends React.Component<ScrollBarProps, ScrollBar
     const { visible } = this.state;
     const { height, scrollHeight } = this.props;
 
-    if (height > scrollHeight) {
+    if (height >= scrollHeight) {
       return false;
     }
 
