@@ -88,7 +88,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
       if (typeof itemKey === 'function') {
         return itemKey(item);
       }
-      return item[itemKey];
+      return item?.[itemKey];
     },
     [itemKey],
   );

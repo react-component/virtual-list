@@ -58,7 +58,9 @@ export default function useScrollTo<T>(
           let itemTop = 0;
           let itemBottom = 0;
 
-          for (let i = 0; i <= index; i += 1) {
+          const maxLen = Math.min(data.length, index);
+
+          for (let i = 0; i <= maxLen; i += 1) {
             const key = getKey(data[i]);
             itemTop = stackTop;
             const cacheHeight = heights.get(key);
