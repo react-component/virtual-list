@@ -92,6 +92,17 @@ const Demo = () => {
           type="button"
           onClick={() => {
             listRef.current.scrollTo({
+              index: 99999999,
+              align: 'top',
+            });
+          }}
+        >
+          Scroll To 99999999 (top)
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            listRef.current.scrollTo({
               index: 50,
               align: 'top',
             });
