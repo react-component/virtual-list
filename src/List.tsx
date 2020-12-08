@@ -31,7 +31,7 @@ export type ScrollConfig =
       align?: ScrollAlign;
       offset?: number;
     };
-export type ScrollTo = (arg: number | ScrollConfig) => void;
+export type ScrollTo = (arg?: number | ScrollConfig | null) => void;
 export type ListRef = {
   scrollTo: ScrollTo;
 };
