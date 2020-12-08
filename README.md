@@ -2,12 +2,16 @@
 
 React Virtual List Component which worked with animation.
 
-[![NPM version][npm-image]][npm-url] [![build status][circleci-image]][circleci-url] [![Test coverage][coveralls-image]][coveralls-url] [![node version][node-image]][node-url] [![npm download][download-image]][download-url]
+[![NPM version][npm-image]][npm-url]
+[![build status][github-actions-image]][github-actions-url]
+[![Test coverage][coveralls-image]][coveralls-url]
+[![node version][node-image]][node-url]
+[![npm download][download-image]][download-url]
 
 [npm-image]: http://img.shields.io/npm/v/rc-virtual-list.svg?style=flat-square
 [npm-url]: http://npmjs.org/package/rc-virtual-list
-[circleci-image]: https://img.shields.io/circleci/build/github/react-component/virtual-list/master.svg?style=flat-square
-[circleci-url]: https://circleci.com/gh/react-component/virtual-list/tree/master
+[github-actions-image]: https://github.com/react-component/virtual-list/workflows/CI/badge.svg
+[github-actions-url]: https://github.com/react-component/virtual-list/actions
 [coveralls-image]: https://img.shields.io/codecov/c/github/react-component/virtual-list/master.svg?style=flat-square
 [coveralls-url]: https://codecov.io/gh/react-component/virtual-list
 [node-image]: https://img.shields.io/badge/node.js-%3E=_6.0-green.svg?style=flat-square
