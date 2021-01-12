@@ -207,10 +207,11 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   maxScrollHeightRef.current = maxScrollHeight;
 
   function keepInRange(newScrollTop: number) {
-    let newTop = Math.max(newScrollTop, 0);
+    let newTop = newScrollTop;
     if (!Number.isNaN(maxScrollHeightRef.current)) {
       newTop = Math.min(newTop, maxScrollHeightRef.current);
     }
+    newTop = Math.max(newScrollTop, 0);
     return newTop;
   }
 
@@ -225,8 +226,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     syncScrollTop(newTop);
   }
 
-  // This code may only trigger in test case.
-  // But we still need a sync if some special escape
+  // When data size reduce. It may trigger native scroll event back to fit scroll position
   function onFallbackScroll(e: React.UIEvent<HTMLDivElement>) {
     const { scrollTop: newScrollTop } = e.currentTarget;
     if (newScrollTop !== scrollTop) {

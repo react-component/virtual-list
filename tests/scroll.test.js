@@ -222,4 +222,33 @@ describe('List.Scroll', () => {
         .instance(),
     );
   });
+
+  it('scroll should in range', () => {
+    const wrapper = genList({ itemHeight: 20, height: 100, data: genData(100) });
+    const ulElement = wrapper.find('ul').instance();
+
+    act(() => {
+      const wheelEvent = new Event('wheel');
+      wheelEvent.deltaY = 9999999;
+      ulElement.dispatchEvent(wheelEvent);
+
+      jest.runAllTimers();
+    });
+
+    wrapper.setProps({ data: genData(1) });
+    act(() => {
+      wrapper
+        .find('.rc-virtual-list-holder')
+        .props()
+        .onScroll({
+          currentTarget: {
+            scrollTop: 0,
+          },
+        });
+    });
+
+    wrapper.setProps({ data: genData(100) });
+
+    expect(wrapper.find('ScrollBar').props().scrollTop).toEqual(0);
+  });
 });
