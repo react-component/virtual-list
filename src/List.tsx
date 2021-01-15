@@ -211,7 +211,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     if (!Number.isNaN(maxScrollHeightRef.current)) {
       newTop = Math.min(newTop, maxScrollHeightRef.current);
     }
-    newTop = Math.max(newScrollTop, 0);
+    newTop = Math.max(newTop, 0);
     return newTop;
   }
 
