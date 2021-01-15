@@ -223,32 +223,51 @@ describe('List.Scroll', () => {
     );
   });
 
-  it('scroll should in range', () => {
-    const wrapper = genList({ itemHeight: 20, height: 100, data: genData(100) });
-    const ulElement = wrapper.find('ul').instance();
+  describe('scroll should in range', () => {
+    it('less than 0', () => {
+      const wrapper = genList({ itemHeight: 20, height: 100, data: genData(100) });
+      const ulElement = wrapper.find('ul').instance();
 
-    act(() => {
-      const wheelEvent = new Event('wheel');
-      wheelEvent.deltaY = 9999999;
-      ulElement.dispatchEvent(wheelEvent);
+      act(() => {
+        const wheelEvent = new Event('wheel');
+        wheelEvent.deltaY = 9999999;
+        ulElement.dispatchEvent(wheelEvent);
 
-      jest.runAllTimers();
+        jest.runAllTimers();
+      });
+
+      wrapper.setProps({ data: genData(1) });
+      act(() => {
+        wrapper
+          .find('.rc-virtual-list-holder')
+          .props()
+          .onScroll({
+            currentTarget: {
+              scrollTop: 0,
+            },
+          });
+      });
+
+      wrapper.setProps({ data: genData(100) });
+
+      expect(wrapper.find('ScrollBar').props().scrollTop).toEqual(0);
     });
 
-    wrapper.setProps({ data: genData(1) });
-    act(() => {
-      wrapper
-        .find('.rc-virtual-list-holder')
-        .props()
-        .onScroll({
-          currentTarget: {
-            scrollTop: 0,
-          },
-        });
+    it('over max height', () => {
+      const wrapper = genList({ itemHeight: 20, height: 100, data: genData(100) });
+      const ulElement = wrapper.find('ul').instance();
+
+      act(() => {
+        const wheelEvent = new Event('wheel');
+        wheelEvent.deltaY = 9999999;
+        ulElement.dispatchEvent(wheelEvent);
+
+        jest.runAllTimers();
+      });
+
+      wrapper.update();
+
+      expect(wrapper.find('ScrollBar').props().scrollTop).toEqual(1900);
     });
-
-    wrapper.setProps({ data: genData(100) });
-
-    expect(wrapper.find('ScrollBar').props().scrollTop).toEqual(0);
   });
 });
