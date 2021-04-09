@@ -56,7 +56,7 @@
     "eslint": "^7.6.0",
     "father": "^2.29.10",
     "glob": "^7.1.6",
-    "np": "^5.0.3",
+    "np": "^7.4.0",
     "rc-animate": "^2.9.1",
     "react": "^v16.9.0-alpha.0",
     "react-dom": "^v16.9.0-alpha.0",
