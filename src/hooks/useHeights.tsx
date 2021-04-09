@@ -1,10 +1,8 @@
 import * as React from 'react';
 import { useRef } from 'react';
 import findDOMNode from 'rc-util/lib/Dom/findDOMNode';
-import { GetKey } from '../interface';
+import type { GetKey } from '../interface';
 import CacheMap from '../utils/CacheMap';
-
-type RefFunc = (instance: HTMLElement) => void;
 
 export default function useHeights<T>(
   getKey: GetKey<T>,

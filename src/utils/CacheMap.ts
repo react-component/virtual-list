@@ -1,4 +1,4 @@
-import React from 'react';
+import type React from 'react';
 
 // Firefox has low performance of map.
 class CacheMap {
