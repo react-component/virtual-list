@@ -3,7 +3,7 @@ import { useRef, useState } from 'react';
 import classNames from 'classnames';
 import Filler from './Filler';
 import ScrollBar from './ScrollBar';
-import { RenderFunc, SharedConfig, GetKey } from './interface';
+import type { RenderFunc, SharedConfig, GetKey } from './interface';
 import useChildren from './hooks/useChildren';
 import useHeights from './hooks/useHeights';
 import useScrollTo from './hooks/useScrollTo';

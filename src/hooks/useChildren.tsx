@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { SharedConfig, RenderFunc } from '../interface';
+import type { SharedConfig, RenderFunc } from '../interface';
 import { Item } from '../Item';
 
 export default function useChildren<T>(
