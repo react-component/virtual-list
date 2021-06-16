@@ -1,6 +1,6 @@
-/* eslint-disable jsx-a11y/label-has-associated-control, jsx-a11y/label-has-for */
 import * as React from 'react';
-import List, { ListRef } from '../src/List';
+import type { ListRef } from '../src/List';
+import List from '../src/List';
 
 interface Item {
   id: number;
@@ -37,6 +37,7 @@ function getData(count: number) {
 const Demo = () => {
   const [height, setHeight] = React.useState(200);
   const [data, setData] = React.useState(getData(20));
+  const [fullHeight, setFullHeight] = React.useState(true);
   const listRef = React.useRef<ListRef>();
 
   return (
@@ -98,6 +99,15 @@ const Demo = () => {
             200
           </label>
         </span>
+        <span>
+          <button
+            onClick={() => {
+              setFullHeight(!fullHeight);
+            }}
+          >
+            Full Height: {String(fullHeight)}
+          </button>
+        </span>
 
         <List
           ref={listRef}
@@ -105,6 +115,7 @@ const Demo = () => {
           height={height}
           itemHeight={10}
           itemKey="id"
+          fullHeight={fullHeight}
           style={{
             border: '1px solid red',
             boxSizing: 'border-box',
