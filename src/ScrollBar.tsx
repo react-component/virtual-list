@@ -71,7 +71,7 @@ export default class ScrollBar extends React.Component<ScrollBarProps, ScrollBar
     e.preventDefault();
   };
 
-  onContainerMouseDown: React.MouseEventHandler = e => {
+  onContainerMouseDown: React.MouseEventHandler = (e) => {
     e.stopPropagation();
     e.preventDefault();
   };
@@ -185,26 +185,34 @@ export default class ScrollBar extends React.Component<ScrollBarProps, ScrollBar
     return visible;
   };
 
+  showScroll = (): boolean => {
+    const { height, scrollHeight } = this.props;
+    return scrollHeight > height;
+  };
+
   // ====================== Render =======================
   render() {
-    const { dragging } = this.state;
+    const { dragging, visible } = this.state;
     const { prefixCls } = this.props;
     const spinHeight = this.getSpinHeight();
     const top = this.getTop();
 
-    const visible = this.getVisible();
+    const canScroll = this.showScroll();
+    const mergedVisible = canScroll && visible;
 
     return (
       <div
         ref={this.scrollbarRef}
-        className={`${prefixCls}-scrollbar`}
+        className={classNames(`${prefixCls}-scrollbar`, {
+          [`${prefixCls}-scrollbar-show`]: canScroll,
+        })}
         style={{
           width: 8,
           top: 0,
           bottom: 0,
           right: 0,
           position: 'absolute',
-          display: visible ? null : 'none',
+          display: mergedVisible ? null : 'none',
         }}
         onMouseDown={this.onContainerMouseDown}
         onMouseMove={this.delayHidden}
