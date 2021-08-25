@@ -10,6 +10,7 @@ export interface ScrollBarProps {
   scrollHeight: number;
   height: number;
   count: number;
+  alwaysShowScrollbar?: boolean;
   onScroll: (scrollTop: number) => void;
   onStartMove: () => void;
   onStopMove: () => void;
@@ -39,7 +40,7 @@ export default class ScrollBar extends React.Component<ScrollBarProps, ScrollBar
     dragging: false,
     pageY: null,
     startTop: null,
-    visible: false,
+    visible: !!this.props.alwaysShowScrollbar,
   };
 
   componentDidMount() {
@@ -59,6 +60,7 @@ export default class ScrollBar extends React.Component<ScrollBarProps, ScrollBar
   }
 
   delayHidden = () => {
+    if (this.props.alwaysShowScrollbar) return;
     clearTimeout(this.visibleTimeout);
 
     this.setState({ visible: true });

@@ -42,6 +42,7 @@ const Demo = () => {
 
         <List
           data={data}
+          alwaysShowScrollbar={true}
           height={500}
           itemHeight={30}
           itemKey="id"
@@ -50,7 +51,7 @@ const Demo = () => {
             boxSizing: 'border-box',
           }}
         >
-          {item => <ForwardMyItem {...item} />}
+          {(item) => <ForwardMyItem {...item} />}
         </List>
       </div>
     </React.StrictMode>

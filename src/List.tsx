@@ -41,6 +41,7 @@ export interface ListProps<T> extends React.HTMLAttributes<any> {
   children: RenderFunc<T>;
   data: T[];
   height?: number;
+  alwaysShowScrollbar?: boolean;
   itemHeight?: number;
   /** If not match virtual scroll condition, Set List still use height of container. */
   fullHeight?: boolean;
@@ -56,6 +57,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   const {
     prefixCls = 'rc-virtual-list',
     className,
+    alwaysShowScrollbar,
     height,
     itemHeight,
     fullHeight = true,
@@ -99,7 +101,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
 
   // ================================ Scroll ================================
   function syncScrollTop(newTop: number | ((prev: number) => number)) {
-    setScrollTop(origin => {
+    setScrollTop((origin) => {
       let value: number;
       if (typeof newTop === 'function') {
         value = newTop(origin);
@@ -242,8 +244,8 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     useVirtual,
     isScrollAtTop,
     isScrollAtBottom,
-    offsetY => {
-      syncScrollTop(top => {
+    (offsetY) => {
+      syncScrollTop((top) => {
         const newTop = top + offsetY;
         return newTop;
       });
@@ -338,9 +340,10 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
           {listChildren}
         </Filler>
       </Component>
-
-      {useVirtual && (
+      {/* TODO: 高度不够 没有出现滚动条的时候不需要渲染下面的 scrollBar */}
+      {useVirtual && inVirtual && (
         <ScrollBar
+          alwaysShowScrollbar={alwaysShowScrollbar}
           ref={scrollBarRef}
           prefixCls={prefixCls}
           scrollTop={scrollTop}

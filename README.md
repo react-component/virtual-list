@@ -42,7 +42,7 @@ open http://localhost:9001/
 ```js
 import List from 'rc-virtual-list';
 
-<List data={[0, 1, 2]} height={200} itemHeight={30} itemKey="id">
+<List data={[0, 1, 2]} height={200} itemHeight={30} alwaysShowScrollbar={true} itemKey="id">
   {index => <div>{index}</div>}
 </List>;
 ```
@@ -60,6 +60,7 @@ import List from 'rc-virtual-list';
 | height     | List height                                             | number                               | -       |
 | itemHeight | Item minium height                                      | number                               | -       |
 | itemKey    | Match key with item                                     | string                               | -       |
+| alwaysShowScrollbar    | scroll bar will show always                 | boolean                              | false   |
 
 `children` provides additional `props` argument to support IE 11 scroll shaking.
 It will set `style` to `visibility: hidden` when measuring. You can ignore this if no requirement on IE.
