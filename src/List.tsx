@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useRef, useState } from 'react';
+import { useRef, useState, useLayoutEffect } from 'react';
 import classNames from 'classnames';
 import Filler from './Filler';
 import ScrollBar from './ScrollBar';
@@ -50,6 +50,8 @@ export interface ListProps<T> extends React.HTMLAttributes<any> {
   virtual?: boolean;
 
   onScroll?: React.UIEventHandler<HTMLElement>;
+  /** Trigger when render list item changed */
+  onVisibleChange?: (visibleList: T[], fullList: T[]) => void;
 }
 
 export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
@@ -66,6 +68,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     virtual,
     component: Component = 'div',
     onScroll,
+    onVisibleChange,
     ...restProps
   } = props;
 
@@ -99,7 +102,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
 
   // ================================ Scroll ================================
   function syncScrollTop(newTop: number | ((prev: number) => number)) {
-    setScrollTop(origin => {
+    setScrollTop((origin) => {
       let value: number;
       if (typeof newTop === 'function') {
         value = newTop(origin);
@@ -242,8 +245,8 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     useVirtual,
     isScrollAtTop,
     isScrollAtBottom,
-    offsetY => {
-      syncScrollTop(top => {
+    (offsetY) => {
+      syncScrollTop((top) => {
         const newTop = top + offsetY;
         return newTop;
       });
@@ -260,7 +263,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     return true;
   });
 
-  React.useLayoutEffect(() => {
+  useLayoutEffect(() => {
     // Firefox only
     function onMozMousePixelScroll(e: Event) {
       if (useVirtual) {
@@ -296,6 +299,14 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   React.useImperativeHandle(ref, () => ({
     scrollTo,
   }));
+
+  // ================================ Effect ================================
+  /** We need told outside that some list not rendered */
+  useLayoutEffect(() => {
+    const renderList = mergedData.slice(start, end);
+
+    onVisibleChange?.(renderList, mergedData);
+  }, [start, end, mergedData]);
 
   // ================================ Render ================================
   const listChildren = useChildren(mergedData, start, end, setInstanceRef, children, sharedConfig);
