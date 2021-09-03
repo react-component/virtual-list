@@ -303,9 +303,11 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   // ================================ Effect ================================
   /** We need told outside that some list not rendered */
   useLayoutEffect(() => {
-    const renderList = mergedData.slice(start, end);
+    if (onVisibleChange) {
+      const renderList = mergedData.slice(start, end + 1);
 
-    onVisibleChange?.(renderList, mergedData);
+      onVisibleChange(renderList, mergedData);
+    }
   }, [start, end, mergedData]);
 
   // ================================ Render ================================
