@@ -16,6 +16,7 @@ export default function useMobileTouchMove(
   // Smooth scroll
   const intervalRef = useRef(null);
 
+  /* eslint-disable prefer-const */
   let cleanUpEvents: () => void;
 
   const onTouchMove = (e: TouchEvent) => {

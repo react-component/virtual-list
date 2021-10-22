@@ -5,8 +5,7 @@ class CacheMap {
   maps: Record<string, number>;
 
   constructor() {
-    this.maps = {};
-    this.maps.prototype = null;
+    this.maps = Object.create(null);
   }
 
   set(key: React.ReactText, value: number) {
