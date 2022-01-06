@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useRef, useState, useLayoutEffect } from 'react';
+import { useRef, useState } from 'react';
 import classNames from 'classnames';
 import Filler from './Filler';
 import ScrollBar from './ScrollBar';
@@ -11,6 +11,7 @@ import useDiffItem from './hooks/useDiffItem';
 import useFrameWheel from './hooks/useFrameWheel';
 import useMobileTouchMove from './hooks/useMobileTouchMove';
 import useOriginScroll from './hooks/useOriginScroll';
+import useLayoutEffect from 'rc-util/lib/hooks/useLayoutEffect';
 
 const EMPTY_DATA = [];
 
