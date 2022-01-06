@@ -4,8 +4,7 @@ import * as React from 'react';
 // @ts-ignore
 import CSSMotion from 'rc-animate/lib/CSSMotion';
 import classNames from 'classnames';
-import type { ListRef } from '../src/List';
-import List from '../src/List';
+import List, { ListRef } from '../src/List';
 import useLayoutEffect from '../src/hooks/useIsomorphicLayoutEffect';
 import './animate.less';
 
@@ -132,7 +131,7 @@ const ForwardMyItem = React.forwardRef(MyItem);
 
 const Demo = () => {
   const [data, setData] = React.useState(originData);
-  const [closeMap, setCloseMap] = React.useState<Record<number, boolean>>({});
+  const [closeMap, setCloseMap] = React.useState<{ [id: number]: boolean }>({});
   const [animating, setAnimating] = React.useState(false);
   const [insertIndex, setInsertIndex] = React.useState<number>();
 
