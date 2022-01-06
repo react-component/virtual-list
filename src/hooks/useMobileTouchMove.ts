@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useRef } from 'react';
-import useLayoutEffect from './useIsomorphicLayoutEffect';
+import useLayoutEffect from 'rc-util/lib/hooks/useLayoutEffect';
 
 const SMOOTH_PTG = 14 / 15;
 
