@@ -202,7 +202,9 @@ describe('List.Basic', () => {
 
       // Wait for collection
       await act(async () => {
-        await Promise.resolve();
+        await new Promise((resolve) => {
+          setTimeout(resolve, 10);
+        });
       });
 
       wrapper.find('Filler').find('ResizeObserver').props().onResize({ offsetHeight: 100 });
