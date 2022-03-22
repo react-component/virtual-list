@@ -74,7 +74,9 @@ export default function useMobileTouchMove(
     }
 
     return () => {
-      listRef.current.removeEventListener('touchstart', onTouchStart);
+      if(listRef.current) {
+        listRef.current.removeEventListener('touchstart', onTouchStart);
+      }
       cleanUpEvents();
       clearInterval(intervalRef.current);
     };
