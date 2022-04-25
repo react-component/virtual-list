@@ -89,7 +89,7 @@ export default class ScrollBar extends React.Component<ScrollBarProps, ScrollBar
     window.removeEventListener('mousemove', this.onMouseMove);
     window.removeEventListener('mouseup', this.onMouseUp);
 
-      this.scrollbarRef.current?.removeEventListener('touchstart', this.onScrollbarTouchStart);
+    this.scrollbarRef.current?.removeEventListener('touchstart', this.onScrollbarTouchStart);
     
     if (this.thumbRef.current) {
       this.thumbRef.current.removeEventListener('touchstart', this.onMouseDown);
