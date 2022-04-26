@@ -381,5 +381,5 @@ const List = React.forwardRef<ListRef, ListProps<any>>(RawList);
 List.displayName = 'List';
 
 export default List as <Item = any>(
-  props: React.PropsWithChildren<ListProps<Item>> & { ref?: React.Ref<ListRef> },
+  props: ListProps<Item> & { ref?: React.Ref<ListRef> },
 ) => React.ReactElement;
