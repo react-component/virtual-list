@@ -33,7 +33,7 @@ export default class ScrollBar extends React.Component<ScrollBarProps, ScrollBar
 
   thumbRef = React.createRef<HTMLDivElement>();
 
-  visibleTimeout: NodeJS.Timeout = null;
+  visibleTimeout: ReturnType<typeof setTimeout> = null;
 
   state: ScrollBarState = {
     dragging: false,
