@@ -37,7 +37,7 @@ export type ListRef = {
   scrollTo: ScrollTo;
 };
 
-export interface ListProps<T> extends React.HTMLAttributes<any> {
+export interface ListProps<T> extends Omit<React.HTMLAttributes<any>, 'children'> {
   prefixCls?: string;
   children: RenderFunc<T>;
   data: T[];
