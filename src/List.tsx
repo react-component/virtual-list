@@ -37,7 +37,7 @@ export type ListRef = {
   scrollTo: ScrollTo;
 };
 
-export interface ListProps<T> extends React.HTMLAttributes<any> {
+export interface ListProps<T> extends Omit<React.HTMLAttributes<any>, 'children'> {
   prefixCls?: string;
   children: RenderFunc<T>;
   data: T[];
@@ -277,10 +277,13 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     componentRef.current.addEventListener('MozMousePixelScroll', onMozMousePixelScroll);
 
     return () => {
-      if(componentRef.current) {
+      if (componentRef.current) {
         componentRef.current.removeEventListener('wheel', onRawWheel);
         componentRef.current.removeEventListener('DOMMouseScroll', onFireFoxScroll as any);
-        componentRef.current.removeEventListener('MozMousePixelScroll', onMozMousePixelScroll as any);
+        componentRef.current.removeEventListener(
+          'MozMousePixelScroll',
+          onMozMousePixelScroll as any,
+        );
       }
     };
   }, [useVirtual]);
@@ -381,5 +384,5 @@ const List = React.forwardRef<ListRef, ListProps<any>>(RawList);
 List.displayName = 'List';
 
 export default List as <Item = any>(
-  props: React.PropsWithChildren<ListProps<Item>> & { ref?: React.Ref<ListRef> },
+  props: ListProps<Item> & { ref?: React.Ref<ListRef> },
 ) => React.ReactElement;
