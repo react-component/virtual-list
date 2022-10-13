@@ -186,6 +186,8 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     if (startIndex === undefined) {
       startIndex = 0;
       startOffset = 0;
+
+      endIndex = Math.ceil(height / itemHeight);
     }
     if (endIndex === undefined) {
       endIndex = mergedData.length - 1;
