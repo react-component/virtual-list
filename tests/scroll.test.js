@@ -209,18 +209,13 @@ describe('List.Scroll', () => {
   it('onScroll should trigger on correct target', () => {
     // Save in tmp variable since React will clean up this
     let currentTarget;
-    const onScroll = jest.fn(e => {
+    const onScroll = jest.fn((e) => {
       ({ currentTarget } = e);
     });
     const wrapper = genList({ itemHeight: 20, height: 100, data: genData(100), onScroll });
     wrapper.find('.rc-virtual-list-holder').simulate('scroll');
 
-    expect(currentTarget).toBe(
-      wrapper
-        .find('.rc-virtual-list-holder')
-        .hostNodes()
-        .instance(),
-    );
+    expect(currentTarget).toBe(wrapper.find('.rc-virtual-list-holder').hostNodes().instance());
   });
 
   describe('scroll should in range', () => {
@@ -268,6 +263,27 @@ describe('List.Scroll', () => {
       wrapper.update();
 
       expect(wrapper.find('ScrollBar').props().scrollTop).toEqual(1900);
+    });
+
+    it('dynamic large to small', () => {
+      const wrapper = genList({ itemHeight: 20, height: 100, data: genData(1000) });
+      const ulElement = wrapper.find('ul').instance();
+
+      // To bottom
+      act(() => {
+        const wheelEvent = new Event('wheel');
+        wheelEvent.deltaY = 9999999;
+        ulElement.dispatchEvent(wheelEvent);
+
+        jest.runAllTimers();
+      });
+
+      // Cut data len
+      wrapper.setProps({
+        data: genData(20),
+      });
+
+      expect(wrapper.find('li').length).toBeLessThan(10);
     });
   });
 });

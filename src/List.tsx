@@ -181,11 +181,12 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
       itemTop = currentItemBottom;
     }
 
-    // Fallback to normal if not match. This code should never reach
-    /* istanbul ignore next */
+    // When scrollTop at the end but data cut to small count will reach this
     if (startIndex === undefined) {
       startIndex = 0;
       startOffset = 0;
+
+      endIndex = Math.ceil(height / itemHeight);
     }
     if (endIndex === undefined) {
       endIndex = mergedData.length - 1;
