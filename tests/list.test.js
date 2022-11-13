@@ -81,11 +81,14 @@ describe('List.Basic', () => {
     });
 
     it('scroll it', () => {
+      const onVisibleChange = jest.fn();
+
       // scroll to top
       scrollTop = 0;
-      const wrapper = genList({ itemHeight: 20, height: 100, data: genData(100) });
+      const wrapper = genList({ itemHeight: 20, height: 100, data: genData(100), onVisibleChange });
       expect(wrapper.find(Filler).props().height).toEqual(2000);
       expect(wrapper.find(Filler).props().offset).toEqual(0);
+      onVisibleChange.mockReset();
 
       // scrollTop to end
       scrollTop = 2000 - 100;
@@ -94,6 +97,9 @@ describe('List.Basic', () => {
       });
       expect(wrapper.find(Filler).props().height).toEqual(2000);
       expect(wrapper.find(Filler).props().offset + wrapper.find('li').length * 20).toEqual(2000);
+
+      expect(onVisibleChange.mock.calls[0][0]).toHaveLength(6);
+      expect(onVisibleChange.mock.calls[0][1]).toHaveLength(100);
     });
   });
 
@@ -191,23 +197,17 @@ describe('List.Basic', () => {
 
     it('work', async () => {
       const wrapper = genList({ itemHeight: 20, height: 40, data: genData(3) });
-      wrapper
-        .find('Filler')
-        .find('ResizeObserver')
-        .props()
-        .onResize({ offsetHeight: 0 });
+      wrapper.find('Filler').find('ResizeObserver').props().onResize({ offsetHeight: 0 });
       expect(collected).toBeFalsy();
 
       // Wait for collection
       await act(async () => {
-        await Promise.resolve();
+        await new Promise((resolve) => {
+          setTimeout(resolve, 10);
+        });
       });
 
-      wrapper
-        .find('Filler')
-        .find('ResizeObserver')
-        .props()
-        .onResize({ offsetHeight: 100 });
+      wrapper.find('Filler').find('ResizeObserver').props().onResize({ offsetHeight: 100 });
       expect(collected).toBeTruthy();
     });
   });

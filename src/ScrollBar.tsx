@@ -33,7 +33,7 @@ export default class ScrollBar extends React.Component<ScrollBarProps, ScrollBar
 
   thumbRef = React.createRef<HTMLDivElement>();
 
-  visibleTimeout: NodeJS.Timeout = null;
+  visibleTimeout: ReturnType<typeof setTimeout> = null;
 
   state: ScrollBarState = {
     dragging: false,
@@ -71,7 +71,7 @@ export default class ScrollBar extends React.Component<ScrollBarProps, ScrollBar
     e.preventDefault();
   };
 
-  onContainerMouseDown: React.MouseEventHandler = e => {
+  onContainerMouseDown: React.MouseEventHandler = (e) => {
     e.stopPropagation();
     e.preventDefault();
   };
@@ -89,10 +89,13 @@ export default class ScrollBar extends React.Component<ScrollBarProps, ScrollBar
     window.removeEventListener('mousemove', this.onMouseMove);
     window.removeEventListener('mouseup', this.onMouseUp);
 
-    this.scrollbarRef.current.removeEventListener('touchstart', this.onScrollbarTouchStart);
-    this.thumbRef.current.removeEventListener('touchstart', this.onMouseDown);
-    this.thumbRef.current.removeEventListener('touchmove', this.onMouseMove);
-    this.thumbRef.current.removeEventListener('touchend', this.onMouseUp);
+    this.scrollbarRef.current?.removeEventListener('touchstart', this.onScrollbarTouchStart);
+    
+    if (this.thumbRef.current) {
+      this.thumbRef.current.removeEventListener('touchstart', this.onMouseDown);
+      this.thumbRef.current.removeEventListener('touchmove', this.onMouseMove);
+      this.thumbRef.current.removeEventListener('touchend', this.onMouseUp);
+    }
 
     raf.cancel(this.moveRaf);
   };
@@ -173,38 +176,35 @@ export default class ScrollBar extends React.Component<ScrollBarProps, ScrollBar
     return ptg * enableHeightRange;
   };
 
-  // Not show scrollbar when height is large thane scrollHeight
-  getVisible = (): boolean => {
-    const { visible } = this.state;
+  // Not show scrollbar when height is large than scrollHeight
+  showScroll = (): boolean => {
     const { height, scrollHeight } = this.props;
-
-    if (height >= scrollHeight) {
-      return false;
-    }
-
-    return visible;
+    return scrollHeight > height;
   };
 
   // ====================== Render =======================
   render() {
-    const { dragging } = this.state;
+    const { dragging, visible } = this.state;
     const { prefixCls } = this.props;
     const spinHeight = this.getSpinHeight();
     const top = this.getTop();
 
-    const visible = this.getVisible();
+    const canScroll = this.showScroll();
+    const mergedVisible = canScroll && visible;
 
     return (
       <div
         ref={this.scrollbarRef}
-        className={`${prefixCls}-scrollbar`}
+        className={classNames(`${prefixCls}-scrollbar`, {
+          [`${prefixCls}-scrollbar-show`]: canScroll,
+        })}
         style={{
           width: 8,
           top: 0,
           bottom: 0,
           right: 0,
           position: 'absolute',
-          display: visible ? null : 'none',
+          display: mergedVisible ? null : 'none',
         }}
         onMouseDown={this.onContainerMouseDown}
         onMouseMove={this.delayHidden}

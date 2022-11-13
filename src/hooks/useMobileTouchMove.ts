@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { useRef } from 'react';
+import useLayoutEffect from 'rc-util/lib/hooks/useLayoutEffect';
 
 const SMOOTH_PTG = 14 / 15;
 
@@ -16,6 +17,7 @@ export default function useMobileTouchMove(
   // Smooth scroll
   const intervalRef = useRef(null);
 
+  /* eslint-disable prefer-const */
   let cleanUpEvents: () => void;
 
   const onTouchMove = (e: TouchEvent) => {
@@ -66,13 +68,13 @@ export default function useMobileTouchMove(
     }
   };
 
-  React.useLayoutEffect(() => {
+  useLayoutEffect(() => {
     if (inVirtual) {
       listRef.current.addEventListener('touchstart', onTouchStart);
     }
 
     return () => {
-      listRef.current.removeEventListener('touchstart', onTouchStart);
+      listRef.current?.removeEventListener('touchstart', onTouchStart);
       cleanUpEvents();
       clearInterval(intervalRef.current);
     };

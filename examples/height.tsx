@@ -6,7 +6,7 @@ interface Item {
   height: number;
 }
 
-const MyItem: React.FC<Item> = ({ id, height }, ref) => {
+const MyItem: React.ForwardRefRenderFunction<HTMLElement, Item> = ({ id, height }, ref) => {
   return (
     <span
       ref={ref}

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { findListDiffIndex } from '../utils/algorithmUtil';
-import { GetKey } from '../interface';
+import type { GetKey } from '../interface';
 
 export default function useDiffItem<T>(
   data: T[],

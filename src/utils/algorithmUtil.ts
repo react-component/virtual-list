@@ -1,4 +1,4 @@
-import * as React from 'react';
+import type * as React from 'react';
 /**
  * Get index with specific start index one by one. e.g.
  * min: 3, max: 9, start: 6

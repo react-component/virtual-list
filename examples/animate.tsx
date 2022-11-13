@@ -5,6 +5,7 @@ import * as React from 'react';
 import CSSMotion from 'rc-animate/lib/CSSMotion';
 import classNames from 'classnames';
 import List, { ListRef } from '../src/List';
+import useLayoutEffect from 'rc-util/lib/hooks/useLayoutEffect';
 import './animate.less';
 
 let uuid = 0;
@@ -58,7 +59,7 @@ const MyItem: React.ForwardRefRenderFunction<any, MyItemProps> = (
   ref,
 ) => {
   const motionRef = React.useRef(false);
-  React.useLayoutEffect(() => {
+  useLayoutEffect(() => {
     return () => {
       if (motionRef.current) {
         onAppear();

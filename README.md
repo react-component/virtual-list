@@ -2,11 +2,7 @@
 
 React Virtual List Component which worked with animation.
 
-[![NPM version][npm-image]][npm-url]
-[![build status][github-actions-image]][github-actions-url]
-[![Test coverage][coveralls-image]][coveralls-url]
-[![node version][node-image]][node-url]
-[![npm download][download-image]][download-url]
+[![NPM version][npm-image]][npm-url] [![dumi](https://img.shields.io/badge/docs%20by-dumi-blue?style=flat-square)](https://github.com/umijs/dumi) [![build status][github-actions-image]][github-actions-url] [![Test coverage][coveralls-image]][coveralls-url] [![node version][node-image]][node-url] [![npm download][download-image]][download-url]
 
 [npm-image]: http://img.shields.io/npm/v/rc-virtual-list.svg?style=flat-square
 [npm-url]: http://npmjs.org/package/rc-virtual-list
@@ -18,6 +14,10 @@ React Virtual List Component which worked with animation.
 [node-url]: http://nodejs.org/download/
 [download-image]: https://img.shields.io/npm/dm/rc-virtual-list.svg?style=flat-square
 [download-url]: https://npmjs.org/package/rc-virtual-list
+
+## Online Preview
+
+https://virtual-list-react-component.vercel.app/
 
 ## Development
 

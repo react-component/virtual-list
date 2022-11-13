@@ -3,7 +3,7 @@ import { useRef, useState } from 'react';
 import classNames from 'classnames';
 import Filler from './Filler';
 import ScrollBar from './ScrollBar';
-import { RenderFunc, SharedConfig, GetKey } from './interface';
+import type { RenderFunc, SharedConfig, GetKey } from './interface';
 import useChildren from './hooks/useChildren';
 import useHeights from './hooks/useHeights';
 import useScrollTo from './hooks/useScrollTo';
@@ -11,6 +11,7 @@ import useDiffItem from './hooks/useDiffItem';
 import useFrameWheel from './hooks/useFrameWheel';
 import useMobileTouchMove from './hooks/useMobileTouchMove';
 import useOriginScroll from './hooks/useOriginScroll';
+import useLayoutEffect from 'rc-util/lib/hooks/useLayoutEffect';
 
 const EMPTY_DATA = [];
 
@@ -36,7 +37,7 @@ export type ListRef = {
   scrollTo: ScrollTo;
 };
 
-export interface ListProps<T> extends React.HTMLAttributes<any> {
+export interface ListProps<T> extends Omit<React.HTMLAttributes<any>, 'children'> {
   prefixCls?: string;
   children: RenderFunc<T>;
   data: T[];
@@ -50,6 +51,8 @@ export interface ListProps<T> extends React.HTMLAttributes<any> {
   virtual?: boolean;
 
   onScroll?: React.UIEventHandler<HTMLElement>;
+  /** Trigger when render list item changed */
+  onVisibleChange?: (visibleList: T[], fullList: T[]) => void;
 }
 
 export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
@@ -66,6 +69,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     virtual,
     component: Component = 'div',
     onScroll,
+    onVisibleChange,
     ...restProps
   } = props;
 
@@ -99,7 +103,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
 
   // ================================ Scroll ================================
   function syncScrollTop(newTop: number | ((prev: number) => number)) {
-    setScrollTop(origin => {
+    setScrollTop((origin) => {
       let value: number;
       if (typeof newTop === 'function') {
         value = newTop(origin);
@@ -177,11 +181,12 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
       itemTop = currentItemBottom;
     }
 
-    // Fallback to normal if not match. This code should never reach
-    /* istanbul ignore next */
+    // When scrollTop at the end but data cut to small count will reach this
     if (startIndex === undefined) {
       startIndex = 0;
       startOffset = 0;
+
+      endIndex = Math.ceil(height / itemHeight);
     }
     if (endIndex === undefined) {
       endIndex = mergedData.length - 1;
@@ -207,10 +212,11 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   maxScrollHeightRef.current = maxScrollHeight;
 
   function keepInRange(newScrollTop: number) {
-    let newTop = Math.max(newScrollTop, 0);
+    let newTop = newScrollTop;
     if (!Number.isNaN(maxScrollHeightRef.current)) {
       newTop = Math.min(newTop, maxScrollHeightRef.current);
     }
+    newTop = Math.max(newTop, 0);
     return newTop;
   }
 
@@ -225,8 +231,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     syncScrollTop(newTop);
   }
 
-  // This code may only trigger in test case.
-  // But we still need a sync if some special escape
+  // When data size reduce. It may trigger native scroll event back to fit scroll position
   function onFallbackScroll(e: React.UIEvent<HTMLDivElement>) {
     const { scrollTop: newScrollTop } = e.currentTarget;
     if (newScrollTop !== scrollTop) {
@@ -242,8 +247,8 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     useVirtual,
     isScrollAtTop,
     isScrollAtBottom,
-    offsetY => {
-      syncScrollTop(top => {
+    (offsetY) => {
+      syncScrollTop((top) => {
         const newTop = top + offsetY;
         return newTop;
       });
@@ -260,7 +265,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     return true;
   });
 
-  React.useLayoutEffect(() => {
+  useLayoutEffect(() => {
     // Firefox only
     function onMozMousePixelScroll(e: Event) {
       if (useVirtual) {
@@ -273,9 +278,14 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     componentRef.current.addEventListener('MozMousePixelScroll', onMozMousePixelScroll);
 
     return () => {
-      componentRef.current.removeEventListener('wheel', onRawWheel);
-      componentRef.current.removeEventListener('DOMMouseScroll', onFireFoxScroll as any);
-      componentRef.current.removeEventListener('MozMousePixelScroll', onMozMousePixelScroll as any);
+      if (componentRef.current) {
+        componentRef.current.removeEventListener('wheel', onRawWheel);
+        componentRef.current.removeEventListener('DOMMouseScroll', onFireFoxScroll as any);
+        componentRef.current.removeEventListener(
+          'MozMousePixelScroll',
+          onMozMousePixelScroll as any,
+        );
+      }
     };
   }, [useVirtual]);
 
@@ -296,6 +306,16 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   React.useImperativeHandle(ref, () => ({
     scrollTo,
   }));
+
+  // ================================ Effect ================================
+  /** We need told outside that some list not rendered */
+  useLayoutEffect(() => {
+    if (onVisibleChange) {
+      const renderList = mergedData.slice(start, end + 1);
+
+      onVisibleChange(renderList, mergedData);
+    }
+  }, [start, end, mergedData]);
 
   // ================================ Render ================================
   const listChildren = useChildren(mergedData, start, end, setInstanceRef, children, sharedConfig);
@@ -365,5 +385,5 @@ const List = React.forwardRef<ListRef, ListProps<any>>(RawList);
 List.displayName = 'List';
 
 export default List as <Item = any>(
-  props: React.PropsWithChildren<ListProps<Item>> & { ref?: React.Ref<ListRef> },
+  props: ListProps<Item> & { ref?: React.Ref<ListRef> },
 ) => React.ReactElement;

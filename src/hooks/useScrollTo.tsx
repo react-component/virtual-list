@@ -1,9 +1,9 @@
 /* eslint-disable no-param-reassign */
 import * as React from 'react';
 import raf from 'rc-util/lib/raf';
-import { ScrollTo } from '../List';
-import { GetKey } from '../interface';
-import CacheMap from '../utils/CacheMap';
+import type { ScrollTo } from '../List';
+import type { GetKey } from '../interface';
+import type CacheMap from '../utils/CacheMap';
 
 export default function useScrollTo<T>(
   containerRef: React.RefObject<HTMLDivElement>,
