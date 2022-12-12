@@ -17,7 +17,7 @@ export default function useScrollTo<T>(
 ): ScrollTo {
   const scrollRef = React.useRef<number>();
 
-  return arg => {
+  return (arg) => {
     // When not argument provided, we think dev may want to show the scrollbar
     if (arg === null || arg === undefined) {
       triggerFlash();
@@ -36,7 +36,7 @@ export default function useScrollTo<T>(
       if ('index' in arg) {
         ({ index } = arg);
       } else {
-        index = data.findIndex(item => getKey(item) === arg.key);
+        index = data.findIndex((item) => getKey(item) === arg.key);
       }
 
       const { offset = 0 } = arg;
@@ -106,7 +106,7 @@ export default function useScrollTo<T>(
             collectHeight();
           }
           syncScroll(times - 1, newTargetAlign);
-        });
+        }, 2); // Delay 2 to wait for List collect heights
       };
 
       syncScroll(3);
