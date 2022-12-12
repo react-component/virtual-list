@@ -60,7 +60,7 @@
     "rc-animate": "^2.9.1",
     "react": "^v16.9.0-alpha.0",
     "react-dom": "^v16.9.0-alpha.0",
-    "typescript": "^3.5.2"
+    "typescript": "^4.0.0"
   },
   "dependencies": {
     "@babel/runtime": "^7.20.0",
