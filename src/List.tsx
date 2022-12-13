@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useRef, useState } from 'react';
 import classNames from 'classnames';
 import Filler from './Filler';
+import type { InnerProps } from './Filler';
 import ScrollBar from './ScrollBar';
 import type { RenderFunc, SharedConfig, GetKey } from './interface';
 import useChildren from './hooks/useChildren';
@@ -53,6 +54,9 @@ export interface ListProps<T> extends Omit<React.HTMLAttributes<any>, 'children'
   onScroll?: React.UIEventHandler<HTMLElement>;
   /** Trigger when render list item changed */
   onVisibleChange?: (visibleList: T[], fullList: T[]) => void;
+
+  /** Inject to inner container props. Only use when you need pass aria related data */
+  innerProps?: InnerProps;
 }
 
 export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
@@ -70,6 +74,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     component: Component = 'div',
     onScroll,
     onVisibleChange,
+    innerProps,
     ...restProps
   } = props;
 
@@ -354,6 +359,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
           offset={offset}
           onInnerResize={collectHeight}
           ref={fillerInnerRef}
+          innerProps={innerProps}
         >
           {listChildren}
         </Filler>
