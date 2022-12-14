@@ -2,6 +2,8 @@ import * as React from 'react';
 import ResizeObserver from 'rc-resize-observer';
 import classNames from 'classnames';
 
+export type InnerProps = Pick<React.HTMLAttributes<HTMLDivElement>, 'role' | 'id'>;
+
 interface FillerProps {
   prefixCls?: string;
   /** Virtual filler height. Should be `count * itemMinHeight` */
@@ -12,6 +14,8 @@ interface FillerProps {
   children: React.ReactNode;
 
   onInnerResize?: () => void;
+
+  innerProps?: InnerProps;
 }
 
 /**
@@ -19,7 +23,7 @@ interface FillerProps {
  */
 const Filler = React.forwardRef(
   (
-    { height, offset, children, prefixCls, onInnerResize }: FillerProps,
+    { height, offset, children, prefixCls, onInnerResize, innerProps }: FillerProps,
     ref: React.Ref<HTMLDivElement>,
   ) => {
     let outerStyle: React.CSSProperties = {};
@@ -57,6 +61,7 @@ const Filler = React.forwardRef(
               [`${prefixCls}-holder-inner`]: prefixCls,
             })}
             ref={ref}
+            {...innerProps}
           >
             {children}
           </div>

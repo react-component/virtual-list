@@ -211,4 +211,19 @@ describe('List.Basic', () => {
       expect(collected).toBeTruthy();
     });
   });
+
+  it('innerProps', () => {
+    const wrapper = genList({
+      itemHeight: 20,
+      height: 100,
+      data: genData(100),
+      virtual: false,
+      innerProps: {
+        role: 'listbox',
+        id: `my_list`,
+      },
+    });
+
+    expect(wrapper.find('div#my_list').prop('role')).toEqual('listbox');
+  });
 });
