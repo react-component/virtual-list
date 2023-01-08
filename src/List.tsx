@@ -43,6 +43,7 @@ export interface ListProps<T> extends Omit<React.HTMLAttributes<any>, 'children'
   children: RenderFunc<T>;
   data: T[];
   height?: number;
+  alwaysShowScrollbar?: boolean;
   itemHeight?: number;
   /** If not match virtual scroll condition, Set List still use height of container. */
   fullHeight?: boolean;
@@ -63,6 +64,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   const {
     prefixCls = 'rc-virtual-list',
     className,
+    alwaysShowScrollbar,
     height,
     itemHeight,
     fullHeight = true,
@@ -364,9 +366,10 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
           {listChildren}
         </Filler>
       </Component>
-
-      {useVirtual && (
+      {/* TODO: 高度不够 没有出现滚动条的时候不需要渲染下面的 scrollBar */}
+      {useVirtual && inVirtual && (
         <ScrollBar
+          alwaysShowScrollbar={alwaysShowScrollbar}
           ref={scrollBarRef}
           prefixCls={prefixCls}
           scrollTop={scrollTop}
