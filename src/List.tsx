@@ -79,7 +79,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   } = props;
 
   // ================================= MISC =================================
-  const useVirtual = !!(virtual !== false && height && itemHeight);
+  const useVirtual = !!(virtual !== false && typeof height === 'number' && itemHeight);
   const inVirtual = useVirtual && data && itemHeight * data.length > height;
 
   const [scrollTop, setScrollTop] = useState(0);
