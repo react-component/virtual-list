@@ -1,67 +1,101 @@
-import * as React from 'react';
 import ResizeObserver from 'rc-resize-observer';
-import classNames from 'classnames';
+import { forwardRef, useLayoutEffect, useRef } from 'react';
+import type { ReactNode, CSSProperties } from 'react';
 
-export type InnerProps = Pick<React.HTMLAttributes<HTMLDivElement>, 'role' | 'id'>;
+export type IInnerProps = Omit<React.HTMLAttributes<HTMLDivElement>, 'role' | 'id'>;
 
 interface FillerProps {
   prefixCls?: string;
-  /** Virtual filler height. Should be `count * itemMinHeight` */
-  height: number;
-  /** Set offset of visible items. Should be the top of start item position */
+  isHorizontalMode: boolean;
+  isVirtualMode: boolean;
+  /** Virtual filler width or height. Should be `count * (itemMinWidth or itemMinHeight)` */
+  scrollSize: number;
+  /** Set offset of visible items. Should be the left or top  of start item position */
   offset?: number;
 
-  children: React.ReactNode;
+  children: ReactNode;
+
+  innerProps?: IInnerProps;
 
   onInnerResize?: () => void;
-
-  innerProps?: InnerProps;
 }
 
 /**
  * Fill component to provided the scroll content real height.
  */
-const Filler = React.forwardRef(
+const Filler = forwardRef(
   (
-    { height, offset, children, prefixCls, onInnerResize, innerProps }: FillerProps,
+    { isHorizontalMode, isVirtualMode, scrollSize, offset, children, prefixCls, onInnerResize, innerProps }: FillerProps,
     ref: React.Ref<HTMLDivElement>,
   ) => {
-    let outerStyle: React.CSSProperties = {};
+    const wrapperRef = useRef<HTMLDivElement>();
 
-    let innerStyle: React.CSSProperties = {
+    let outerStyle: CSSProperties = {};
+
+    let innerStyle: CSSProperties = {
       display: 'flex',
-      flexDirection: 'column',
+      flexDirection: isHorizontalMode ? 'row' : 'column',
     };
 
+    useLayoutEffect(()=> {
+      if(isHorizontalMode && isVirtualMode) {
+        const innerHeight = (wrapperRef.current.firstElementChild as HTMLDivElement).offsetHeight;
+        wrapperRef.current.style.height = `${innerHeight}px`;
+      }
+    }, [isHorizontalMode, isVirtualMode, wrapperRef])
+
+    if(offset === undefined && isHorizontalMode) {
+      outerStyle = {
+        width: 'fit-content'
+      }
+    }
+    
     if (offset !== undefined) {
-      outerStyle = { height, position: 'relative', overflow: 'hidden' };
+      outerStyle = { 
+        position: 'relative',
+        [isHorizontalMode ? 'width' : 'height']: scrollSize,
+        overflow: 'hidden'
+      };
 
       innerStyle = {
         ...innerStyle,
-        transform: `translateY(${offset}px)`,
+        transform: `${isHorizontalMode ? `translateX(${offset}px` : `translateY(${offset}px` }`,
         position: 'absolute',
-        left: 0,
-        right: 0,
-        top: 0,
+        ...(isHorizontalMode ? {
+          top: 0,
+          bottom: 0,
+          left: 0,
+          height: 'fit-content'
+        } : {
+          left: 0,
+          right: 0,
+          top: 0
+        })
+        
       };
     }
 
+    innerStyle = {
+      ...(innerProps?.style || {}), // custom style
+      ...innerStyle
+    }
+
+    const className = `${prefixCls ? `${prefixCls}-holder-inner` : 'holder-inner'}`
+
     return (
-      <div style={outerStyle}>
+      <div style={outerStyle} ref={wrapperRef}>
         <ResizeObserver
-          onResize={({ offsetHeight }) => {
-            if (offsetHeight && onInnerResize) {
+          onResize={({ offsetWidth, offsetHeight }) => {
+            if (offsetWidth && offsetHeight && onInnerResize) {
               onInnerResize();
             }
           }}
         >
           <div
+           {...innerProps}
             style={innerStyle}
-            className={classNames({
-              [`${prefixCls}-holder-inner`]: prefixCls,
-            })}
+            className={className}
             ref={ref}
-            {...innerProps}
           >
             {children}
           </div>

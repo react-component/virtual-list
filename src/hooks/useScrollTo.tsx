@@ -1,21 +1,20 @@
-/* eslint-disable no-param-reassign */
-import * as React from 'react';
 import raf from 'rc-util/lib/raf';
-import type { ScrollTo } from '../List';
-import type { GetKey } from '../interface';
-import type CacheMap from '../utils/CacheMap';
+import { useRef } from 'react';
+import type { Key, RefObject } from 'react';
+import type { IGetKey, IScrollTo, ITargetAlign } from '../types';
 
 export default function useScrollTo<T>(
-  containerRef: React.RefObject<HTMLDivElement>,
+  isHorizontalMode: boolean,
+  containerRef: RefObject<HTMLDivElement>,
   data: T[],
-  heights: CacheMap,
-  itemHeight: number,
-  getKey: GetKey<T>,
-  collectHeight: () => void,
-  syncScrollTop: (newTop: number) => void,
+  getRectSizeByKey: (key: Key) => number,
+  itemSize: number,
+  getKey: IGetKey<T>,
+  collectRectSize: () => void,
+  syncScrollOffset: (newOffset: number) => void,
   triggerFlash: () => void,
-): ScrollTo {
-  const scrollRef = React.useRef<number>();
+): IScrollTo {
+  const scrollRef = useRef<number>();
 
   return (arg) => {
     // When not argument provided, we think dev may want to show the scrollbar
@@ -28,7 +27,7 @@ export default function useScrollTo<T>(
     raf.cancel(scrollRef.current);
 
     if (typeof arg === 'number') {
-      syncScrollTop(arg);
+      syncScrollOffset(arg);
     } else if (arg && typeof arg === 'object') {
       let index: number;
       const { align } = arg;
@@ -42,70 +41,71 @@ export default function useScrollTo<T>(
       const { offset = 0 } = arg;
 
       // We will retry 3 times in case dynamic height shaking
-      const syncScroll = (times: number, targetAlign?: 'top' | 'bottom') => {
-        if (times < 0 || !containerRef.current) return;
+      const syncScroll = (tryCount: number, targetAlign?: ITargetAlign) => {
+        if (tryCount < 0 || !containerRef.current) return;
 
-        const height = containerRef.current.clientHeight;
-        let needCollectHeight = false;
-        let newTargetAlign: 'top' | 'bottom' | null = targetAlign;
+        const clientSize = containerRef.current[isHorizontalMode ? 'clientWidth' : 'clientHeight'];
+        let needCollectSize = false;
+        let newTargetAlign: ITargetAlign | null = targetAlign;
 
         // Go to next frame if height not exist
-        if (height) {
+        if (clientSize) {
           const mergedAlign = targetAlign || align;
 
-          // Get top & bottom
-          let stackTop = 0;
-          let itemTop = 0;
-          let itemBottom = 0;
+          // Get start & end
+          let stackStart = 0;
+          let itemStart = 0;
+          let itemEnd = 0;
 
           const maxLen = Math.min(data.length, index);
 
           for (let i = 0; i <= maxLen; i += 1) {
             const key = getKey(data[i]);
-            itemTop = stackTop;
-            const cacheHeight = heights.get(key);
-            itemBottom = itemTop + (cacheHeight === undefined ? itemHeight : cacheHeight);
+            itemStart = stackStart;
+            const cachedRectSize = getRectSizeByKey(key);
+            itemEnd = itemStart + (cachedRectSize === undefined ? itemSize : cachedRectSize);
 
-            stackTop = itemBottom;
+            stackStart = itemEnd;
 
-            if (i === index && cacheHeight === undefined) {
-              needCollectHeight = true;
+            if (i === index && cachedRectSize === undefined) {
+              needCollectSize = true;
             }
           }
 
           // Scroll to
-          let targetTop: number | null = null;
+          let targetStart: number | null = null;
 
           switch (mergedAlign) {
-            case 'top':
-              targetTop = itemTop - offset;
+
+            case 'start':
+              targetStart = itemStart - offset;
               break;
-            case 'bottom':
-              targetTop = itemBottom - height + offset;
+            case 'end':
+              targetStart = itemEnd - clientSize + offset;
               break;
 
             default: {
-              const { scrollTop } = containerRef.current;
-              const scrollBottom = scrollTop + height;
-              if (itemTop < scrollTop) {
-                newTargetAlign = 'top';
-              } else if (itemBottom > scrollBottom) {
-                newTargetAlign = 'bottom';
+              const scrollStart = containerRef.current[isHorizontalMode ? 'scrollLeft' : 'scrollTop'];
+              const scrollEnd = scrollStart + clientSize;
+              if (itemStart < scrollStart) {
+                newTargetAlign = 'start';
+              } else if (itemEnd > scrollEnd) {
+                newTargetAlign = 'end';
               }
             }
           }
 
-          if (targetTop !== null && targetTop !== containerRef.current.scrollTop) {
-            syncScrollTop(targetTop);
+          if (targetStart !== null && targetStart !== containerRef.current[isHorizontalMode ? 'scrollLeft' : 'scrollTop']) {
+            syncScrollOffset(targetStart);
           }
         }
 
         // We will retry since element may not sync height as it described
         scrollRef.current = raf(() => {
-          if (needCollectHeight) {
-            collectHeight();
+          if (needCollectSize) {
+            collectRectSize();
           }
-          syncScroll(times - 1, newTargetAlign);
+          syncScroll(tryCount - 1, newTargetAlign);
         }, 2); // Delay 2 to wait for List collect heights
       };
 

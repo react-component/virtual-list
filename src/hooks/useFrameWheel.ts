@@ -1,7 +1,7 @@
 import { useRef } from 'react';
-import raf from 'rc-util/lib/raf';
-import isFF from '../utils/isFirefox';
-import useOriginScroll from './useOriginScroll';
+import { isFF } from '../utils';
+import raf from 'rc-util/lib/raf'
+import useLockScroll from './useLockScroll';
 
 interface FireFoxDOMMouseScrollEvent {
   detail: number;
@@ -9,39 +9,40 @@ interface FireFoxDOMMouseScrollEvent {
 }
 
 export default function useFrameWheel(
+  isHorizontalMode: boolean,
   inVirtual: boolean,
   isScrollAtTop: boolean,
   isScrollAtBottom: boolean,
   onWheelDelta: (offset: number) => void,
 ): [(e: WheelEvent) => void, (e: FireFoxDOMMouseScrollEvent) => void] {
   const offsetRef = useRef(0);
-  const nextFrameRef = useRef<number>(null);
+  const frameRAFRef = useRef<number>(null);
 
   // Firefox patch
   const wheelValueRef = useRef<number>(null);
   const isMouseScrollRef = useRef<boolean>(false);
 
   // Scroll status sync
-  const originScroll = useOriginScroll(isScrollAtTop, isScrollAtBottom);
+  const lockScrollFn = useLockScroll(isScrollAtTop, isScrollAtBottom);
 
   function onWheel(event: WheelEvent) {
     if (!inVirtual) return;
 
-    raf.cancel(nextFrameRef.current);
+    raf.cancel(frameRAFRef.current);
 
-    const { deltaY } = event;
-    offsetRef.current += deltaY;
-    wheelValueRef.current = deltaY;
+    const delta = event[isHorizontalMode ? 'deltaX' : 'deltaY']
+    offsetRef.current += delta;
+    wheelValueRef.current = delta;
 
     // Do nothing when scroll at the edge, Skip check when is in scroll
-    if (originScroll(deltaY)) return;
+    if (lockScrollFn(delta)) return;
 
     // Proxy of scroll events
     if (!isFF) {
       event.preventDefault();
     }
 
-    nextFrameRef.current = raf(() => {
+    frameRAFRef.current = raf(() => {
       // Patch a multiple for Firefox to fix wheel number too small
       // ref: https://github.com/ant-design/ant-design/issues/26372#issuecomment-679460266
       const patchMultiple = isMouseScrollRef.current ? 10 : 1;

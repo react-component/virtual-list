@@ -1,42 +1,19 @@
-/* eslint-disable jsx-a11y/label-has-associated-control, jsx-a11y/label-has-for */
-import * as React from 'react';
-import List, { ListRef } from '../src/List';
-import './basic.less';
+import React, { Component, useRef, useState } from 'react';
+import List from '../src/List';
+import { IDirection } from '../src/types';
+import { mockData } from './utils';
+import { ForwardMyItem } from './Item';
+import type { IItem } from './Item';
+import type { UIEventHandler} from 'react';
+import type { IListRef } from '../src/types';
 
-interface Item {
-  id: string;
-}
-
-const MyItem: React.ForwardRefRenderFunction<any, Item> = ({ id }, ref) => (
-  <span
-    ref={ref}
-    // style={{
-    //   // height: 30 + (id % 2 ? 0 : 10),
-    // }}
-    className="fixed-item"
-    onClick={() => {
-      console.log('Click:', id);
-    }}
-  >
-    {id}
-  </span>
-);
-
-const ForwardMyItem = React.forwardRef(MyItem);
-
-class TestItem extends React.Component<Item, {}> {
+class TestItem extends Component<IItem, {}> {
   state = {};
 
   render() {
-    return <div style={{ lineHeight: '30px' }}>{this.props.id}</div>;
+    const isHorizontalMode =  this.props.direction === IDirection.Horizontal;
+    return <div style={{ lineHeight: '30px'}} className={`item ${ isHorizontalMode? 'item-horizontal' : ''}`}>{this.props.id}</div>;
   }
-}
-
-const data: Item[] = [];
-for (let i = 0; i < 1000; i += 1) {
-  data.push({
-    id: String(i),
-  });
 }
 
 const TYPES = [
@@ -44,38 +21,43 @@ const TYPES = [
   { name: 'ref react node', type: 'react', component: TestItem },
 ];
 
-const onScroll: React.UIEventHandler<HTMLElement> = e => {
-  console.log('scroll:', e.currentTarget.scrollTop);
+const onScroll: (direction: IDirection) => UIEventHandler<HTMLElement> = (direction: IDirection) => e => {
+  console.log('scroll:', e.currentTarget[direction === IDirection.Horizontal ? 'scrollLeft' : 'scrollTop']);
 };
 
+const data = mockData(IDirection.Horizontal);
+
 const Demo = () => {
-  const [destroy, setDestroy] = React.useState(false);
-  const [visible, setVisible] = React.useState(true);
-  const [type, setType] = React.useState('dom');
-  const listRef = React.useRef<ListRef>(null);
+  const [destroy, setDestroy] = useState(false);
+  const [destroyHorizontal, setDestroyHorizontal] = useState(false);
+  const [visible, setVisible] = useState(true);
+  const [verticalType, setVerticalType] = useState('dom');
+  const [horizontalType, setHorizontalType] = useState('dom');
+  const listVerticalRef = useRef<IListRef>(null);
+  const listHorizontalRef = useRef<IListRef>(null);
 
   return (
     <React.StrictMode>
       <div style={{ height: '200vh' }}>
         <h2>Basic</h2>
+        <p>Direction: Vertical</p>
         {TYPES.map(({ name, type: nType }) => (
           <label key={nType}>
             <input
-              name="type"
+              name="verticalType"
               type="radio"
-              checked={type === nType}
+              checked={verticalType === nType}
               onChange={() => {
-                setType(nType);
+                setVerticalType(nType);
               }}
             />
             {name}
           </label>
         ))}
-
         <button
           type="button"
           onClick={() => {
-            listRef.current.scrollTo(null);
+            listVerticalRef.current.scrollTo(null);
           }}
         >
           Show scroll bar
@@ -83,7 +65,7 @@ const Demo = () => {
         <button
           type="button"
           onClick={() => {
-            listRef.current.scrollTo(500);
+            listVerticalRef.current.scrollTo(500);
           }}
         >
           Scroll To 100px
@@ -91,7 +73,7 @@ const Demo = () => {
         <button
           type="button"
           onClick={() => {
-            listRef.current.scrollTo({
+            listVerticalRef.current.scrollTo({
               index: 99999999,
               align: 'top',
             });
@@ -102,7 +84,7 @@ const Demo = () => {
         <button
           type="button"
           onClick={() => {
-            listRef.current.scrollTo({
+            listVerticalRef.current.scrollTo({
               index: 50,
               align: 'top',
             });
@@ -113,7 +95,7 @@ const Demo = () => {
         <button
           type="button"
           onClick={() => {
-            listRef.current.scrollTo({
+            listVerticalRef.current.scrollTo({
               index: 50,
               align: 'bottom',
             });
@@ -124,7 +106,7 @@ const Demo = () => {
         <button
           type="button"
           onClick={() => {
-            listRef.current.scrollTo({
+            listVerticalRef.current.scrollTo({
               index: 50,
               align: 'auto',
             });
@@ -135,7 +117,7 @@ const Demo = () => {
         <button
           type="button"
           onClick={() => {
-            listRef.current.scrollTo({
+            listVerticalRef.current.scrollTo({
               index: 50,
               align: 'top',
               offset: 15,
@@ -147,7 +129,7 @@ const Demo = () => {
         <button
           type="button"
           onClick={() => {
-            listRef.current.scrollTo({
+            listVerticalRef.current.scrollTo({
               index: 50,
               align: 'bottom',
               offset: 15,
@@ -159,7 +141,7 @@ const Demo = () => {
         <button
           type="button"
           onClick={() => {
-            listRef.current.scrollTo({
+            listVerticalRef.current.scrollTo({
               key: '50',
               align: 'auto',
             });
@@ -180,7 +162,7 @@ const Demo = () => {
         <button
           type="button"
           onClick={() => {
-            listRef.current.scrollTo({
+            listVerticalRef.current.scrollTo({
               index: data.length - 2,
               align: 'top',
             });
@@ -191,7 +173,7 @@ const Demo = () => {
         <button
           type="button"
           onClick={() => {
-            listRef.current.scrollTo({
+            listVerticalRef.current.scrollTo({
               index: 0,
               align: 'bottom',
             });
@@ -202,8 +184,12 @@ const Demo = () => {
 
         <button
           type="button"
+          disabled={destroy}
           onClick={() => {
-            listRef.current.scrollTo({
+            if(destroy) {
+              return 
+            }
+            listVerticalRef.current.scrollTo({
               index: 50,
               align: 'top',
             });
@@ -216,23 +202,214 @@ const Demo = () => {
         {!destroy && (
           <List
             id="list"
-            ref={listRef}
+            ref={listVerticalRef}
             data={data}
-            height={200}
-            itemHeight={20}
+            containerSize={200}
+            itemSize={20}
             itemKey="id"
             style={{
               border: '1px solid red',
               boxSizing: 'border-box',
               display: visible ? null : 'none',
             }}
-            onScroll={onScroll}
+            onScroll={onScroll(IDirection.Vertical)}
+          >
+            {(item, _, props) => {
+              return verticalType === 'dom' ? (
+                <ForwardMyItem {...item} {...props} direction={IDirection.Vertical} />
+              ) : (
+                <TestItem {...item} {...props} direction={IDirection.Vertical} />
+              )
+            }
+            }
+          </List>
+        )}
+        <br />
+        <br />
+        <br />
+        <br />
+        <br />
+        <p>Direction: Horizontal</p>
+        {TYPES.map(({ name, type: nType }) => (
+          <label key={nType}>
+            <input
+              name="horizontalType"
+              type="radio"
+              checked={horizontalType === nType}
+              onChange={() => {
+                setHorizontalType(nType);
+              }}
+            />
+            {name}
+          </label>
+        ))}
+        <button
+          type="button"
+          onClick={() => {
+            listHorizontalRef.current.scrollTo(null);
+          }}
+        >
+          Show scroll bar
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            listHorizontalRef.current.scrollTo(500);
+          }}
+        >
+          Scroll To 100px
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            listHorizontalRef.current.scrollTo({
+              index: 99999999,
+              align: 'top',
+            });
+          }}
+        >
+          Scroll To 99999999 (top)
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            listHorizontalRef.current.scrollTo({
+              index: 50,
+              align: 'top',
+            });
+          }}
+        >
+          Scroll To 50 (top)
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            listHorizontalRef.current.scrollTo({
+              index: 50,
+              align: 'bottom',
+            });
+          }}
+        >
+          Scroll To 50 (bottom)
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            listHorizontalRef.current.scrollTo({
+              index: 50,
+              align: 'auto',
+            });
+          }}
+        >
+          Scroll To 50 (auto)
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            listHorizontalRef.current.scrollTo({
+              index: 50,
+              align: 'top',
+              offset: 15,
+            });
+          }}
+        >
+          Scroll To 50 (top) + 15 offset
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            listHorizontalRef.current.scrollTo({
+              index: 50,
+              align: 'bottom',
+              offset: 15,
+            });
+          }}
+        >
+          Scroll To 50 (bottom) + 15 offset
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            listHorizontalRef.current.scrollTo({
+              key: '50',
+              align: 'auto',
+            });
+          }}
+        >
+          Scroll To key 50 (auto)
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            setVisible(v => !v);
+          }}
+        >
+          visible
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            listHorizontalRef.current.scrollTo({
+              index: data.length - 2,
+              align: 'top',
+            });
+          }}
+        >
+          Scroll To Last (top)
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            listHorizontalRef.current.scrollTo({
+              index: 0,
+              align: 'bottom',
+            });
+          }}
+        >
+          Scroll To First (bottom)
+        </button>
+
+        <button
+          type="button"
+          disabled={destroyHorizontal}
+          onClick={() => {
+            if(destroyHorizontal) {
+              return 
+            }
+            listHorizontalRef.current.scrollTo({
+              index: 50,
+              align: 'top',
+            });
+            setDestroyHorizontal(true);
+          }}
+        >
+          Scroll To remove
+        </button>
+
+        {!destroyHorizontal && (
+          <List
+            id="list"
+            ref={listHorizontalRef}
+            data={data}
+            containerSize={800}
+            direction={IDirection.Horizontal}
+            itemSize={20}
+            itemKey="id"
+            style={{
+              border: '1px solid red',
+              boxSizing: 'border-box',
+              width: 'min-content',
+              display: visible ? null : 'none',
+            }}
+            onScroll={onScroll(IDirection.Horizontal)}
           >
             {(item, _, props) =>
-              type === 'dom' ? (
-                <ForwardMyItem {...item} {...props} />
+              horizontalType === 'dom' ? (
+                <ForwardMyItem {...item} {...props} direction={IDirection.Horizontal} />
               ) : (
-                <TestItem {...item} {...props} />
+                <TestItem {...item} {...props}  direction={IDirection.Horizontal} />
               )
             }
           </List>
@@ -243,5 +420,3 @@ const Demo = () => {
 };
 
 export default Demo;
-
-/* eslint-enable */

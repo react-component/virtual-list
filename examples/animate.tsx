@@ -1,11 +1,10 @@
-/* eslint-disable arrow-body-style */
-
-import * as React from 'react';
-// @ts-ignore
+import React, { forwardRef, StrictMode, useRef, useState } from 'react';
 import CSSMotion from 'rc-animate/lib/CSSMotion';
-import classNames from 'classnames';
-import List, { ListRef } from '../src/List';
+import List from '../src/List';
+import { useIsHorizontalMode } from '../src/hooks';
 import useLayoutEffect from 'rc-util/lib/hooks/useLayoutEffect';
+import  { IDirection} from '../src/types';
+import type { IListRef } from '../src/types';
 import './animate.less';
 
 let uuid = 0;
@@ -29,6 +28,7 @@ interface Item {
 }
 
 interface MyItemProps extends Item {
+  direction?: IDirection;
   visible: boolean;
   motionAppear: boolean;
   onClose: (id: string) => void;
@@ -48,6 +48,7 @@ const MyItem: React.ForwardRefRenderFunction<any, MyItemProps> = (
   {
     id,
     uuid: itemUuid,
+    direction = IDirection.Vertical,
     visible,
     onClose,
     onLeave,
@@ -58,7 +59,8 @@ const MyItem: React.ForwardRefRenderFunction<any, MyItemProps> = (
   },
   ref,
 ) => {
-  const motionRef = React.useRef(false);
+  const motionRef = useRef(false);
+  const isHorizontalMode = useIsHorizontalMode(direction);
   useLayoutEffect(() => {
     return () => {
       if (motionRef.current) {
@@ -89,7 +91,7 @@ const MyItem: React.ForwardRefRenderFunction<any, MyItemProps> = (
         return (
           <div
             ref={passedMotionRef}
-            className={classNames('item', className)}
+            className={`item ${isHorizontalMode ? 'item-horizontal' : ''} ${className||''}`}
             style={style}
             data-id={id}
           >
@@ -127,15 +129,15 @@ const MyItem: React.ForwardRefRenderFunction<any, MyItemProps> = (
   );
 };
 
-const ForwardMyItem = React.forwardRef(MyItem);
+const ForwardMyItem = forwardRef(MyItem);
 
 const Demo = () => {
-  const [data, setData] = React.useState(originData);
-  const [closeMap, setCloseMap] = React.useState<{ [id: number]: boolean }>({});
-  const [animating, setAnimating] = React.useState(false);
-  const [insertIndex, setInsertIndex] = React.useState<number>();
+  const [data, setData] = useState(originData);
+  const [closeMap, setCloseMap] = useState<{ [id: number]: boolean }>({});
+  const [animating, setAnimating] = useState(false);
+  const [insertIndex, setInsertIndex] = useState<number>();
 
-  const listRef = React.useRef<ListRef>();
+  const listRef = useRef<IListRef>();
 
   const onClose = (id: string) => {
     setCloseMap({
@@ -150,7 +152,6 @@ const Demo = () => {
   };
 
   const onAppear = (...args: any[]) => {
-    console.log('Appear:', args);
     setAnimating(false);
   };
 
@@ -174,16 +175,17 @@ const Demo = () => {
   };
 
   return (
-    <React.StrictMode>
+    <StrictMode>
       <div>
         <h2>Animate</h2>
+        <p>Direction: Vertical</p>
         <p>Current: {data.length} records</p>
 
         <List<Item>
           data={data}
           data-id="list"
-          height={200}
-          itemHeight={20}
+          containerSize={200}
+          // itemSize={20}
           itemKey="id"
           // disabled={animating}
           ref={listRef}
@@ -207,8 +209,47 @@ const Demo = () => {
             />
           )}
         </List>
+        
+        <br />
+        <br />
+        <br />
+        <br />
+        <p>Direction: Horizontal</p>
+        <p>Current: {data.length} records</p>
+
+        <List<Item>
+          direction={IDirection.Horizontal}
+          data={data}
+          data-id="list"
+          containerSize={1000}
+          // itemSize={20}
+          itemKey="id"
+          // disabled={animating}
+          ref={listRef}
+          style={{
+            width: 'min-content',
+            border: '1px solid red',
+            boxSizing: 'border-box',
+          }}
+          // onSkipRender={onAppear}
+          // onItemRemove={onAppear}
+        >
+          {(item, index) => (
+            <ForwardMyItem
+              {...item}
+              motionAppear={animating && insertIndex === index}
+              direction={IDirection.Horizontal}
+              visible={!closeMap[item.id]}
+              onClose={onClose}
+              onLeave={onLeave}
+              onAppear={onAppear}
+              onInsertBefore={onInsertBefore}
+              onInsertAfter={onInsertAfter}
+            />
+          )}
+        </List>
       </div>
-    </React.StrictMode>
+    </StrictMode>
   );
 };
 
