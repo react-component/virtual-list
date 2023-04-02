@@ -8,12 +8,13 @@ const Demo = () => {
   return (
     <StrictMode>
       <div>
-        <h2>Dynamic Height</h2>
+        <h2>Fixed Height</h2>
 
         <List
           data={mockData(IDirection.Vertical)}
           containerSize={500}
-          itemSize={30}
+          itemSize={32}
+          isStaticItem
           isEnableVirtual
           itemKey="id"
           style={{
@@ -21,13 +22,7 @@ const Demo = () => {
             boxSizing: 'border-box',
           }}
         >
-          {(item) => (
-            <ForwardMyItem
-              {...item}
-              style={{ height: item.size }}
-              direction={IDirection.Vertical}
-            />
-          )}
+          {(item) => <ForwardMyItem {...item} direction={IDirection.Vertical} />}
         </List>
         <br />
         <br />
@@ -35,13 +30,14 @@ const Demo = () => {
         <br />
         <br />
         <br />
-        <h2>Dynamic Width</h2>
+        <h2>Fixed Width</h2>
 
         <List
           data={mockData(IDirection.Horizontal)}
           direction={IDirection.Horizontal}
           containerSize={800}
-          itemSize={30}
+          itemSize={150}
+          isStaticItem
           isEnableVirtual
           itemKey="id"
           style={{
@@ -54,7 +50,7 @@ const Demo = () => {
             <ForwardMyItem
               {...item}
               direction={IDirection.Horizontal}
-              style={{ height: '100px', width: item.size }}
+              style={{ height: '100px' }}
             />
           )}
         </List>

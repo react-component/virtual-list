@@ -3,29 +3,39 @@
 }
 
 .item {
+  position: relative;
   display: inline-block;
   box-sizing: border-box;
   margin: 0;
   padding: 0 16px;
   overflow: hidden;
   line-height: 31px;
-  position: relative;
 
   &:hover {
     background: rgba(255, 0, 0, 0.1);
   }
 
   &::after {
-    content: '';
-    border-bottom: 1px solid gray;
     position: absolute;
+    right: 0;
     bottom: 0;
     left: 0;
-    right: 0;
+    border-bottom: 1px solid gray;
+    content: '';
   }
 
   button {
-    vertical-align: text-top;
     margin-right: 8px;
+    vertical-align: text-top;
+  }
+
+  &.item-horizontal {
+    flex-shrink: 0;
+    width: 150px;
+    border-right: 1px solid gray;
+
+    > div {
+      width: 100%;
+    }
   }
 }
