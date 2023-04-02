@@ -1,16 +1,22 @@
-import * as React from 'react';
+import { cloneElement, memo, useCallback } from 'react';
+import type { ReactElement } from 'react';
 
 export interface ItemProps {
-  children: React.ReactElement;
+  children: ReactElement;
   setRef: (element: HTMLElement) => void;
 }
 
-export function Item({ children, setRef }: ItemProps) {
-  const refFunc = React.useCallback(node => {
-    setRef(node);
-  }, []);
+export const Item = ({ children, setRef }: ItemProps) => {
+  const updateRef = useCallback(
+    (node) => {
+      setRef(node);
+    },
+    [setRef],
+  );
 
-  return React.cloneElement(children, {
-    ref: refFunc,
+  return cloneElement(children, {
+    ref: updateRef,
   });
-}
+};
+
+export default memo(Item);
