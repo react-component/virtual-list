@@ -1,6 +1,7 @@
 /* eslint-disable jsx-a11y/label-has-associated-control, jsx-a11y/label-has-for */
 import * as React from 'react';
 import List, { ListRef } from '../src/List';
+import { Direction } from '../src/interface';
 import './basic.less';
 
 interface Item {
@@ -44,7 +45,7 @@ const TYPES = [
   { name: 'ref react node', type: 'react', component: TestItem },
 ];
 
-const DIRECTIONS: { name: string; direction: 'rtl' | 'ltr' }[] = [
+const DIRECTIONS: { name: string; direction: Direction }[] = [
   { name: 'Left to right', direction: 'ltr' },
   { name: 'Right to left', direction: 'rtl' },
 ];
@@ -57,7 +58,7 @@ const Demo = () => {
   const [destroy, setDestroy] = React.useState(false);
   const [visible, setVisible] = React.useState(true);
   const [type, setType] = React.useState('dom');
-  const [direction, setDirection] = React.useState<'ltr' | 'rtl'>('ltr');
+  const [direction, setDirection] = React.useState<Direction>('ltr');
   const listRef = React.useRef<ListRef>(null);
 
   return (

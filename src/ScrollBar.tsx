@@ -1,6 +1,7 @@
 import * as React from 'react';
 import classNames from 'classnames';
 import raf from 'rc-util/lib/raf';
+import { Direction } from './interface';
 
 const MIN_SIZE = 20;
 
@@ -10,7 +11,7 @@ export interface ScrollBarProps {
   scrollHeight: number;
   height: number;
   count: number;
-  direction: string;
+  direction?: Direction;
   onScroll: (scrollTop: number) => void;
   onStartMove: () => void;
   onStopMove: () => void;

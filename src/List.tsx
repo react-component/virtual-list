@@ -4,7 +4,7 @@ import classNames from 'classnames';
 import Filler from './Filler';
 import type { InnerProps } from './Filler';
 import ScrollBar from './ScrollBar';
-import type { RenderFunc, SharedConfig, GetKey } from './interface';
+import type { RenderFunc, SharedConfig, GetKey, Direction } from './interface';
 import useChildren from './hooks/useChildren';
 import useHeights from './hooks/useHeights';
 import useScrollTo from './hooks/useScrollTo';
@@ -50,7 +50,7 @@ export interface ListProps<T> extends Omit<React.HTMLAttributes<any>, 'children'
   component?: string | React.FC<any> | React.ComponentClass<any>;
   /** Set `false` will always use real scroll instead of virtual one */
   virtual?: boolean;
-  direction?: 'ltr' | 'rtl';
+  direction?: Direction;
 
   onScroll?: React.UIEventHandler<HTMLElement>;
   /** Trigger when render list item changed */

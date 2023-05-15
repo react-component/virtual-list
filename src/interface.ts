@@ -9,3 +9,5 @@ export interface SharedConfig<T> {
 }
 
 export type GetKey<T> = (item: T) => React.Key;
+
+export type Direction = 'ltr' | 'rtl' | undefined;
