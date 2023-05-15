@@ -73,6 +73,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     children,
     itemKey,
     virtual,
+    direction,
     component: Component = 'div',
     onScroll,
     onVisibleChange,
@@ -375,7 +376,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
           height={height}
           scrollHeight={scrollHeight}
           count={mergedData.length}
-          direction={props.direction}
+          direction={direction}
           onScroll={onScrollBar}
           onStartMove={() => {
             setScrollMoving(true);

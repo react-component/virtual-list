@@ -179,17 +179,6 @@ export default class ScrollBar extends React.Component<ScrollBarProps, ScrollBar
     return ptg * enableHeightRange;
   };
 
-  getScrollBarPositionDirection(direction: ScrollBarDirectionType) {
-    if (direction === 'rtl') {
-      return {
-        left: 0,
-      };
-    }
-    return {
-      right: 0,
-    };
-  }
-
   // Not show scrollbar when height is large than scrollHeight
   showScroll = (): boolean => {
     const { height, scrollHeight } = this.props;
@@ -205,7 +194,15 @@ export default class ScrollBar extends React.Component<ScrollBarProps, ScrollBar
 
     const canScroll = this.showScroll();
     const mergedVisible = canScroll && visible;
-    const scrollBarDirection = this.getScrollBarPositionDirection(direction);
+    const scrollBarDirection =
+      direction === 'rtl'
+        ? {
+            left: 0,
+          }
+        : {
+            right: 0,
+          };
+
     return (
       <div
         ref={this.scrollbarRef}
