@@ -44,7 +44,12 @@ const TYPES = [
   { name: 'ref react node', type: 'react', component: TestItem },
 ];
 
-const onScroll: React.UIEventHandler<HTMLElement> = e => {
+const DIRECTIONS: { name: string; direction: 'rtl' | 'ltr' }[] = [
+  { name: 'Left to right', direction: 'ltr' },
+  { name: 'Right to left', direction: 'rtl' },
+];
+
+const onScroll: React.UIEventHandler<HTMLElement> = (e) => {
   console.log('scroll:', e.currentTarget.scrollTop);
 };
 
@@ -52,6 +57,7 @@ const Demo = () => {
   const [destroy, setDestroy] = React.useState(false);
   const [visible, setVisible] = React.useState(true);
   const [type, setType] = React.useState('dom');
+  const [direction, setDirection] = React.useState<'ltr' | 'rtl'>('ltr');
   const listRef = React.useRef<ListRef>(null);
 
   return (
@@ -171,7 +177,7 @@ const Demo = () => {
         <button
           type="button"
           onClick={() => {
-            setVisible(v => !v);
+            setVisible((v) => !v);
           }}
         >
           visible
@@ -213,11 +219,26 @@ const Demo = () => {
           Scroll To remove
         </button>
 
+        {DIRECTIONS.map(({ name, direction: nDirection }) => (
+          <label key={nDirection}>
+            <input
+              name="direction"
+              type="radio"
+              checked={direction === nDirection}
+              onChange={() => {
+                setDirection(nDirection);
+              }}
+            />
+            {name}
+          </label>
+        ))}
+
         {!destroy && (
           <List
             id="list"
             ref={listRef}
             data={data}
+            direction={direction}
             height={200}
             itemHeight={20}
             itemKey="id"

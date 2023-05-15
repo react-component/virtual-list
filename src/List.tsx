@@ -50,6 +50,7 @@ export interface ListProps<T> extends Omit<React.HTMLAttributes<any>, 'children'
   component?: string | React.FC<any> | React.ComponentClass<any>;
   /** Set `false` will always use real scroll instead of virtual one */
   virtual?: boolean;
+  direction?: 'ltr' | 'rtl';
 
   onScroll?: React.UIEventHandler<HTMLElement>;
   /** Trigger when render list item changed */
@@ -71,6 +72,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     children,
     itemKey,
     virtual,
+    direction,
     component: Component = 'div',
     onScroll,
     onVisibleChange,
@@ -343,6 +345,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
       style={{
         ...style,
         position: 'relative',
+        ...(direction && { direction }),
       }}
       className={mergedClassName}
       {...restProps}
@@ -373,6 +376,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
           height={height}
           scrollHeight={scrollHeight}
           count={mergedData.length}
+          direction={direction}
           onScroll={onScrollBar}
           onStartMove={() => {
             setScrollMoving(true);
