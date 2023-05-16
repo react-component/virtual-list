@@ -4,12 +4,15 @@ import raf from 'rc-util/lib/raf';
 
 const MIN_SIZE = 20;
 
+export type ScrollBarDirectionType = 'ltr' | 'rtl';
+
 export interface ScrollBarProps {
   prefixCls: string;
   scrollTop: number;
   scrollHeight: number;
   height: number;
   count: number;
+  direction?: ScrollBarDirectionType;
   onScroll: (scrollTop: number) => void;
   onStartMove: () => void;
   onStopMove: () => void;
@@ -90,7 +93,7 @@ export default class ScrollBar extends React.Component<ScrollBarProps, ScrollBar
     window.removeEventListener('mouseup', this.onMouseUp);
 
     this.scrollbarRef.current?.removeEventListener('touchstart', this.onScrollbarTouchStart);
-    
+
     if (this.thumbRef.current) {
       this.thumbRef.current.removeEventListener('touchstart', this.onMouseDown);
       this.thumbRef.current.removeEventListener('touchmove', this.onMouseMove);
@@ -185,12 +188,20 @@ export default class ScrollBar extends React.Component<ScrollBarProps, ScrollBar
   // ====================== Render =======================
   render() {
     const { dragging, visible } = this.state;
-    const { prefixCls } = this.props;
+    const { prefixCls, direction } = this.props;
     const spinHeight = this.getSpinHeight();
     const top = this.getTop();
 
     const canScroll = this.showScroll();
     const mergedVisible = canScroll && visible;
+    const scrollBarDirection =
+      direction === 'rtl'
+        ? {
+            left: 0,
+          }
+        : {
+            right: 0,
+          };
 
     return (
       <div
@@ -202,7 +213,7 @@ export default class ScrollBar extends React.Component<ScrollBarProps, ScrollBar
           width: 8,
           top: 0,
           bottom: 0,
-          right: 0,
+          ...scrollBarDirection,
           position: 'absolute',
           display: mergedVisible ? null : 'none',
         }}

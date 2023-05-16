@@ -286,4 +286,24 @@ describe('List.Scroll', () => {
       expect(wrapper.find('li').length).toBeLessThan(10);
     });
   });
+
+  it('scrollbar should be left position with rtl', () => {
+    jest.useFakeTimers();
+    const listRef = React.createRef();
+    const wrapper = genList({
+      itemHeight: 20,
+      height: 100,
+      data: genData(100),
+      ref: listRef,
+      direction: 'rtl',
+    });
+    jest.runAllTimers();
+
+    listRef.current.scrollTo(null);
+    expect(wrapper.find('.rc-virtual-list-scrollbar-thumb').props().style.display).not.toEqual(
+      'none',
+    );
+    expect(wrapper.find('.rc-virtual-list-scrollbar').props().style.left).toEqual(0);
+    jest.useRealTimers();
+  });
 });
