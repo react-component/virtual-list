@@ -305,5 +305,7 @@ describe('List.Scroll', () => {
     );
     expect(wrapper.find('.rc-virtual-list-scrollbar').props().style.left).toEqual(0);
     jest.useRealTimers();
+
+    expect(wrapper.exists('.rc-virtual-list-rtl')).toBeTruthy();
   });
 });

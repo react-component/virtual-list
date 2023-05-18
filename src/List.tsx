@@ -88,7 +88,11 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   const [scrollTop, setScrollTop] = useState(0);
   const [scrollMoving, setScrollMoving] = useState(false);
 
-  const mergedClassName = classNames(prefixCls, className);
+  const mergedClassName = classNames(
+    prefixCls,
+    { [`${prefixCls}-rtl`]: direction === 'rtl' },
+    className,
+  );
   const mergedData = data || EMPTY_DATA;
   const componentRef = useRef<HTMLDivElement>();
   const fillerInnerRef = useRef<HTMLDivElement>();
