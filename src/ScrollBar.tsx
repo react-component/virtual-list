@@ -57,7 +57,9 @@ export default class ScrollBar extends React.Component<ScrollBarProps, ScrollBar
   }
 
   componentWillUnmount() {
-    this.removeEvents(true);
+    this.removeEvents();
+    this.scrollbarRef.current?.removeEventListener('touchstart', this.onScrollbarTouchStart);
+    this.thumbRef.current?.removeEventListener('touchstart', this.onMouseDown);
     clearTimeout(this.visibleTimeout);
   }
 
@@ -88,18 +90,11 @@ export default class ScrollBar extends React.Component<ScrollBarProps, ScrollBar
     this.thumbRef.current.addEventListener('touchend', this.onMouseUp);
   };
 
-  removeEvents = (unmount?: boolean) => {
+  removeEvents = () => {
     window.removeEventListener('mousemove', this.onMouseMove);
     window.removeEventListener('mouseup', this.onMouseUp);
 
-    if (unmount) {
-      this.scrollbarRef.current?.removeEventListener('touchstart', this.onScrollbarTouchStart);
-    }
-
     if (this.thumbRef.current) {
-      if (unmount) {
-        this.thumbRef.current.removeEventListener('touchstart', this.onMouseDown);
-      }
       this.thumbRef.current.removeEventListener('touchmove', this.onMouseMove);
       this.thumbRef.current.removeEventListener('touchend', this.onMouseUp);
     }
@@ -126,7 +121,6 @@ export default class ScrollBar extends React.Component<ScrollBarProps, ScrollBar
   onMouseMove = (e: MouseEvent | TouchEvent) => {
     const { dragging, pageY, startTop } = this.state;
     const { onScroll } = this.props;
-
     raf.cancel(this.moveRaf);
 
     if (dragging) {
