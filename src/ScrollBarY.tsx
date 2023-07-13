@@ -58,6 +58,8 @@ export default class ScrollBarY extends React.Component<ScrollBarProps, ScrollBa
 
   componentWillUnmount() {
     this.removeEvents();
+    this.scrollbarRef.current?.removeEventListener('touchstart', this.onScrollbarTouchStart);
+    this.thumbRef.current?.removeEventListener('touchstart', this.onMouseDown);
     clearTimeout(this.visibleTimeout);
   }
 
@@ -92,10 +94,7 @@ export default class ScrollBarY extends React.Component<ScrollBarProps, ScrollBa
     window.removeEventListener('mousemove', this.onMouseMove);
     window.removeEventListener('mouseup', this.onMouseUp);
 
-    this.scrollbarRef.current?.removeEventListener('touchstart', this.onScrollbarTouchStart);
-
     if (this.thumbRef.current) {
-      this.thumbRef.current.removeEventListener('touchstart', this.onMouseDown);
       this.thumbRef.current.removeEventListener('touchmove', this.onMouseMove);
       this.thumbRef.current.removeEventListener('touchend', this.onMouseUp);
     }
@@ -122,7 +121,6 @@ export default class ScrollBarY extends React.Component<ScrollBarProps, ScrollBa
   onMouseMove = (e: MouseEvent | TouchEvent) => {
     const { dragging, pageY, startTop } = this.state;
     const { onScroll } = this.props;
-
     raf.cancel(this.moveRaf);
 
     if (dragging) {
