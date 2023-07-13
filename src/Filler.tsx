@@ -11,11 +11,19 @@ interface FillerProps {
   /** Set offset of visible items. Should be the top of start item position */
   offset?: number;
 
+  horizontalScroll?: boolean;
+
   children: React.ReactNode;
+
+  fillerOuterRef: React.MutableRefObject<HTMLDivElement>;
 
   onInnerResize?: () => void;
 
   innerProps?: InnerProps;
+
+  onWidthChange: (width: number) => void;
+
+  onScrollWidthChange: (scrollWidth: number) => void;
 }
 
 /**
@@ -23,33 +31,45 @@ interface FillerProps {
  */
 const Filler = React.forwardRef(
   (
-    { height, offset, children, prefixCls, onInnerResize, innerProps }: FillerProps,
+    {
+      height,
+      offset,
+      children,
+      prefixCls,
+      horizontalScroll,
+      fillerOuterRef,
+      onInnerResize,
+      innerProps,
+      onWidthChange,
+      onScrollWidthChange,
+    }: FillerProps,
     ref: React.Ref<HTMLDivElement>,
   ) => {
     let outerStyle: React.CSSProperties = {};
 
     let innerStyle: React.CSSProperties = {
-      display: 'flex',
+      display: horizontalScroll ? 'inline-flex' : 'flex',
       flexDirection: 'column',
     };
 
     if (offset !== undefined) {
-      outerStyle = { height, position: 'relative', overflow: 'hidden' };
+      outerStyle = {
+        height,
+        position: 'relative',
+        overflow: 'hidden',
+      };
 
       innerStyle = {
         ...innerStyle,
         transform: `translateY(${offset}px)`,
-        position: 'absolute',
-        left: 0,
-        right: 0,
-        top: 0,
       };
     }
 
-    return (
-      <div style={outerStyle}>
+    const outerContainer = (
+      <div ref={fillerOuterRef} style={outerStyle}>
         <ResizeObserver
-          onResize={({ offsetHeight }) => {
+          onResize={({ offsetWidth, offsetHeight }) => {
+            onScrollWidthChange(offsetWidth);
             if (offsetHeight && onInnerResize) {
               onInnerResize();
             }
@@ -67,6 +87,18 @@ const Filler = React.forwardRef(
           </div>
         </ResizeObserver>
       </div>
+    );
+
+    return horizontalScroll ? (
+      <ResizeObserver
+        onResize={({ offsetWidth }) => {
+          onWidthChange(offsetWidth);
+        }}
+      >
+        {outerContainer}
+      </ResizeObserver>
+    ) : (
+      outerContainer
     );
   },
 );

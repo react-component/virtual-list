@@ -51,15 +51,16 @@ import List from 'rc-virtual-list';
 
 ## List
 
-| Prop       | Description                                             | Type                                 | Default |
-| ---------- | ------------------------------------------------------- | ------------------------------------ | ------- |
-| children   | Render props of item                                    | (item, index, props) => ReactElement | -       |
-| component  | Customize List dom element                              | string \| Component                  | div     |
-| data       | Data list                                               | Array                                | -       |
-| disabled   | Disable scroll check. Usually used on animation control | boolean                              | false   |
-| height     | List height                                             | number                               | -       |
-| itemHeight | Item minium height                                      | number                               | -       |
-| itemKey    | Match key with item                                     | string                               | -       |
+| Prop             | Description                                             | Type                                 | Default |
+| ---------------- | ------------------------------------------------------- | ------------------------------------ | ------- |
+| children         | Render props of item                                    | (item, index, props) => ReactElement | -       |
+| component        | Customize List dom element                              | string \| Component                  | div     |
+| data             | Data list                                               | Array                                | -       |
+| disabled         | Disable scroll check. Usually used on animation control | boolean                              | false   |
+| height           | List height                                             | number                               | -       |
+| itemHeight       | Item minium height                                      | number                               | -       |
+| itemKey          | Match key with item                                     | string                               | -       |
+| horizontalScroll | enable horizontal scroll                                | boolean                              | -       |
 
 `children` provides additional `props` argument to support IE 11 scroll shaking.
 It will set `style` to `visibility: hidden` when measuring. You can ignore this if no requirement on IE.

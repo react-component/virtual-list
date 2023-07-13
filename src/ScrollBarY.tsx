@@ -29,7 +29,7 @@ function getPageY(e: React.MouseEvent | MouseEvent | TouchEvent) {
   return 'touches' in e ? e.touches[0].pageY : e.pageY;
 }
 
-export default class ScrollBar extends React.Component<ScrollBarProps, ScrollBarState> {
+export default class ScrollBarY extends React.Component<ScrollBarProps, ScrollBarState> {
   moveRaf: number = null;
 
   scrollbarRef = React.createRef<HTMLDivElement>();
@@ -175,6 +175,7 @@ export default class ScrollBar extends React.Component<ScrollBarProps, ScrollBar
     if (scrollTop === 0 || enableScrollRange === 0) {
       return 0;
     }
+
     const ptg = scrollTop / enableScrollRange;
     return ptg * enableHeightRange;
   };
@@ -206,8 +207,8 @@ export default class ScrollBar extends React.Component<ScrollBarProps, ScrollBar
     return (
       <div
         ref={this.scrollbarRef}
-        className={classNames(`${prefixCls}-scrollbar`, {
-          [`${prefixCls}-scrollbar-show`]: canScroll,
+        className={classNames(`${prefixCls}-scrollbar-y`, {
+          [`${prefixCls}-scrollbar-y-show`]: canScroll,
         })}
         style={{
           width: 8,
@@ -222,8 +223,8 @@ export default class ScrollBar extends React.Component<ScrollBarProps, ScrollBar
       >
         <div
           ref={this.thumbRef}
-          className={classNames(`${prefixCls}-scrollbar-thumb`, {
-            [`${prefixCls}-scrollbar-thumb-moving`]: dragging,
+          className={classNames(`${prefixCls}-scrollbar-y-thumb`, {
+            [`${prefixCls}-scrollbar-y-thumb-moving`]: dragging,
           })}
           style={{
             width: '100%',
