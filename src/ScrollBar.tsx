@@ -179,12 +179,6 @@ export default class ScrollBar extends React.Component<ScrollBarProps, ScrollBar
     return ptg * enableHeightRange;
   };
 
-  // Not show scrollbar when height is large than scrollHeight
-  showScroll = (): boolean => {
-    const { height, scrollHeight } = this.props;
-    return scrollHeight > height;
-  };
-
   // ====================== Render =======================
   render() {
     const { dragging, visible } = this.state;
@@ -192,8 +186,6 @@ export default class ScrollBar extends React.Component<ScrollBarProps, ScrollBar
     const spinHeight = this.getSpinHeight();
     const top = this.getTop();
 
-    const canScroll = this.showScroll();
-    const mergedVisible = canScroll && visible;
     const scrollBarDirection =
       direction === 'rtl'
         ? {
@@ -206,16 +198,14 @@ export default class ScrollBar extends React.Component<ScrollBarProps, ScrollBar
     return (
       <div
         ref={this.scrollbarRef}
-        className={classNames(`${prefixCls}-scrollbar`, {
-          [`${prefixCls}-scrollbar-show`]: canScroll,
-        })}
+        className={`${prefixCls}-scrollbar`}
         style={{
           width: 8,
           top: 0,
           bottom: 0,
           ...scrollBarDirection,
           position: 'absolute',
-          display: mergedVisible ? null : 'none',
+          display: visible ? null : 'none',
         }}
         onMouseDown={this.onContainerMouseDown}
         onMouseMove={this.delayHidden}

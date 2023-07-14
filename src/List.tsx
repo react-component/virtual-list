@@ -372,7 +372,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
         </Filler>
       </Component>
 
-      {useVirtual && (
+      {useVirtual && scrollHeight > height && (
         <ScrollBar
           ref={scrollBarRef}
           prefixCls={prefixCls}
