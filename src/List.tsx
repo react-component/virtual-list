@@ -1,11 +1,10 @@
+/* eslint-disable @typescript-eslint/consistent-type-imports */
 import * as React from 'react';
 import { useRef, useState } from 'react';
 import classNames from 'classnames';
-import Filler from './Filler';
-import type { InnerProps } from './Filler';
-import type { ScrollBarDirectionType } from './ScrollBar';
-import ScrollBar from './ScrollBar';
-import type { RenderFunc, SharedConfig, GetKey } from './interface';
+import Filler, { InnerProps } from './Filler';
+import { ScrollBarDirectionType } from './ScrollBar';
+import { RenderFunc, SharedConfig, GetKey } from './interface';
 import useChildren from './hooks/useChildren';
 import useHeights from './hooks/useHeights';
 import useScrollTo from './hooks/useScrollTo';
@@ -14,6 +13,7 @@ import useFrameWheel from './hooks/useFrameWheel';
 import useMobileTouchMove from './hooks/useMobileTouchMove';
 import useOriginScroll from './hooks/useOriginScroll';
 import useLayoutEffect from 'rc-util/lib/hooks/useLayoutEffect';
+import ScrollBar, { ScrollBarRef } from './ScrollBar';
 
 const EMPTY_DATA = [];
 
@@ -52,6 +52,7 @@ export interface ListProps<T> extends Omit<React.HTMLAttributes<any>, 'children'
   /** Set `false` will always use real scroll instead of virtual one */
   virtual?: boolean;
   direction?: ScrollBarDirectionType;
+  scrollWidth?: number;
 
   onScroll?: React.UIEventHandler<HTMLElement>;
   /** Trigger when render list item changed */
@@ -74,6 +75,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     itemKey,
     virtual,
     direction,
+    scrollWidth,
     component: Component = 'div',
     onScroll,
     onVisibleChange,
@@ -87,6 +89,8 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
 
   const [scrollTop, setScrollTop] = useState(0);
   const [scrollMoving, setScrollMoving] = useState(false);
+  const [width, setWidth] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
 
   const mergedClassName = classNames(
     prefixCls,
@@ -96,7 +100,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   const mergedData = data || EMPTY_DATA;
   const componentRef = useRef<HTMLDivElement>();
   const fillerInnerRef = useRef<HTMLDivElement>();
-  const scrollBarRef = useRef<any>(); // Hack on scrollbar to enable flash call
+  const scrollBarYRef = useRef<ScrollBarRef>(); // Hack on scrollbar to enable flash call
 
   // =============================== Item Key ===============================
   const getKey = React.useCallback<GetKey<T>>(
@@ -123,10 +127,23 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
         value = newTop;
       }
 
-      const alignedTop = keepInRange(value);
+      const alignedTop = keepInHeightRange(value);
 
       componentRef.current.scrollTop = alignedTop;
       return alignedTop;
+    });
+  }
+
+  function syncScrollLeft(newLeft: number | ((prev: number) => number)) {
+    setScrollLeft((origin) => {
+      let value: number;
+      if (typeof newLeft === 'function') {
+        value = newLeft(origin);
+      } else {
+        value = newLeft;
+      }
+
+      return keepInWidthRange(value);
     });
   }
 
@@ -222,8 +239,11 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   const maxScrollHeight = scrollHeight - height;
   const maxScrollHeightRef = useRef(maxScrollHeight);
   maxScrollHeightRef.current = maxScrollHeight;
+  const maxScrollWidth = (scrollWidth || 0) - width;
+  const maxScrollWidthRef = useRef(maxScrollWidth);
+  maxScrollWidthRef.current = maxScrollWidth;
 
-  function keepInRange(newScrollTop: number) {
+  function keepInHeightRange(newScrollTop: number) {
     let newTop = newScrollTop;
     if (!Number.isNaN(maxScrollHeightRef.current)) {
       newTop = Math.min(newTop, maxScrollHeightRef.current);
@@ -232,17 +252,31 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     return newTop;
   }
 
-  const isScrollAtTop = scrollTop <= 0;
-  const isScrollAtBottom = scrollTop >= maxScrollHeight;
-
-  const originScroll = useOriginScroll(isScrollAtTop, isScrollAtBottom);
-
-  // ================================ Scroll ================================
-  function onScrollBar(newScrollTop: number) {
-    const newTop = newScrollTop;
-    syncScrollTop(newTop);
+  function keepInWidthRange(newScrollLeft: number) {
+    let newLeft = newScrollLeft;
+    if (!Number.isNaN(maxScrollWidthRef.current)) {
+      newLeft = Math.min(newLeft, maxScrollWidthRef.current);
+    }
+    newLeft = Math.max(newLeft, 0);
+    return newLeft;
   }
 
+  const canScrollX = scrollWidth > width;
+  const canScrollY = scrollHeight > height;
+
+  const isScrollAtTop = scrollTop <= 0;
+  const isScrollAtBottom = scrollTop >= maxScrollHeight;
+  const isScrollAtLeft = scrollLeft <= 0;
+  const isScrollAtRight = scrollLeft >= maxScrollWidth;
+
+  const originScroll = useOriginScroll(
+    isScrollAtTop,
+    isScrollAtBottom,
+    isScrollAtLeft,
+    isScrollAtRight,
+  );
+
+  // ================================ Scroll ================================
   // When data size reduce. It may trigger native scroll event back to fit scroll position
   function onFallbackScroll(e: React.UIEvent<HTMLDivElement>) {
     const { scrollTop: newScrollTop } = e.currentTarget;
@@ -259,23 +293,36 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     useVirtual,
     isScrollAtTop,
     isScrollAtBottom,
-    (offsetY) => {
-      syncScrollTop((top) => {
-        const newTop = top + offsetY;
-        return newTop;
-      });
+    isScrollAtLeft,
+    isScrollAtRight,
+    canScrollX,
+    (offsetX, offsetY, isHorizontal) => {
+      if (isHorizontal) {
+        if (scrollWidth) {
+          syncScrollLeft((left) => {
+            const newLeft = left + offsetX;
+            return newLeft;
+          });
+        }
+      } else {
+        syncScrollTop((top) => {
+          const newTop = top + offsetY;
+          return newTop;
+        });
+      }
     },
   );
 
-  // Mobile touch move
-  useMobileTouchMove(useVirtual, componentRef, (deltaY, smoothOffset) => {
-    if (originScroll(deltaY, smoothOffset)) {
-      return false;
-    }
+  function onStartMove() {
+    setScrollMoving(true);
+  }
 
-    onRawWheel({ preventDefault() {}, deltaY } as WheelEvent);
-    return true;
-  });
+  function onStopMove() {
+    setScrollMoving(false);
+  }
+
+  // Mobile touch move
+  useMobileTouchMove(useVirtual, componentRef, originScroll, onRawWheel);
 
   useLayoutEffect(() => {
     // Firefox only
@@ -311,7 +358,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     collectHeight,
     syncScrollTop,
     () => {
-      scrollBarRef.current?.delayHidden();
+      scrollBarYRef.current?.delayHidden();
     },
   );
 
@@ -344,6 +391,9 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
       }
     }
   }
+  if (scrollWidth && useVirtual) {
+    componentStyle.overflowX = 'hidden';
+  }
 
   return (
     <div
@@ -363,32 +413,51 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
         <Filler
           prefixCls={prefixCls}
           height={scrollHeight}
-          offset={offset}
+          offsetY={offset}
+          offsetX={scrollLeft}
+          scrollWidth={scrollWidth}
           onInnerResize={collectHeight}
           ref={fillerInnerRef}
           innerProps={innerProps}
+          onWidthChange={(newWidth) => {
+            setWidth(newWidth);
+            syncScrollLeft(scrollLeft);
+          }}
         >
           {listChildren}
         </Filler>
       </Component>
 
-      {useVirtual && scrollHeight > height && (
-        <ScrollBar
-          ref={scrollBarRef}
-          prefixCls={prefixCls}
-          scrollTop={scrollTop}
-          height={height}
-          scrollHeight={scrollHeight}
-          count={mergedData.length}
-          direction={direction}
-          onScroll={onScrollBar}
-          onStartMove={() => {
-            setScrollMoving(true);
-          }}
-          onStopMove={() => {
-            setScrollMoving(false);
-          }}
-        />
+      {useVirtual && (
+        <>
+          {canScrollY && (
+            <ScrollBar
+              type="y"
+              ref={scrollBarYRef}
+              prefixCls={prefixCls}
+              scrollOffset={scrollTop}
+              size={height}
+              scrollSize={scrollHeight}
+              count={mergedData.length}
+              direction={direction}
+              onScroll={syncScrollTop}
+              onStartMove={onStartMove}
+              onStopMove={onStopMove}
+            />
+          )}
+          {canScrollX && (
+            <ScrollBar
+              type="x"
+              prefixCls={prefixCls}
+              size={width}
+              scrollOffset={scrollLeft}
+              scrollSize={scrollWidth}
+              onScroll={syncScrollLeft}
+              onStartMove={onStartMove}
+              onStopMove={onStopMove}
+            />
+          )}
+        </>
       )}
     </div>
   );

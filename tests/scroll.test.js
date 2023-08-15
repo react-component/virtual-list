@@ -55,7 +55,7 @@ describe('List.Scroll', () => {
     jest.runAllTimers();
 
     listRef.current.scrollTo(null);
-    expect(wrapper.find('.rc-virtual-list-scrollbar-thumb').props().style.display).not.toEqual(
+    expect(wrapper.find('.rc-virtual-list-scrollbar-y-thumb').props().style.display).not.toEqual(
       'none',
     );
     jest.useRealTimers();
@@ -140,7 +140,7 @@ describe('List.Scroll', () => {
       const wrapper = genList({ itemHeight: 20, height: 100, data: genData(100), ref: listRef });
 
       // Mouse down
-      wrapper.find('.rc-virtual-list-scrollbar-thumb').simulate('mousedown', {
+      wrapper.find('.rc-virtual-list-scrollbar-y-thumb').simulate('mousedown', {
         pageY: 0,
       });
 
@@ -185,7 +185,7 @@ describe('List.Scroll', () => {
             data: genData(5),
             ...props,
           });
-          expect(wrapper.find('.rc-virtual-list-scrollbar-thumb')).toHaveLength(0);
+          expect(wrapper.find('.rc-virtual-list-scrollbar-y-thumb')).toHaveLength(0);
         });
       });
     });
@@ -197,7 +197,7 @@ describe('List.Scroll', () => {
     // Mouse down
     const preventDefault = jest.fn();
     const stopPropagation = jest.fn();
-    wrapper.find('.rc-virtual-list-scrollbar').simulate('mousedown', {
+    wrapper.find('.rc-virtual-list-scrollbar-y').simulate('mousedown', {
       preventDefault,
       stopPropagation,
     });
@@ -245,7 +245,7 @@ describe('List.Scroll', () => {
 
       wrapper.setProps({ data: genData(100) });
 
-      expect(wrapper.find('ScrollBar').props().scrollTop).toEqual(0);
+      expect(wrapper.find('ScrollBarY').props().scrollTop).toEqual(0);
     });
 
     it('over max height', () => {
@@ -262,7 +262,7 @@ describe('List.Scroll', () => {
 
       wrapper.update();
 
-      expect(wrapper.find('ScrollBar').props().scrollTop).toEqual(1900);
+      expect(wrapper.find('ScrollBarY').props().scrollTop).toEqual(1900);
     });
 
     it('dynamic large to small', () => {
@@ -300,10 +300,10 @@ describe('List.Scroll', () => {
     jest.runAllTimers();
 
     listRef.current.scrollTo(null);
-    expect(wrapper.find('.rc-virtual-list-scrollbar-thumb').props().style.display).not.toEqual(
+    expect(wrapper.find('.rc-virtual-list-scrollbar-y-thumb').props().style.display).not.toEqual(
       'none',
     );
-    expect(wrapper.find('.rc-virtual-list-scrollbar').props().style.left).toEqual(0);
+    expect(wrapper.find('.rc-virtual-list-scrollbar-y').props().style.left).toEqual(0);
     jest.useRealTimers();
 
     expect(wrapper.exists('.rc-virtual-list-rtl')).toBeTruthy();

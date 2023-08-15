@@ -12,9 +12,13 @@ export default function useFrameWheel(
   inVirtual: boolean,
   isScrollAtTop: boolean,
   isScrollAtBottom: boolean,
-  onWheelDelta: (offset: number) => void,
-): [(e: WheelEvent) => void, (e: FireFoxDOMMouseScrollEvent) => void] {
-  const offsetRef = useRef(0);
+  isScrollAtLeft: boolean,
+  isScrollAtRight: boolean,
+  canScrollX: boolean,
+  onWheelDelta: (offsetX: number, offsetY: number, isHorizontal: boolean) => void,
+): [(e: WheelEvent, isTouch?: boolean) => void, (e: FireFoxDOMMouseScrollEvent) => void] {
+  const offsetYRef = useRef(0);
+  const offsetXRef = useRef(0);
   const nextFrameRef = useRef<number>(null);
 
   // Firefox patch
@@ -22,31 +26,43 @@ export default function useFrameWheel(
   const isMouseScrollRef = useRef<boolean>(false);
 
   // Scroll status sync
-  const originScroll = useOriginScroll(isScrollAtTop, isScrollAtBottom);
+  const originScroll = useOriginScroll(
+    isScrollAtTop,
+    isScrollAtBottom,
+    isScrollAtLeft,
+    isScrollAtRight,
+    canScrollX,
+  );
 
-  function onWheel(event: WheelEvent) {
+  function onWheel(event: WheelEvent, isTouch?: boolean) {
     if (!inVirtual) return;
 
     raf.cancel(nextFrameRef.current);
 
-    const { deltaY } = event;
-    offsetRef.current += deltaY;
+    const { deltaX, deltaY } = event;
+    const isHorizontal = Math.abs(deltaX) >= Math.abs(deltaY);
+    offsetYRef.current += deltaY;
+    offsetXRef.current += deltaX;
     wheelValueRef.current = deltaY;
 
-    // Do nothing when scroll at the edge, Skip check when is in scroll
-    if (originScroll(deltaY)) return;
+    if (!isTouch) {
+      // Do nothing when scroll at the edge, Skip check when is in scroll
+      if (originScroll(deltaX, deltaY)) return;
 
-    // Proxy of scroll events
-    if (!isFF) {
-      event.preventDefault();
+      // Proxy of scroll events
+      if (!isFF) {
+        event.preventDefault();
+      }
     }
 
     nextFrameRef.current = raf(() => {
       // Patch a multiple for Firefox to fix wheel number too small
       // ref: https://github.com/ant-design/ant-design/issues/26372#issuecomment-679460266
       const patchMultiple = isMouseScrollRef.current ? 10 : 1;
-      onWheelDelta(offsetRef.current * patchMultiple);
-      offsetRef.current = 0;
+      // offsetX is not need patchMultiple (Mouse wheel does not trigger X-axis scrolling)
+      onWheelDelta(offsetXRef.current, offsetYRef.current * patchMultiple, isHorizontal);
+      offsetXRef.current = 0;
+      offsetYRef.current = 0;
     });
   }
 

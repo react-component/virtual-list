@@ -123,10 +123,7 @@ describe('List.Touch', () => {
 
     const touchEvent = new Event('touchstart');
     touchEvent.preventDefault = preventDefault;
-    wrapper
-      .find('.rc-virtual-list-scrollbar')
-      .instance()
-      .dispatchEvent(touchEvent);
+    wrapper.find('.rc-virtual-list-scrollbar-y').instance().dispatchEvent(touchEvent);
 
     expect(preventDefault).toHaveBeenCalled();
   });

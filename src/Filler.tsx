@@ -8,14 +8,20 @@ interface FillerProps {
   prefixCls?: string;
   /** Virtual filler height. Should be `count * itemMinHeight` */
   height: number;
-  /** Set offset of visible items. Should be the top of start item position */
-  offset?: number;
+  /** Set offsetY of visible items. Should be the top of start item position */
+  offsetY?: number;
+
+  offsetX: number;
+
+  scrollWidth?: number;
 
   children: React.ReactNode;
 
   onInnerResize?: () => void;
 
   innerProps?: InnerProps;
+
+  onWidthChange: (width: number) => void;
 }
 
 /**
@@ -23,30 +29,40 @@ interface FillerProps {
  */
 const Filler = React.forwardRef(
   (
-    { height, offset, children, prefixCls, onInnerResize, innerProps }: FillerProps,
+    {
+      height,
+      offsetY,
+      offsetX,
+      children,
+      prefixCls,
+      scrollWidth,
+      onInnerResize,
+      innerProps,
+      onWidthChange,
+    }: FillerProps,
     ref: React.Ref<HTMLDivElement>,
   ) => {
     let outerStyle: React.CSSProperties = {};
 
     let innerStyle: React.CSSProperties = {
-      display: 'flex',
+      display: scrollWidth !== undefined ? 'inline-flex' : 'flex',
       flexDirection: 'column',
     };
 
-    if (offset !== undefined) {
-      outerStyle = { height, position: 'relative', overflow: 'hidden' };
-
-      innerStyle = {
-        ...innerStyle,
-        transform: `translateY(${offset}px)`,
-        position: 'absolute',
-        left: 0,
-        right: 0,
-        top: 0,
+    if (offsetY !== undefined) {
+      outerStyle = {
+        height,
+        position: 'relative',
+        overflow: 'hidden',
       };
     }
 
-    return (
+    innerStyle = {
+      ...innerStyle,
+      transform: `translate(-${offsetX}px, ${offsetY || 0}px)`,
+    };
+
+    const outerContainer = (
       <div style={outerStyle}>
         <ResizeObserver
           onResize={({ offsetHeight }) => {
@@ -67,6 +83,18 @@ const Filler = React.forwardRef(
           </div>
         </ResizeObserver>
       </div>
+    );
+
+    return scrollWidth !== undefined ? (
+      <ResizeObserver
+        onResize={({ offsetWidth }) => {
+          onWidthChange(offsetWidth);
+        }}
+      >
+        {outerContainer}
+      </ResizeObserver>
+    ) : (
+      outerContainer
     );
   },
 );
