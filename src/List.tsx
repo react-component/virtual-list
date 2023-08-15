@@ -1,10 +1,10 @@
-/* eslint-disable @typescript-eslint/consistent-type-imports */
 import * as React from 'react';
 import { useRef, useState } from 'react';
 import classNames from 'classnames';
-import Filler, { InnerProps } from './Filler';
-import { ScrollBarDirectionType } from './ScrollBar';
-import { RenderFunc, SharedConfig, GetKey } from './interface';
+import type { InnerProps } from './Filler';
+import Filler from './Filler';
+import type { ScrollBarDirectionType } from './ScrollBar';
+import type { RenderFunc, SharedConfig, GetKey } from './interface';
 import useChildren from './hooks/useChildren';
 import useHeights from './hooks/useHeights';
 import useScrollTo from './hooks/useScrollTo';
@@ -13,7 +13,8 @@ import useFrameWheel from './hooks/useFrameWheel';
 import useMobileTouchMove from './hooks/useMobileTouchMove';
 import useOriginScroll from './hooks/useOriginScroll';
 import useLayoutEffect from 'rc-util/lib/hooks/useLayoutEffect';
-import ScrollBar, { ScrollBarRef } from './ScrollBar';
+import type { ScrollBarRef } from './ScrollBar';
+import ScrollBar from './ScrollBar';
 
 const EMPTY_DATA = [];
 
