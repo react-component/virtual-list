@@ -29,7 +29,7 @@ export interface ScrollBarRef {
   delayHidden: () => void;
 }
 
-function getPageY(e: React.MouseEvent | MouseEvent | TouchEvent) {
+function getPageY(e: React.MouseEvent | React.TouchEvent | MouseEvent | TouchEvent) {
   return 'touches' in e ? e.touches[0].pageY : e.pageY;
 }
 
@@ -105,10 +105,13 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
   };
 
   // ======================== Thumb =========================
-  const onThumbMouseDown = (e: React.MouseEvent | TouchEvent) => {
+  const stateRef = React.useRef({ top, dragging, pageY, startTop });
+  stateRef.current = { top, dragging, pageY, startTop };
+
+  const onThumbMouseDown = (e: React.MouseEvent | React.TouchEvent | TouchEvent) => {
     setDragging(true);
     setPageY(getPageY(e));
-    setStartTop(top);
+    setStartTop(stateRef.current.top);
 
     onStartMove();
     e.stopPropagation();
@@ -116,31 +119,23 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
   };
 
   // ======================== Effect ========================
-  const stateRef = React.useRef({ top, dragging, pageY, startTop });
-  stateRef.current = { top, dragging, pageY, startTop };
 
+  // React make event as passive, but we need to preventDefault
+  // Add event on dom directly instead.
+  // ref: https://github.com/facebook/react/issues/9809
   React.useEffect(() => {
     const onScrollbarTouchStart = (e: TouchEvent) => {
-      e.preventDefault();
-    };
-    const onThumbTouchStart = (e: React.MouseEvent | TouchEvent) => {
-      setDragging(true);
-      setPageY(getPageY(e));
-      setStartTop(stateRef.current.top);
-
-      onStartMove();
-      e.stopPropagation();
       e.preventDefault();
     };
 
     const scrollbarEle = scrollbarRef.current;
     const thumbEle = thumbRef.current;
     scrollbarEle.addEventListener('touchstart', onScrollbarTouchStart);
-    thumbEle.addEventListener('touchstart', onThumbTouchStart);
+    thumbEle.addEventListener('touchstart', onThumbMouseDown);
 
     return () => {
       scrollbarEle.removeEventListener('touchstart', onScrollbarTouchStart);
-      thumbEle.removeEventListener('touchstart', onThumbTouchStart);
+      thumbEle.removeEventListener('touchstart', onThumbMouseDown);
     };
   }, []);
 
@@ -175,11 +170,15 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
       };
 
       window.addEventListener('mousemove', onMouseMove);
+      window.addEventListener('touchmove', onMouseMove);
       window.addEventListener('mouseup', onMouseUp);
+      window.addEventListener('touchend', onMouseUp);
 
       return () => {
         window.removeEventListener('mousemove', onMouseMove);
+        window.removeEventListener('touchmove', onMouseMove);
         window.removeEventListener('mouseup', onMouseUp);
+        window.removeEventListener('touchend', onMouseUp);
 
         raf.cancel(moveRafId);
       };
