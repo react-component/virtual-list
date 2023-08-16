@@ -9,13 +9,18 @@ interface FillerProps {
   /** Virtual filler height. Should be `count * itemMinHeight` */
   height: number;
   /** Set offset of visible items. Should be the top of start item position */
-  offset?: number;
+  offsetY?: number;
+  offsetX?: number;
+
+  scrollWidth?: number;
 
   children: React.ReactNode;
 
   onInnerResize?: () => void;
 
   innerProps?: InnerProps;
+
+  rtl: boolean;
 }
 
 /**
@@ -23,7 +28,17 @@ interface FillerProps {
  */
 const Filler = React.forwardRef(
   (
-    { height, offset, children, prefixCls, onInnerResize, innerProps }: FillerProps,
+    {
+      height,
+      offsetY,
+      offsetX,
+      scrollWidth,
+      children,
+      prefixCls,
+      onInnerResize,
+      innerProps,
+      rtl,
+    }: FillerProps,
     ref: React.Ref<HTMLDivElement>,
   ) => {
     let outerStyle: React.CSSProperties = {};
@@ -33,12 +48,18 @@ const Filler = React.forwardRef(
       flexDirection: 'column',
     };
 
-    if (offset !== undefined) {
-      outerStyle = { height, position: 'relative', overflow: 'hidden' };
+    if (offsetY !== undefined) {
+      outerStyle = {
+        height,
+        width: scrollWidth,
+        minWidth: '100%',
+        position: 'relative',
+        overflow: 'hidden',
+      };
 
       innerStyle = {
         ...innerStyle,
-        transform: `translateY(${offset}px)`,
+        transform: `translate(${rtl ? offsetX : -offsetX}px, ${offsetY}px)`,
         position: 'absolute',
         left: 0,
         right: 0,
