@@ -1,6 +1,5 @@
 import * as React from 'react';
 import classNames from 'classnames';
-import ResizeObserver, { type ResizeObserverProps } from 'rc-resize-observer';
 import raf from 'rc-util/lib/raf';
 
 const MIN_SIZE = 20;
@@ -17,8 +16,7 @@ export interface ScrollBarProps {
   onStopMove: () => void;
   horizontal?: boolean;
 
-  // This can be remove when test move to @testing-lib
-  height?: number;
+  containerSize: number;
 }
 
 export interface ScrollBarRef {
@@ -43,7 +41,7 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
     onStopMove,
     onScroll,
     horizontal,
-    height = 0,
+    containerSize,
   } = props;
 
   const [dragging, setDragging] = React.useState(false);
@@ -51,12 +49,6 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
   const [startTop, setStartTop] = React.useState<number | null>(null);
 
   const isLTR = !rtl;
-
-  // ========================= Size =========================
-  const [containerSize, setContainerSize] = React.useState<number>(height);
-  const onResize: ResizeObserverProps['onResize'] = (size) => {
-    setContainerSize(horizontal ? size.width : size.height);
-  };
 
   // ========================= Refs =========================
   const scrollbarRef = React.useRef<HTMLDivElement>();
@@ -256,27 +248,25 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
   }
 
   return (
-    <ResizeObserver onResize={onResize}>
+    <div
+      ref={scrollbarRef}
+      className={classNames(scrollbarPrefixCls, {
+        [`${scrollbarPrefixCls}-horizontal`]: horizontal,
+        [`${scrollbarPrefixCls}-vertical`]: !horizontal,
+      })}
+      style={containerStyle}
+      onMouseDown={onContainerMouseDown}
+      onMouseMove={delayHidden}
+    >
       <div
-        ref={scrollbarRef}
-        className={classNames(scrollbarPrefixCls, {
-          [`${scrollbarPrefixCls}-horizontal`]: horizontal,
-          [`${scrollbarPrefixCls}-vertical`]: !horizontal,
+        ref={thumbRef}
+        className={classNames(`${scrollbarPrefixCls}-thumb`, {
+          [`${scrollbarPrefixCls}-thumb-moving`]: dragging,
         })}
-        style={containerStyle}
-        onMouseDown={onContainerMouseDown}
-        onMouseMove={delayHidden}
-      >
-        <div
-          ref={thumbRef}
-          className={classNames(`${scrollbarPrefixCls}-thumb`, {
-            [`${scrollbarPrefixCls}-thumb-moving`]: dragging,
-          })}
-          style={thumbStyle}
-          onMouseDown={onThumbMouseDown}
-        />
-      </div>
-    </ResizeObserver>
+        style={thumbStyle}
+        onMouseDown={onThumbMouseDown}
+      />
+    </div>
   );
 });
 

@@ -12,6 +12,8 @@ export default function useFrameWheel(
   inVirtual: boolean,
   isScrollAtTop: boolean,
   isScrollAtBottom: boolean,
+  isScrollAtLeft: boolean,
+  isScrollAtRight: boolean,
   onWheelDelta: (offset: number) => void,
 ): [(e: WheelEvent) => void, (e: FireFoxDOMMouseScrollEvent) => void] {
   const offsetRef = useRef(0);
@@ -24,9 +26,7 @@ export default function useFrameWheel(
   // Scroll status sync
   const originScroll = useOriginScroll(isScrollAtTop, isScrollAtBottom);
 
-  function onWheel(event: WheelEvent) {
-    if (!inVirtual) return;
-
+  function onWheelY(event: WheelEvent) {
     raf.cancel(nextFrameRef.current);
 
     const { deltaY } = event;
@@ -48,6 +48,26 @@ export default function useFrameWheel(
       onWheelDelta(offsetRef.current * patchMultiple);
       offsetRef.current = 0;
     });
+  }
+
+  function onWheelX(event: WheelEvent) {
+    const { deltaX } = event;
+
+    console.log('>>>', deltaX);
+
+    event.preventDefault();
+  }
+
+  function onWheel(event: WheelEvent) {
+    if (!inVirtual) return;
+
+    const { deltaX, deltaY } = event;
+
+    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+      onWheelX(event);
+    } else {
+      onWheelY(event);
+    }
   }
 
   // A patch for firefox
