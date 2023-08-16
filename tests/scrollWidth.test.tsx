@@ -80,7 +80,7 @@ describe('List.scrollWidth', () => {
     await act(async () => {
       onLibResize([
         {
-          target: container.querySelector('.rc-virtual-list-scrollbar-horizontal')!,
+          target: container.querySelector('.rc-virtual-list-holder')!,
         } as ResizeObserverEntry,
       ]);
 

@@ -3,6 +3,7 @@ import { act } from 'react-dom/test-utils';
 import { mount } from 'enzyme';
 import { spyElementPrototypes } from './utils/domHook';
 import List from '../src';
+import { createEvent, fireEvent, render } from '@testing-library/react';
 
 function genData(count) {
   return new Array(count).fill(null).map((_, index) => ({ id: String(index) }));
@@ -19,6 +20,10 @@ describe('List.Scroll', () => {
       clientHeight: {
         get: () => 100,
       },
+      getBoundingClientRect: () => ({
+        width: 100,
+        height: 100,
+      }),
     });
   });
 
@@ -34,7 +39,7 @@ describe('List.Scroll', () => {
     jest.useRealTimers();
   });
 
-  function genList(props) {
+  function genList(props, func = mount) {
     let node = (
       <List component="ul" itemKey="id" {...props}>
         {({ id }) => <li>{id}</li>}
@@ -45,7 +50,7 @@ describe('List.Scroll', () => {
       node = <div>{node}</div>;
     }
 
-    return mount(node);
+    return func(node);
   }
 
   it('scrollTo null will show the scrollbar', () => {
@@ -307,5 +312,28 @@ describe('List.Scroll', () => {
     jest.useRealTimers();
 
     expect(wrapper.exists('.rc-virtual-list-rtl')).toBeTruthy();
+  });
+
+  it('wheel horizontal', () => {
+    const { container } = genList(
+      {
+        itemHeight: 20,
+        height: 100,
+        data: genData(100),
+        scrollWidth: 1000,
+      },
+      render,
+    );
+
+    const holder = container.querySelector('ul');
+
+    const event = createEvent.wheel(holder, {
+      deltaX: -100,
+    });
+    const spyPreventDefault = jest.spyOn(event, 'preventDefault');
+
+    fireEvent(holder, event);
+
+    expect(spyPreventDefault).toHaveBeenCalled();
   });
 });

@@ -300,8 +300,11 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
       // Horizontal scroll no need sync virtual position
       setOffsetLeft((left) => {
         let newLeft = left + offsetXY;
+
+        const max = scrollWidth - size.width;
         newLeft = Math.max(newLeft, 0);
-        newLeft = Math.min(newLeft, scrollWidth - size.width);
+        newLeft = Math.min(newLeft, max);
+
         return newLeft;
       });
     } else {
@@ -317,6 +320,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     useVirtual,
     isScrollAtTop,
     isScrollAtBottom,
+    !!scrollWidth,
     onWheelDelta,
   );
 
