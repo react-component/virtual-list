@@ -51,15 +51,17 @@ const Filler = React.forwardRef(
     if (offsetY !== undefined) {
       outerStyle = {
         height,
-        width: scrollWidth,
-        minWidth: '100%',
+        // Not set since this will break `sticky: right`
+        // width: scrollWidth,
+        // minWidth: '100%',
         position: 'relative',
         overflow: 'hidden',
       };
 
       innerStyle = {
         ...innerStyle,
-        transform: `translate(${rtl ? offsetX : -offsetX}px, ${offsetY}px)`,
+        transform: `translateY(${offsetY}px)`,
+        [rtl ? 'marginRight' : 'marginLeft']: -offsetX,
         position: 'absolute',
         left: 0,
         right: 0,

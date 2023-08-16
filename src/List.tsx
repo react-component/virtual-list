@@ -386,7 +386,15 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   }, [start, end, mergedData]);
 
   // ================================ Render ================================
-  const listChildren = useChildren(mergedData, start, end, setInstanceRef, children, sharedConfig);
+  const listChildren = useChildren(
+    mergedData,
+    start,
+    end,
+    scrollWidth,
+    setInstanceRef,
+    children,
+    sharedConfig,
+  );
 
   let componentStyle: React.CSSProperties = null;
   if (height) {
