@@ -376,6 +376,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
         position: 'relative',
       }}
       className={mergedClassName}
+      {...containerProps}
       {...restProps}
     >
       <Component
@@ -393,6 +394,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
           onInnerResize={collectHeight}
           ref={fillerInnerRef}
           innerProps={innerProps}
+          rtl={isRTL}
         >
           {listChildren}
         </Filler>
@@ -404,7 +406,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
           prefixCls={prefixCls}
           scrollOffset={offsetTop}
           scrollRange={scrollHeight}
-          direction={direction}
+          rtl={isRTL}
           onScroll={onScrollBar}
           onStartMove={onScrollbarStartMove}
           onStopMove={onScrollbarStopMove}
@@ -417,7 +419,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
           prefixCls={prefixCls}
           scrollOffset={offsetLeft}
           scrollRange={scrollWidth}
-          direction={direction}
+          rtl={isRTL}
           onScroll={onScrollBar}
           onStartMove={onScrollbarStartMove}
           onStopMove={onScrollbarStopMove}

@@ -11,9 +11,7 @@ export interface ScrollBarProps {
   prefixCls: string;
   scrollOffset: number;
   scrollRange: number;
-  // height: number;
-  // count: number;
-  direction?: ScrollBarDirectionType;
+  rtl: boolean;
   onScroll: (scrollOffset: number, horizontal?: boolean) => void;
   onStartMove: () => void;
   onStopMove: () => void;
@@ -35,7 +33,7 @@ function getPageXY(
 const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) => {
   const {
     prefixCls,
-    direction,
+    rtl,
     scrollOffset,
     scrollRange,
     onStartMove,
@@ -48,7 +46,7 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
   const [pageXY, setPageXY] = React.useState<number | null>(null);
   const [startTop, setStartTop] = React.useState<number | null>(null);
 
-  const isLTR = direction !== 'rtl';
+  const isLTR = !rtl;
 
   // ========================= Size =========================
   const [containerSize, setContainerSize] = React.useState<number>(0);

@@ -18,6 +18,8 @@ const MyItem: React.ForwardRefRenderFunction<HTMLElement, Item> = ({ id, height 
         boxSizing: 'border-box',
         display: 'inline-block',
         whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
       }}
     >
       {id} {'longText '.repeat(100)}

@@ -19,6 +19,8 @@ interface FillerProps {
   onInnerResize?: () => void;
 
   innerProps?: InnerProps;
+
+  rtl: boolean;
 }
 
 /**
@@ -35,6 +37,7 @@ const Filler = React.forwardRef(
       prefixCls,
       onInnerResize,
       innerProps,
+      rtl,
     }: FillerProps,
     ref: React.Ref<HTMLDivElement>,
   ) => {
@@ -50,7 +53,7 @@ const Filler = React.forwardRef(
 
       innerStyle = {
         ...innerStyle,
-        transform: `translate(${-offsetX}px, ${offsetY}px)`,
+        transform: `translate(${rtl ? offsetX : -offsetX}px, ${offsetY}px)`,
         position: 'absolute',
         left: 0,
         right: 0,
