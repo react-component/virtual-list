@@ -12,7 +12,7 @@ export interface ScrollBarProps {
   scrollOffset: number;
   scrollRange: number;
   // height: number;
-  count: number;
+  // count: number;
   direction?: ScrollBarDirectionType;
   onScroll: (scrollOffset: number) => void;
   onStartMove: () => void;
@@ -36,8 +36,6 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
   const {
     prefixCls,
     direction,
-    // height,
-    count,
     scrollOffset,
     scrollRange,
     onStartMove,
@@ -77,11 +75,11 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
 
   // ========================= Spin =========================
   const spinSize = React.useMemo(() => {
-    let baseSize = (containerSize / count) * 10;
+    let baseSize = (containerSize / scrollRange) * 100;
     baseSize = Math.max(baseSize, MIN_SIZE);
     baseSize = Math.min(baseSize, containerSize / 2);
     return Math.floor(baseSize);
-  }, [count, containerSize]);
+  }, [containerSize, scrollRange]);
 
   // ======================== Range =========================
   const enableScrollRange = scrollRange - containerSize || 0;
