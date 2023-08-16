@@ -402,6 +402,26 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
           }}
         />
       )}
+
+      {useVirtual && scrollWidth && (
+        <ScrollBar
+          ref={scrollBarRef}
+          prefixCls={prefixCls}
+          scrollTop={scrollTop}
+          height={height}
+          scrollHeight={scrollHeight}
+          count={mergedData.length}
+          direction={direction}
+          onScroll={onScrollBar}
+          onStartMove={() => {
+            setScrollMoving(true);
+          }}
+          onStopMove={() => {
+            setScrollMoving(false);
+          }}
+          horizontal
+        />
+      )}
     </div>
   );
 }

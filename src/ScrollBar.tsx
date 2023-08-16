@@ -16,13 +16,7 @@ export interface ScrollBarProps {
   onScroll: (scrollTop: number) => void;
   onStartMove: () => void;
   onStopMove: () => void;
-}
-
-interface ScrollBarState {
-  dragging: boolean;
-  pageY: number;
-  startTop: number;
-  visible: boolean;
+  horizontal?: boolean;
 }
 
 export interface ScrollBarRef {
@@ -44,6 +38,7 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
     onStartMove,
     onStopMove,
     onScroll,
+    horizontal,
   } = props;
 
   const [dragging, setDragging] = React.useState(false);
@@ -195,10 +190,15 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
   }));
 
   // ======================== Render ========================
+  const scrollbarPrefixCls = `${prefixCls}-scrollbar`;
+
   return (
     <div
       ref={scrollbarRef}
-      className={`${prefixCls}-scrollbar`}
+      className={classNames(scrollbarPrefixCls, {
+        [`${scrollbarPrefixCls}-horizontal`]: horizontal,
+        [`${scrollbarPrefixCls}-vertical`]: !horizontal,
+      })}
       style={{
         width: 8,
         top: 0,
@@ -212,8 +212,8 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
     >
       <div
         ref={thumbRef}
-        className={classNames(`${prefixCls}-scrollbar-thumb`, {
-          [`${prefixCls}-scrollbar-thumb-moving`]: dragging,
+        className={classNames(`${scrollbarPrefixCls}-thumb`, {
+          [`${scrollbarPrefixCls}-thumb-moving`]: dragging,
         })}
         style={{
           width: '100%',
