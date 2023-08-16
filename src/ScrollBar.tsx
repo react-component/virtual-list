@@ -50,6 +50,8 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
   const [pageXY, setPageXY] = React.useState<number | null>(null);
   const [startTop, setStartTop] = React.useState<number | null>(null);
 
+  const isLTR = direction !== 'rtl';
+
   // ========================= Size =========================
   const [containerSize, setContainerSize] = React.useState<number>(0);
   const onResize: ResizeObserverProps['onResize'] = (size) => {
@@ -148,10 +150,17 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
         raf.cancel(moveRafId);
 
         if (stateDragging) {
-          const offsetY = getPageXY(e, horizontal) - statePageY;
-          const newTop = stateStartTop + offsetY;
+          const offset = getPageXY(e, horizontal) - statePageY;
+          let newTop = stateStartTop;
 
-          const ptg = enableHeightRange ? newTop / enableHeightRange : 0;
+          if (!isLTR && horizontal) {
+            newTop -= offset;
+          } else {
+            newTop += offset;
+          }
+
+          const ptg: number = enableHeightRange ? newTop / enableHeightRange : 0;
+
           const newScrollTop = Math.ceil(ptg * enableScrollRange);
           moveRafId = raf(() => {
             onScroll(newScrollTop);
@@ -193,26 +202,12 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
   // ======================== Render ========================
   const scrollbarPrefixCls = `${prefixCls}-scrollbar`;
 
-  // const scrollBarDirection =
-  // direction === 'rtl'
-  //   ? {
-  //       left: 0,
-  //     }
-  //   : {
-  //       right: 0,
-  //     };
-
   const containerStyle: React.CSSProperties = {
-    // ...scrollBarDirection,
     position: 'absolute',
     display: visible ? null : 'none',
   };
 
   const thumbStyle: React.CSSProperties = {
-    // width: '100%',
-    // height: spinHeight,
-    // top,
-    // left: 0,
     position: 'absolute',
     background: 'rgba(0, 0, 0, 0.5)',
     borderRadius: 99,
@@ -230,17 +225,22 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
     // Thumb
     thumbStyle.height = '100%';
     thumbStyle.width = spinSize;
-    thumbStyle.left = top;
+
+    if (isLTR) {
+      thumbStyle.left = top;
+    } else {
+      thumbStyle.right = top;
+    }
   } else {
     // Container
     containerStyle.width = 8;
     containerStyle.top = 0;
     containerStyle.bottom = 0;
 
-    if (direction === 'rtl') {
-      containerStyle.left = 0;
-    } else {
+    if (isLTR) {
       containerStyle.right = 0;
+    } else {
+      containerStyle.left = 0;
     }
 
     // Thumb

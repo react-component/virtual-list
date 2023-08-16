@@ -35,13 +35,21 @@ for (let i = 0; i < 100; i += 1) {
 }
 
 const Demo = () => {
+  const [rtl, setRTL] = React.useState(false);
   return (
     <React.StrictMode>
       <div>
-        <h2>Dynamic Height</h2>
+        <button
+          onClick={() => {
+            setRTL(!rtl);
+          }}
+        >
+          RTL: {String(rtl)}
+        </button>
 
-        <div style={{ width: 500 }}>
+        <div style={{ width: 500, margin: 64 }}>
           <List
+            direction={rtl ? 'rtl' : 'ltr'}
             data={data}
             height={300}
             itemHeight={30}
