@@ -58,9 +58,13 @@ const Demo = () => {
             itemHeight={30}
             itemKey="id"
             scrollWidth={2328}
+            // scrollWidth={100}
             style={{
               border: '1px solid red',
               boxSizing: 'border-box',
+            }}
+            onScroll={(e) => {
+              console.log('Scroll:', e);
             }}
           >
             {(item) => <ForwardMyItem {...item} />}

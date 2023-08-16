@@ -67,7 +67,7 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
     setVisible(true);
 
     visibleTimeoutRef.current = setTimeout(() => {
-      // setVisible(false);
+      setVisible(false);
     }, 2000);
   };
 
@@ -81,7 +81,10 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
 
   // ======================== Range =========================
   const enableScrollRange = scrollRange - containerSize || 0;
-  const enableHeightRange = containerSize - spinSize || 0;
+  const enableOffsetRange = containerSize - spinSize || 0;
+
+  // `scrollWidth` < `clientWidth` means no need to show scrollbar
+  const canScroll = enableScrollRange > 0;
 
   // ========================= Top ==========================
   const top = React.useMemo(() => {
@@ -89,8 +92,8 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
       return 0;
     }
     const ptg = scrollOffset / enableScrollRange;
-    return ptg * enableHeightRange;
-  }, [scrollOffset, enableScrollRange, enableHeightRange]);
+    return ptg * enableOffsetRange;
+  }, [scrollOffset, enableScrollRange, enableOffsetRange]);
 
   // ====================== Container =======================
   const onContainerMouseDown: React.MouseEventHandler = (e) => {
@@ -155,7 +158,7 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
             newTop += offset;
           }
 
-          const ptg: number = enableHeightRange ? newTop / enableHeightRange : 0;
+          const ptg: number = enableOffsetRange ? newTop / enableOffsetRange : 0;
 
           let newScrollTop = Math.ceil(ptg * enableScrollRange);
           newScrollTop = Math.max(newScrollTop, 0);
@@ -203,7 +206,7 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
 
   const containerStyle: React.CSSProperties = {
     position: 'absolute',
-    display: visible ? null : 'none',
+    visibility: visible && canScroll ? null : 'hidden',
   };
 
   const thumbStyle: React.CSSProperties = {

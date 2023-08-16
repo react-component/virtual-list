@@ -49,7 +49,13 @@ const Filler = React.forwardRef(
     };
 
     if (offsetY !== undefined) {
-      outerStyle = { height, width: scrollWidth, position: 'relative', overflow: 'hidden' };
+      outerStyle = {
+        height,
+        width: scrollWidth,
+        minWidth: '100%',
+        position: 'relative',
+        overflow: 'hidden',
+      };
 
       innerStyle = {
         ...innerStyle,
