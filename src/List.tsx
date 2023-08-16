@@ -1,6 +1,8 @@
 import * as React from 'react';
 import { useRef, useState } from 'react';
 import classNames from 'classnames';
+import type { ResizeObserverProps } from 'rc-resize-observer';
+import ResizeObserver from 'rc-resize-observer';
 import Filler from './Filler';
 import type { InnerProps } from './Filler';
 import type { ScrollBarDirectionType, ScrollBarRef } from './ScrollBar';
@@ -14,6 +16,8 @@ import useFrameWheel from './hooks/useFrameWheel';
 import useMobileTouchMove from './hooks/useMobileTouchMove';
 import useOriginScroll from './hooks/useOriginScroll';
 import useLayoutEffect from 'rc-util/lib/hooks/useLayoutEffect';
+import { getSpinSize } from './utils/scrollbarUtil';
+import { useEvent } from 'rc-util';
 
 const EMPTY_DATA = [];
 
@@ -97,7 +101,6 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   const mergedData = data || EMPTY_DATA;
   const componentRef = useRef<HTMLDivElement>();
   const fillerInnerRef = useRef<HTMLDivElement>();
-  const scrollBarRef = useRef<ScrollBarRef>(); // Hack on scrollbar to enable flash call
 
   // =============================== Item Key ===============================
 
@@ -232,6 +235,25 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   rangeRef.current.start = start;
   rangeRef.current.end = end;
 
+  // ================================= Size =================================
+  const [size, setSize] = React.useState({ width: 0, height });
+  const onHolderResize: ResizeObserverProps['onResize'] = (sizeInfo) => {
+    setSize(sizeInfo);
+  };
+
+  // Hack on scrollbar to enable flash call
+  const verticalScrollBarRef = useRef<ScrollBarRef>();
+  const horizontalScrollBarRef = useRef<ScrollBarRef>();
+
+  const horizontalScrollBarSpinSize = React.useMemo(
+    () => getSpinSize(size.width, scrollWidth),
+    [size.width, scrollWidth],
+  );
+  const verticalScrollBarSpinSize = React.useMemo(
+    () => getSpinSize(size.height, scrollHeight),
+    [size.height, scrollHeight],
+  );
+
   // =============================== In Range ===============================
   const maxScrollHeight = scrollHeight - height;
   const maxScrollHeightRef = useRef(maxScrollHeight);
@@ -273,17 +295,33 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     onScroll?.(e);
   }
 
+  const onWheelDelta = useEvent((offsetXY, fromHorizontal) => {
+    if (fromHorizontal) {
+      // Horizontal scroll no need sync virtual position
+      setOffsetLeft((left) => {
+        let newLeft = left + offsetXY;
+
+        const max = scrollWidth - size.width;
+        newLeft = Math.max(newLeft, 0);
+        newLeft = Math.min(newLeft, max);
+
+        return newLeft;
+      });
+    } else {
+      syncScrollTop((top) => {
+        const newTop = top + offsetXY;
+        return newTop;
+      });
+    }
+  });
+
   // Since this added in global,should use ref to keep update
   const [onRawWheel, onFireFoxScroll] = useFrameWheel(
     useVirtual,
     isScrollAtTop,
     isScrollAtBottom,
-    (offsetY) => {
-      syncScrollTop((top) => {
-        const newTop = top + offsetY;
-        return newTop;
-      });
-    },
+    !!scrollWidth,
+    onWheelDelta,
   );
 
   // Mobile touch move
@@ -317,6 +355,11 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   }, [useVirtual]);
 
   // ================================= Ref ==================================
+  const delayHideScrollBar = () => {
+    verticalScrollBarRef.current?.delayHidden();
+    horizontalScrollBarRef.current?.delayHidden();
+  };
+
   const scrollTo = useScrollTo<T>(
     componentRef,
     mergedData,
@@ -325,9 +368,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     getKey,
     collectHeight,
     syncScrollTop,
-    () => {
-      scrollBarRef.current?.delayHidden();
-    },
+    delayHideScrollBar,
   );
 
   React.useImperativeHandle(ref, () => ({
@@ -379,30 +420,33 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
       {...containerProps}
       {...restProps}
     >
-      <Component
-        className={`${prefixCls}-holder`}
-        style={componentStyle}
-        ref={componentRef}
-        onScroll={onFallbackScroll}
-      >
-        <Filler
-          prefixCls={prefixCls}
-          height={scrollHeight}
-          offsetX={offsetLeft}
-          offsetY={offset}
-          scrollWidth={scrollWidth}
-          onInnerResize={collectHeight}
-          ref={fillerInnerRef}
-          innerProps={innerProps}
-          rtl={isRTL}
+      <ResizeObserver onResize={onHolderResize}>
+        <Component
+          className={`${prefixCls}-holder`}
+          style={componentStyle}
+          ref={componentRef}
+          onScroll={onFallbackScroll}
+          onMouseEnter={delayHideScrollBar}
         >
-          {listChildren}
-        </Filler>
-      </Component>
+          <Filler
+            prefixCls={prefixCls}
+            height={scrollHeight}
+            offsetX={offsetLeft}
+            offsetY={offset}
+            scrollWidth={scrollWidth}
+            onInnerResize={collectHeight}
+            ref={fillerInnerRef}
+            innerProps={innerProps}
+            rtl={isRTL}
+          >
+            {listChildren}
+          </Filler>
+        </Component>
+      </ResizeObserver>
 
       {useVirtual && scrollHeight > height && (
         <ScrollBar
-          ref={scrollBarRef}
+          ref={verticalScrollBarRef}
           prefixCls={prefixCls}
           scrollOffset={offsetTop}
           scrollRange={scrollHeight}
@@ -410,13 +454,14 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
           onScroll={onScrollBar}
           onStartMove={onScrollbarStartMove}
           onStopMove={onScrollbarStopMove}
-          height={height}
+          spinSize={verticalScrollBarSpinSize}
+          containerSize={size.height}
         />
       )}
 
       {useVirtual && scrollWidth && (
         <ScrollBar
-          ref={scrollBarRef}
+          ref={horizontalScrollBarRef}
           prefixCls={prefixCls}
           scrollOffset={offsetLeft}
           scrollRange={scrollWidth}
@@ -424,6 +469,8 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
           onScroll={onScrollBar}
           onStartMove={onScrollbarStartMove}
           onStopMove={onScrollbarStopMove}
+          spinSize={horizontalScrollBarSpinSize}
+          containerSize={size.width}
           horizontal
         />
       )}

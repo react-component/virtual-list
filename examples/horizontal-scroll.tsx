@@ -64,7 +64,7 @@ const Demo = () => {
               boxSizing: 'border-box',
             }}
             onScroll={(e) => {
-              console.log('Scroll:', e);
+              // console.log('Scroll:', e);
             }}
           >
             {(item) => <ForwardMyItem {...item} />}

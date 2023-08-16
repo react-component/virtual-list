@@ -5,14 +5,18 @@ import useOriginScroll from './useOriginScroll';
 
 interface FireFoxDOMMouseScrollEvent {
   detail: number;
-  preventDefault: Function;
+  preventDefault: VoidFunction;
 }
 
 export default function useFrameWheel(
   inVirtual: boolean,
   isScrollAtTop: boolean,
   isScrollAtBottom: boolean,
-  onWheelDelta: (offset: number) => void,
+  horizontalScroll: boolean,
+  /***
+   * Return `true` when you need to prevent default event
+   */
+  onWheelDelta: (offset: number, horizontal?: boolean) => void,
 ): [(e: WheelEvent) => void, (e: FireFoxDOMMouseScrollEvent) => void] {
   const offsetRef = useRef(0);
   const nextFrameRef = useRef<number>(null);
@@ -24,9 +28,7 @@ export default function useFrameWheel(
   // Scroll status sync
   const originScroll = useOriginScroll(isScrollAtTop, isScrollAtBottom);
 
-  function onWheel(event: WheelEvent) {
-    if (!inVirtual) return;
-
+  function onWheelY(event: WheelEvent) {
     raf.cancel(nextFrameRef.current);
 
     const { deltaY } = event;
@@ -48,6 +50,44 @@ export default function useFrameWheel(
       onWheelDelta(offsetRef.current * patchMultiple);
       offsetRef.current = 0;
     });
+  }
+
+  function onWheelX(event: WheelEvent) {
+    const { deltaX } = event;
+
+    onWheelDelta(deltaX, true);
+
+    if (!isFF) {
+      event.preventDefault();
+    }
+  }
+
+  // Check for which direction does wheel do
+  const wheelDirectionRef = useRef<'x' | 'y' | null>(null);
+  const wheelDirectionCleanRef = useRef<number>(null);
+
+  function onWheel(event: WheelEvent) {
+    if (!inVirtual) return;
+
+    // Wait for 2 frame to clean direction
+    raf.cancel(wheelDirectionCleanRef.current);
+    wheelDirectionCleanRef.current = raf(() => {
+      wheelDirectionRef.current = null;
+    }, 2);
+
+    const { deltaX, deltaY } = event;
+    const absX = Math.abs(deltaX);
+    const absY = Math.abs(deltaY);
+
+    if (wheelDirectionRef.current === null) {
+      wheelDirectionRef.current = horizontalScroll && absX > absY ? 'x' : 'y';
+    }
+
+    if (wheelDirectionRef.current === 'x') {
+      onWheelX(event);
+    } else {
+      onWheelY(event);
+    }
   }
 
   // A patch for firefox
