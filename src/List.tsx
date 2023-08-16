@@ -355,6 +355,11 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   }, [useVirtual]);
 
   // ================================= Ref ==================================
+  const delayHideScrollBar = () => {
+    verticalScrollBarRef.current?.delayHidden();
+    horizontalScrollBarRef.current?.delayHidden();
+  };
+
   const scrollTo = useScrollTo<T>(
     componentRef,
     mergedData,
@@ -363,10 +368,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     getKey,
     collectHeight,
     syncScrollTop,
-    () => {
-      verticalScrollBarRef.current?.delayHidden();
-      horizontalScrollBarRef.current?.delayHidden();
-    },
+    delayHideScrollBar,
   );
 
   React.useImperativeHandle(ref, () => ({
@@ -424,6 +426,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
           style={componentStyle}
           ref={componentRef}
           onScroll={onFallbackScroll}
+          onMouseEnter={delayHideScrollBar}
         >
           <Filler
             prefixCls={prefixCls}

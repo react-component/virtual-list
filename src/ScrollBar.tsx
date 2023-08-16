@@ -64,7 +64,7 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
 
     visibleTimeoutRef.current = setTimeout(() => {
       setVisible(false);
-    }, 5000);
+    }, 3000);
   };
 
   // ======================== Range =========================
@@ -245,6 +245,7 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
       className={classNames(scrollbarPrefixCls, {
         [`${scrollbarPrefixCls}-horizontal`]: horizontal,
         [`${scrollbarPrefixCls}-vertical`]: !horizontal,
+        [`${scrollbarPrefixCls}-visible`]: visible,
       })}
       style={containerStyle}
       onMouseDown={onContainerMouseDown}
