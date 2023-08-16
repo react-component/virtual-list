@@ -91,20 +91,26 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   // ================================= MISC =================================
   const useVirtual = !!(virtual !== false && height && itemHeight);
   const inVirtual = useVirtual && data && itemHeight * data.length > height;
+  const isRTL = direction === 'rtl';
 
-  const [offsetTop, setOffsetTop] = useState(0);
-  const [offsetWidth, setOffsetWidth] = useState(0);
-  const [scrollMoving, setScrollMoving] = useState(false);
-
-  const mergedClassName = classNames(
-    prefixCls,
-    { [`${prefixCls}-rtl`]: direction === 'rtl' },
-    className,
-  );
+  const mergedClassName = classNames(prefixCls, { [`${prefixCls}-rtl`]: isRTL }, className);
   const mergedData = data || EMPTY_DATA;
   const componentRef = useRef<HTMLDivElement>();
   const fillerInnerRef = useRef<HTMLDivElement>();
   const scrollBarRef = useRef<ScrollBarRef>(); // Hack on scrollbar to enable flash call
+
+  // =============================== Item Key ===============================
+
+  const [offsetTop, setOffsetTop] = useState(0);
+  const [offsetLeft, setOffsetLeft] = useState(0);
+  const [scrollMoving, setScrollMoving] = useState(false);
+
+  const onScrollbarStartMove = () => {
+    setScrollMoving(true);
+  };
+  const onScrollbarStopMove = () => {
+    setScrollMoving(false);
+  };
 
   // =============================== Item Key ===============================
   const getKey = React.useCallback<GetKey<T>>(
@@ -246,9 +252,14 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   const originScroll = useOriginScroll(isScrollAtTop, isScrollAtBottom);
 
   // ================================ Scroll ================================
-  function onScrollBar(newScrollTop: number) {
-    const newTop = newScrollTop;
-    syncScrollTop(newTop);
+  function onScrollBar(newScrollOffset: number, horizontal?: boolean) {
+    const newOffset = newScrollOffset;
+
+    if (horizontal) {
+      setOffsetLeft(newOffset);
+    } else {
+      syncScrollTop(newOffset);
+    }
   }
 
   // When data size reduce. It may trigger native scroll event back to fit scroll position
@@ -293,19 +304,15 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
       }
     }
 
-    componentRef.current.addEventListener('wheel', onRawWheel);
-    componentRef.current.addEventListener('DOMMouseScroll', onFireFoxScroll as any);
-    componentRef.current.addEventListener('MozMousePixelScroll', onMozMousePixelScroll);
+    const componentEle = componentRef.current;
+    componentEle.addEventListener('wheel', onRawWheel);
+    componentEle.addEventListener('DOMMouseScroll', onFireFoxScroll as any);
+    componentEle.addEventListener('MozMousePixelScroll', onMozMousePixelScroll);
 
     return () => {
-      if (componentRef.current) {
-        componentRef.current.removeEventListener('wheel', onRawWheel);
-        componentRef.current.removeEventListener('DOMMouseScroll', onFireFoxScroll as any);
-        componentRef.current.removeEventListener(
-          'MozMousePixelScroll',
-          onMozMousePixelScroll as any,
-        );
-      }
+      componentEle.removeEventListener('wheel', onRawWheel);
+      componentEle.removeEventListener('DOMMouseScroll', onFireFoxScroll as any);
+      componentEle.removeEventListener('MozMousePixelScroll', onMozMousePixelScroll as any);
     };
   }, [useVirtual]);
 
@@ -357,6 +364,11 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     }
   }
 
+  const containerProps: React.HTMLAttributes<HTMLDivElement> = {};
+  if (isRTL) {
+    containerProps.dir = 'rtl';
+  }
+
   return (
     <div
       style={{
@@ -375,7 +387,8 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
         <Filler
           prefixCls={prefixCls}
           height={scrollHeight}
-          offset={offset}
+          offsetX={offsetLeft}
+          offsetY={offset}
           scrollWidth={scrollWidth}
           onInnerResize={collectHeight}
           ref={fillerInnerRef}
@@ -393,12 +406,8 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
           scrollRange={scrollHeight}
           direction={direction}
           onScroll={onScrollBar}
-          onStartMove={() => {
-            setScrollMoving(true);
-          }}
-          onStopMove={() => {
-            setScrollMoving(false);
-          }}
+          onStartMove={onScrollbarStartMove}
+          onStopMove={onScrollbarStopMove}
         />
       )}
 
@@ -406,16 +415,12 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
         <ScrollBar
           ref={scrollBarRef}
           prefixCls={prefixCls}
-          scrollOffset={offsetWidth}
+          scrollOffset={offsetLeft}
           scrollRange={scrollWidth}
           direction={direction}
           onScroll={onScrollBar}
-          onStartMove={() => {
-            setScrollMoving(true);
-          }}
-          onStopMove={() => {
-            setScrollMoving(false);
-          }}
+          onStartMove={onScrollbarStartMove}
+          onStopMove={onScrollbarStopMove}
           horizontal
         />
       )}

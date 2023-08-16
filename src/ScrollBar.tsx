@@ -14,7 +14,7 @@ export interface ScrollBarProps {
   // height: number;
   // count: number;
   direction?: ScrollBarDirectionType;
-  onScroll: (scrollOffset: number) => void;
+  onScroll: (scrollOffset: number, horizontal?: boolean) => void;
   onStartMove: () => void;
   onStopMove: () => void;
   horizontal?: boolean;
@@ -159,9 +159,12 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
 
           const ptg: number = enableHeightRange ? newTop / enableHeightRange : 0;
 
-          const newScrollTop = Math.ceil(ptg * enableScrollRange);
+          let newScrollTop = Math.ceil(ptg * enableScrollRange);
+          newScrollTop = Math.max(newScrollTop, 0);
+          newScrollTop = Math.min(newScrollTop, enableScrollRange);
+
           moveRafId = raf(() => {
-            onScroll(newScrollTop);
+            onScroll(newScrollTop, horizontal);
           });
         }
       };

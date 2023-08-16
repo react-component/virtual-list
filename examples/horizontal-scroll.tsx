@@ -17,9 +17,10 @@ const MyItem: React.ForwardRefRenderFunction<HTMLElement, Item> = ({ id, height 
         lineHeight: '30px',
         boxSizing: 'border-box',
         display: 'inline-block',
+        whiteSpace: 'nowrap',
       }}
     >
-      longtextlongtextlongtextlongtextlongtextlongtextlongtextlongtextlongtextlongtextlongtextlongtextlongtextlongtextlongtextlongtextlongtextlongtextlongtextlongtextlongtextlongtextlongtextlongtextlongtextlongtextlongtextlongtextlongtextlongtextlongtextlongtextlongtextlongtextlongtextlongtextlongtextlongtextlongtext
+      {id} {'longText '.repeat(100)}
     </span>
   );
 };
