@@ -87,7 +87,7 @@ describe('List.Basic', () => {
       scrollTop = 0;
       const wrapper = genList({ itemHeight: 20, height: 100, data: genData(100), onVisibleChange });
       expect(wrapper.find(Filler).props().height).toEqual(2000);
-      expect(wrapper.find(Filler).props().offset).toEqual(0);
+      expect(wrapper.find(Filler).props().offsetY).toEqual(0);
       onVisibleChange.mockReset();
 
       // scrollTop to end
@@ -96,7 +96,7 @@ describe('List.Basic', () => {
         scrollTop,
       });
       expect(wrapper.find(Filler).props().height).toEqual(2000);
-      expect(wrapper.find(Filler).props().offset + wrapper.find('li').length * 20).toEqual(2000);
+      expect(wrapper.find(Filler).props().offsetY + wrapper.find('li').length * 20).toEqual(2000);
 
       expect(onVisibleChange.mock.calls[0][0]).toHaveLength(6);
       expect(onVisibleChange.mock.calls[0][1]).toHaveLength(100);

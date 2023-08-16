@@ -16,6 +16,9 @@ export interface ScrollBarProps {
   onStartMove: () => void;
   onStopMove: () => void;
   horizontal?: boolean;
+
+  // This can be remove when test move to @testing-lib
+  height?: number;
 }
 
 export interface ScrollBarRef {
@@ -40,6 +43,7 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
     onStopMove,
     onScroll,
     horizontal,
+    height = 0,
   } = props;
 
   const [dragging, setDragging] = React.useState(false);
@@ -49,7 +53,7 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
   const isLTR = !rtl;
 
   // ========================= Size =========================
-  const [containerSize, setContainerSize] = React.useState<number>(0);
+  const [containerSize, setContainerSize] = React.useState<number>(height);
   const onResize: ResizeObserverProps['onResize'] = (size) => {
     setContainerSize(horizontal ? size.width : size.height);
   };

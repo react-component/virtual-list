@@ -410,6 +410,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
           onScroll={onScrollBar}
           onStartMove={onScrollbarStartMove}
           onStopMove={onScrollbarStopMove}
+          height={height}
         />
       )}
 
