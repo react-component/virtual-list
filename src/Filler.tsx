@@ -11,6 +11,8 @@ interface FillerProps {
   /** Set offset of visible items. Should be the top of start item position */
   offset?: number;
 
+  scrollWidth?: number;
+
   children: React.ReactNode;
 
   onInnerResize?: () => void;
@@ -23,7 +25,7 @@ interface FillerProps {
  */
 const Filler = React.forwardRef(
   (
-    { height, offset, children, prefixCls, onInnerResize, innerProps }: FillerProps,
+    { height, offset, scrollWidth, children, prefixCls, onInnerResize, innerProps }: FillerProps,
     ref: React.Ref<HTMLDivElement>,
   ) => {
     let outerStyle: React.CSSProperties = {};
@@ -34,7 +36,7 @@ const Filler = React.forwardRef(
     };
 
     if (offset !== undefined) {
-      outerStyle = { height, position: 'relative', overflow: 'hidden' };
+      outerStyle = { height, width: scrollWidth, position: 'relative', overflow: 'hidden' };
 
       innerStyle = {
         ...innerStyle,

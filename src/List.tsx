@@ -3,7 +3,7 @@ import { useRef, useState } from 'react';
 import classNames from 'classnames';
 import Filler from './Filler';
 import type { InnerProps } from './Filler';
-import type { ScrollBarDirectionType } from './ScrollBar';
+import type { ScrollBarDirectionType, ScrollBarRef } from './ScrollBar';
 import ScrollBar from './ScrollBar';
 import type { RenderFunc, SharedConfig, GetKey } from './interface';
 import useChildren from './hooks/useChildren';
@@ -52,6 +52,12 @@ export interface ListProps<T> extends Omit<React.HTMLAttributes<any>, 'children'
   /** Set `false` will always use real scroll instead of virtual one */
   virtual?: boolean;
   direction?: ScrollBarDirectionType;
+  /**
+   * By default `scrollWidth` is same as container.
+   * When set this, it will show the horizontal scrollbar and
+   * `scrollWidth` will be used as the real width instead of container width.
+   */
+  scrollWidth?: number;
 
   onScroll?: React.UIEventHandler<HTMLElement>;
   /** Trigger when render list item changed */
@@ -74,6 +80,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     itemKey,
     virtual,
     direction,
+    scrollWidth,
     component: Component = 'div',
     onScroll,
     onVisibleChange,
@@ -96,7 +103,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   const mergedData = data || EMPTY_DATA;
   const componentRef = useRef<HTMLDivElement>();
   const fillerInnerRef = useRef<HTMLDivElement>();
-  const scrollBarRef = useRef<any>(); // Hack on scrollbar to enable flash call
+  const scrollBarRef = useRef<ScrollBarRef>(); // Hack on scrollbar to enable flash call
 
   // =============================== Item Key ===============================
   const getKey = React.useCallback<GetKey<T>>(
@@ -339,6 +346,10 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     if (useVirtual) {
       componentStyle.overflowY = 'hidden';
 
+      if (scrollWidth) {
+        componentStyle.overflowX = 'hidden';
+      }
+
       if (scrollMoving) {
         componentStyle.pointerEvents = 'none';
       }
@@ -364,6 +375,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
           prefixCls={prefixCls}
           height={scrollHeight}
           offset={offset}
+          scrollWidth={scrollWidth}
           onInnerResize={collectHeight}
           ref={fillerInnerRef}
           innerProps={innerProps}
