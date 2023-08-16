@@ -1,5 +1,6 @@
 import * as React from 'react';
 import classNames from 'classnames';
+import ResizeObserver, { type ResizeObserverProps } from 'rc-resize-observer';
 import raf from 'rc-util/lib/raf';
 
 const MIN_SIZE = 20;
@@ -8,12 +9,12 @@ export type ScrollBarDirectionType = 'ltr' | 'rtl';
 
 export interface ScrollBarProps {
   prefixCls: string;
-  scrollTop: number;
-  scrollHeight: number;
-  height: number;
+  scrollOffset: number;
+  scrollRange: number;
+  // height: number;
   count: number;
   direction?: ScrollBarDirectionType;
-  onScroll: (scrollTop: number) => void;
+  onScroll: (scrollOffset: number) => void;
   onStartMove: () => void;
   onStopMove: () => void;
   horizontal?: boolean;
@@ -23,18 +24,22 @@ export interface ScrollBarRef {
   delayHidden: () => void;
 }
 
-function getPageY(e: React.MouseEvent | React.TouchEvent | MouseEvent | TouchEvent) {
-  return 'touches' in e ? e.touches[0].pageY : e.pageY;
+function getPageXY(
+  e: React.MouseEvent | React.TouchEvent | MouseEvent | TouchEvent,
+  horizontal: boolean,
+) {
+  const obj = 'touches' in e ? e.touches[0] : e;
+  return obj[horizontal ? 'pageX' : 'pageY'];
 }
 
 const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) => {
   const {
     prefixCls,
     direction,
-    height,
+    // height,
     count,
-    scrollTop,
-    scrollHeight,
+    scrollOffset,
+    scrollRange,
     onStartMove,
     onStopMove,
     onScroll,
@@ -42,8 +47,14 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
   } = props;
 
   const [dragging, setDragging] = React.useState(false);
-  const [pageY, setPageY] = React.useState<number | null>(null);
+  const [pageXY, setPageXY] = React.useState<number | null>(null);
   const [startTop, setStartTop] = React.useState<number | null>(null);
+
+  // ========================= Size =========================
+  const [containerSize, setContainerSize] = React.useState<number>(0);
+  const onResize: ResizeObserverProps['onResize'] = (size) => {
+    setContainerSize(horizontal ? size.width : size.height);
+  };
 
   // ========================= Refs =========================
   const scrollbarRef = React.useRef<HTMLDivElement>();
@@ -58,40 +69,30 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
     setVisible(true);
 
     visibleTimeoutRef.current = setTimeout(() => {
-      setVisible(false);
+      // setVisible(false);
     }, 2000);
   };
 
   // ========================= Spin =========================
-  const spinHeight = React.useMemo(() => {
-    let baseHeight = (height / count) * 10;
-    baseHeight = Math.max(baseHeight, MIN_SIZE);
-    baseHeight = Math.min(baseHeight, height / 2);
-    return Math.floor(baseHeight);
-  }, [count, height]);
+  const spinSize = React.useMemo(() => {
+    let baseSize = (containerSize / count) * 10;
+    baseSize = Math.max(baseSize, MIN_SIZE);
+    baseSize = Math.min(baseSize, containerSize / 2);
+    return Math.floor(baseSize);
+  }, [count, containerSize]);
 
   // ======================== Range =========================
-  const enableScrollRange = scrollHeight - height || 0;
-  const enableHeightRange = height - spinHeight || 0;
+  const enableScrollRange = scrollRange - containerSize || 0;
+  const enableHeightRange = containerSize - spinSize || 0;
 
   // ========================= Top ==========================
   const top = React.useMemo(() => {
-    if (scrollTop === 0 || enableScrollRange === 0) {
+    if (scrollOffset === 0 || enableScrollRange === 0) {
       return 0;
     }
-    const ptg = scrollTop / enableScrollRange;
+    const ptg = scrollOffset / enableScrollRange;
     return ptg * enableHeightRange;
-  }, [scrollTop, enableScrollRange, enableHeightRange]);
-
-  // ====================== Direction =======================
-  const scrollBarDirection =
-    direction === 'rtl'
-      ? {
-          left: 0,
-        }
-      : {
-          right: 0,
-        };
+  }, [scrollOffset, enableScrollRange, enableHeightRange]);
 
   // ====================== Container =======================
   const onContainerMouseDown: React.MouseEventHandler = (e) => {
@@ -100,12 +101,12 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
   };
 
   // ======================== Thumb =========================
-  const stateRef = React.useRef({ top, dragging, pageY, startTop });
-  stateRef.current = { top, dragging, pageY, startTop };
+  const stateRef = React.useRef({ top, dragging, pageY: pageXY, startTop });
+  stateRef.current = { top, dragging, pageY: pageXY, startTop };
 
   const onThumbMouseDown = (e: React.MouseEvent | React.TouchEvent | TouchEvent) => {
     setDragging(true);
-    setPageY(getPageY(e));
+    setPageXY(getPageXY(e, horizontal));
     setStartTop(stateRef.current.top);
 
     onStartMove();
@@ -147,7 +148,7 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
         raf.cancel(moveRafId);
 
         if (stateDragging) {
-          const offsetY = getPageY(e) - statePageY;
+          const offsetY = getPageXY(e, horizontal) - statePageY;
           const newTop = stateStartTop + offsetY;
 
           const ptg = enableHeightRange ? newTop / enableHeightRange : 0;
@@ -182,7 +183,7 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
 
   React.useEffect(() => {
     delayHidden();
-  }, [scrollTop]);
+  }, [scrollOffset]);
 
   // ====================== Imperative ======================
   React.useImperativeHandle(ref, () => ({
@@ -192,43 +193,84 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
   // ======================== Render ========================
   const scrollbarPrefixCls = `${prefixCls}-scrollbar`;
 
+  // const scrollBarDirection =
+  // direction === 'rtl'
+  //   ? {
+  //       left: 0,
+  //     }
+  //   : {
+  //       right: 0,
+  //     };
+
+  const containerStyle: React.CSSProperties = {
+    // ...scrollBarDirection,
+    position: 'absolute',
+    display: visible ? null : 'none',
+  };
+
+  const thumbStyle: React.CSSProperties = {
+    // width: '100%',
+    // height: spinHeight,
+    // top,
+    // left: 0,
+    position: 'absolute',
+    background: 'rgba(0, 0, 0, 0.5)',
+    borderRadius: 99,
+    cursor: 'pointer',
+    userSelect: 'none',
+  };
+
+  if (horizontal) {
+    // Container
+    containerStyle.height = 8;
+    containerStyle.left = 0;
+    containerStyle.right = 0;
+    containerStyle.bottom = 0;
+
+    // Thumb
+    thumbStyle.height = '100%';
+    thumbStyle.width = spinSize;
+    thumbStyle.left = top;
+  } else {
+    // Container
+    containerStyle.width = 8;
+    containerStyle.top = 0;
+    containerStyle.bottom = 0;
+
+    if (direction === 'rtl') {
+      containerStyle.left = 0;
+    } else {
+      containerStyle.right = 0;
+    }
+
+    // Thumb
+    thumbStyle.width = '100%';
+    thumbStyle.height = spinSize;
+    thumbStyle.top = top;
+  }
+
   return (
-    <div
-      ref={scrollbarRef}
-      className={classNames(scrollbarPrefixCls, {
-        [`${scrollbarPrefixCls}-horizontal`]: horizontal,
-        [`${scrollbarPrefixCls}-vertical`]: !horizontal,
-      })}
-      style={{
-        width: 8,
-        top: 0,
-        bottom: 0,
-        ...scrollBarDirection,
-        position: 'absolute',
-        display: visible ? null : 'none',
-      }}
-      onMouseDown={onContainerMouseDown}
-      onMouseMove={delayHidden}
-    >
+    <ResizeObserver onResize={onResize}>
       <div
-        ref={thumbRef}
-        className={classNames(`${scrollbarPrefixCls}-thumb`, {
-          [`${scrollbarPrefixCls}-thumb-moving`]: dragging,
+        ref={scrollbarRef}
+        className={classNames(scrollbarPrefixCls, {
+          [`${scrollbarPrefixCls}-horizontal`]: horizontal,
+          [`${scrollbarPrefixCls}-vertical`]: !horizontal,
         })}
-        style={{
-          width: '100%',
-          height: spinHeight,
-          top,
-          left: 0,
-          position: 'absolute',
-          background: 'rgba(0, 0, 0, 0.5)',
-          borderRadius: 99,
-          cursor: 'pointer',
-          userSelect: 'none',
-        }}
-        onMouseDown={onThumbMouseDown}
-      />
-    </div>
+        style={containerStyle}
+        onMouseDown={onContainerMouseDown}
+        onMouseMove={delayHidden}
+      >
+        <div
+          ref={thumbRef}
+          className={classNames(`${scrollbarPrefixCls}-thumb`, {
+            [`${scrollbarPrefixCls}-thumb-moving`]: dragging,
+          })}
+          style={thumbStyle}
+          onMouseDown={onThumbMouseDown}
+        />
+      </div>
+    </ResizeObserver>
   );
 });
 

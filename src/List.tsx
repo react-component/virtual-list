@@ -388,9 +388,8 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
         <ScrollBar
           ref={scrollBarRef}
           prefixCls={prefixCls}
-          scrollTop={scrollTop}
-          height={height}
-          scrollHeight={scrollHeight}
+          scrollOffset={scrollTop}
+          scrollRange={scrollHeight}
           count={mergedData.length}
           direction={direction}
           onScroll={onScrollBar}
@@ -407,9 +406,8 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
         <ScrollBar
           ref={scrollBarRef}
           prefixCls={prefixCls}
-          scrollTop={scrollTop}
-          height={height}
-          scrollHeight={scrollHeight}
+          scrollOffset={scrollTop}
+          scrollRange={scrollHeight}
           count={mergedData.length}
           direction={direction}
           onScroll={onScrollBar}
