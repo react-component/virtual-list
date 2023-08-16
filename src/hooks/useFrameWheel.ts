@@ -5,16 +5,14 @@ import useOriginScroll from './useOriginScroll';
 
 interface FireFoxDOMMouseScrollEvent {
   detail: number;
-  preventDefault: Function;
+  preventDefault: VoidFunction;
 }
 
 export default function useFrameWheel(
   inVirtual: boolean,
   isScrollAtTop: boolean,
   isScrollAtBottom: boolean,
-  isScrollAtLeft: boolean,
-  isScrollAtRight: boolean,
-  onWheelDelta: (offset: number) => void,
+  onWheelDelta: (offset: number, horizontal?: boolean) => void,
 ): [(e: WheelEvent) => void, (e: FireFoxDOMMouseScrollEvent) => void] {
   const offsetRef = useRef(0);
   const nextFrameRef = useRef<number>(null);
@@ -53,7 +51,7 @@ export default function useFrameWheel(
   function onWheelX(event: WheelEvent) {
     const { deltaX } = event;
 
-    console.log('>>>', deltaX);
+    onWheelDelta(deltaX, true);
 
     event.preventDefault();
   }

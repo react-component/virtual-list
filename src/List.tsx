@@ -16,6 +16,8 @@ import useFrameWheel from './hooks/useFrameWheel';
 import useMobileTouchMove from './hooks/useMobileTouchMove';
 import useOriginScroll from './hooks/useOriginScroll';
 import useLayoutEffect from 'rc-util/lib/hooks/useLayoutEffect';
+import { getSpinSize } from './utils/scrollbarUtil';
+import { useEvent } from 'rc-util';
 
 const EMPTY_DATA = [];
 
@@ -100,10 +102,6 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   const componentRef = useRef<HTMLDivElement>();
   const fillerInnerRef = useRef<HTMLDivElement>();
 
-  // Hack on scrollbar to enable flash call
-  const verticalScrollBarRef = useRef<ScrollBarRef>();
-  const horizontalScrollBarRef = useRef<ScrollBarRef>();
-
   // =============================== Item Key ===============================
 
   const [offsetTop, setOffsetTop] = useState(0);
@@ -130,12 +128,6 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
 
   const sharedConfig: SharedConfig<T> = {
     getKey,
-  };
-
-  // ================================= Size =================================
-  const [size, setSize] = React.useState({ width: 0, height });
-  const onHolderResize: ResizeObserverProps['onResize'] = (sizeInfo) => {
-    setSize(sizeInfo);
   };
 
   // ================================ Scroll ================================
@@ -243,6 +235,25 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   rangeRef.current.start = start;
   rangeRef.current.end = end;
 
+  // ================================= Size =================================
+  const [size, setSize] = React.useState({ width: 0, height });
+  const onHolderResize: ResizeObserverProps['onResize'] = (sizeInfo) => {
+    setSize(sizeInfo);
+  };
+
+  // Hack on scrollbar to enable flash call
+  const verticalScrollBarRef = useRef<ScrollBarRef>();
+  const horizontalScrollBarRef = useRef<ScrollBarRef>();
+
+  const horizontalScrollBarSpinSize = React.useMemo(
+    () => getSpinSize(size.width, scrollWidth),
+    [size.width, scrollWidth],
+  );
+  const verticalScrollBarSpinSize = React.useMemo(
+    () => getSpinSize(size.height, scrollHeight),
+    [size.height, scrollHeight],
+  );
+
   // =============================== In Range ===============================
   const maxScrollHeight = scrollHeight - height;
   const maxScrollHeightRef = useRef(maxScrollHeight);
@@ -284,19 +295,29 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     onScroll?.(e);
   }
 
+  const onWheelDelta = useEvent((offsetXY, fromHorizontal) => {
+    if (fromHorizontal) {
+      // Horizontal scroll no need sync virtual position
+      setOffsetLeft((left) => {
+        let newLeft = left + offsetXY;
+        newLeft = Math.max(newLeft, 0);
+        newLeft = Math.min(newLeft, scrollWidth - size.width);
+        return newLeft;
+      });
+    } else {
+      syncScrollTop((top) => {
+        const newTop = top + offsetXY;
+        return newTop;
+      });
+    }
+  });
+
   // Since this added in global,should use ref to keep update
   const [onRawWheel, onFireFoxScroll] = useFrameWheel(
     useVirtual,
     isScrollAtTop,
     isScrollAtBottom,
-    offsetLeft <= 0,
-    offsetLeft >= scrollWidth,
-    (offsetY) => {
-      syncScrollTop((top) => {
-        const newTop = top + offsetY;
-        return newTop;
-      });
-    },
+    onWheelDelta,
   );
 
   // Mobile touch move
@@ -426,6 +447,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
           onScroll={onScrollBar}
           onStartMove={onScrollbarStartMove}
           onStopMove={onScrollbarStopMove}
+          spinSize={verticalScrollBarSpinSize}
           containerSize={size.height}
         />
       )}
@@ -440,6 +462,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
           onScroll={onScrollBar}
           onStartMove={onScrollbarStartMove}
           onStopMove={onScrollbarStopMove}
+          spinSize={horizontalScrollBarSpinSize}
           containerSize={size.width}
           horizontal
         />

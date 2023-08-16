@@ -2,8 +2,6 @@ import * as React from 'react';
 import classNames from 'classnames';
 import raf from 'rc-util/lib/raf';
 
-const MIN_SIZE = 20;
-
 export type ScrollBarDirectionType = 'ltr' | 'rtl';
 
 export interface ScrollBarProps {
@@ -16,6 +14,7 @@ export interface ScrollBarProps {
   onStopMove: () => void;
   horizontal?: boolean;
 
+  spinSize: number;
   containerSize: number;
 }
 
@@ -41,6 +40,7 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
     onStopMove,
     onScroll,
     horizontal,
+    spinSize,
     containerSize,
   } = props;
 
@@ -64,16 +64,8 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
 
     visibleTimeoutRef.current = setTimeout(() => {
       setVisible(false);
-    }, 2000);
+    }, 5000);
   };
-
-  // ========================= Spin =========================
-  const spinSize = React.useMemo(() => {
-    let baseSize = (containerSize / scrollRange) * 100;
-    baseSize = Math.max(baseSize, MIN_SIZE);
-    baseSize = Math.min(baseSize, containerSize / 2);
-    return Math.floor(baseSize);
-  }, [containerSize, scrollRange]);
 
   // ======================== Range =========================
   const enableScrollRange = scrollRange - containerSize || 0;
