@@ -52,7 +52,9 @@ describe('List.Scroll', () => {
     jest.useFakeTimers();
     const listRef = React.createRef();
     const wrapper = genList({ itemHeight: 20, height: 100, data: genData(100), ref: listRef });
-    jest.runAllTimers();
+    act(() => {
+      jest.runAllTimers();
+    });
 
     listRef.current.scrollTo(null);
     expect(wrapper.find('.rc-virtual-list-scrollbar-thumb').props().style.display).not.toEqual(
@@ -65,8 +67,10 @@ describe('List.Scroll', () => {
     it('value scroll', () => {
       const listRef = React.createRef();
       const wrapper = genList({ itemHeight: 20, height: 100, data: genData(100), ref: listRef });
-      listRef.current.scrollTo(903);
-      jest.runAllTimers();
+      act(() => {
+        listRef.current.scrollTo(903);
+        jest.runAllTimers();
+      });
       expect(wrapper.find('ul').instance().scrollTop).toEqual(903);
 
       wrapper.unmount();
@@ -79,40 +83,56 @@ describe('List.Scroll', () => {
 
     describe('index scroll', () => {
       it('work', () => {
-        listRef.current.scrollTo({ index: 30, align: 'top' });
-        jest.runAllTimers();
+        act(() => {
+          listRef.current.scrollTo({ index: 30, align: 'top' });
+          jest.runAllTimers();
+        });
         expect(wrapper.find('ul').instance().scrollTop).toEqual(600);
       });
 
       it('out of range should not crash', () => {
         expect(() => {
-          listRef.current.scrollTo({ index: 99999999999, align: 'top' });
-          jest.runAllTimers();
+          act(() => {
+            listRef.current.scrollTo({ index: 99999999999, align: 'top' });
+            jest.runAllTimers();
+          });
         }).not.toThrow();
       });
     });
 
     it('scroll top should not out of range', () => {
-      listRef.current.scrollTo({ index: 0, align: 'bottom' });
-      jest.runAllTimers();
+      act(() => {
+        listRef.current.scrollTo({ index: 0, align: 'bottom' });
+        jest.runAllTimers();
+      });
       expect(wrapper.find('ul').instance().scrollTop).toEqual(0);
     });
 
     it('key scroll', () => {
-      listRef.current.scrollTo({ key: '30', align: 'bottom' });
-      jest.runAllTimers();
+      act(() => {
+        listRef.current.scrollTo({ key: '30', align: 'bottom' });
+        jest.runAllTimers();
+      });
       expect(wrapper.find('ul').instance().scrollTop).toEqual(520);
     });
 
     it('smart', () => {
-      listRef.current.scrollTo(0);
-      listRef.current.scrollTo({ index: 30 });
-      jest.runAllTimers();
+      act(() => {
+        listRef.current.scrollTo(0);
+      });
+      act(() => {
+        listRef.current.scrollTo({ index: 30 });
+        jest.runAllTimers();
+      });
       expect(wrapper.find('ul').instance().scrollTop).toEqual(520);
 
-      listRef.current.scrollTo(800);
-      listRef.current.scrollTo({ index: 30 });
-      jest.runAllTimers();
+      act(() => {
+        listRef.current.scrollTo(800);
+      });
+      act(() => {
+        listRef.current.scrollTo({ index: 30 });
+        jest.runAllTimers();
+      });
       expect(wrapper.find('ul').instance().scrollTop).toEqual(600);
     });
   });

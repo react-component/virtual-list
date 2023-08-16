@@ -15,11 +15,11 @@ export default function useHeights<T>(
   const heightsRef = useRef(new CacheMap());
   const collectRafRef = useRef<number>();
 
-  function cancelRaf() {
+  const cancelRaf = React.useCallback(function cancelRaf() {
     raf.cancel(collectRafRef.current);
-  }
+  }, []);
 
-  function collectHeight() {
+  const collectHeight = React.useCallback(function () {
     cancelRaf();
 
     collectRafRef.current = raf(() => {
@@ -36,28 +36,31 @@ export default function useHeights<T>(
       // Always trigger update mark to tell parent that should re-calculate heights when resized
       setUpdatedMark((c) => c + 1);
     });
-  }
+  }, []);
 
-  function setInstanceRef(item: T, instance: HTMLElement) {
-    const key = getKey(item);
-    const origin = instanceRef.current.get(key);
+  const setInstanceRef = React.useCallback(
+    function (item: T, instance: HTMLElement) {
+      const key = getKey(item);
+      const origin = instanceRef.current.get(key);
 
-    if (instance) {
-      instanceRef.current.set(key, instance);
-      collectHeight();
-    } else {
-      instanceRef.current.delete(key);
-    }
-
-    // Instance changed
-    if (!origin !== !instance) {
       if (instance) {
-        onItemAdd?.(item);
+        instanceRef.current.set(key, instance);
+        collectHeight();
       } else {
-        onItemRemove?.(item);
+        instanceRef.current.delete(key);
       }
-    }
-  }
+
+      // Instance changed
+      if (!origin !== !instance) {
+        if (instance) {
+          onItemAdd?.(item);
+        } else {
+          onItemRemove?.(item);
+        }
+      }
+    },
+    [getKey, onItemAdd, onItemRemove],
+  );
 
   useEffect(() => {
     return cancelRaf;

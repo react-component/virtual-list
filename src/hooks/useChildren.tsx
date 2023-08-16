@@ -10,17 +10,19 @@ export default function useChildren<T>(
   renderFunc: RenderFunc<T>,
   { getKey }: SharedConfig<T>,
 ) {
-  return list.slice(startIndex, endIndex + 1).map((item, index) => {
-    const eleIndex = startIndex + index;
-    const node = renderFunc(item, eleIndex, {
-      // style: status === 'MEASURE_START' ? { visibility: 'hidden' } : {},
-    }) as React.ReactElement;
+  return React.useMemo(() => {
+    return list.slice(startIndex, endIndex + 1).map((item, index) => {
+      const eleIndex = startIndex + index;
+      const node = renderFunc(item, eleIndex, {
+        // style: status === 'MEASURE_START' ? { visibility: 'hidden' } : {},
+      }) as React.ReactElement;
 
-    const key = getKey(item);
-    return (
-      <Item key={key} setRef={ele => setNodeRef(item, ele)}>
-        {node}
-      </Item>
-    );
-  });
+      const key = getKey(item);
+      return (
+        <Item key={key} setRef={(ele) => setNodeRef(item, ele)}>
+          {node}
+        </Item>
+      );
+    });
+  }, [list, startIndex, endIndex, setNodeRef, renderFunc, getKey]);
 }
