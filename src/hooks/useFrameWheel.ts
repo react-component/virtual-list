@@ -59,13 +59,8 @@ export default function useFrameWheel(
   function onWheel(event: WheelEvent) {
     if (!inVirtual) return;
 
-    const { deltaX, deltaY } = event;
-
-    if (Math.abs(deltaX) > Math.abs(deltaY)) {
-      onWheelX(event);
-    } else {
-      onWheelY(event);
-    }
+    onWheelX(event);
+    onWheelY(event);
   }
 
   // A patch for firefox
