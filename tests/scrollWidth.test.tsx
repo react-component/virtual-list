@@ -7,6 +7,8 @@ import List, { type ListProps } from '../src';
 import { _rs as onLibResize } from 'rc-resize-observer/lib/utils/observerUtil';
 import '@testing-library/jest-dom';
 
+const ITEM_HEIGHT = 20;
+
 function genData(count) {
   return new Array(count).fill(null).map((_, index) => ({ id: String(index) }));
 }
@@ -19,7 +21,7 @@ describe('List.scrollWidth', () => {
   beforeAll(() => {
     mockElement = spyElementPrototypes(HTMLElement, {
       offsetHeight: {
-        get: () => 20,
+        get: () => ITEM_HEIGHT,
       },
       clientHeight: {
         get: () => 100,
@@ -73,7 +75,7 @@ describe('List.scrollWidth', () => {
 
   it('work', async () => {
     const { container } = await genList({
-      itemHeight: 20,
+      itemHeight: ITEM_HEIGHT,
       height: 100,
       data: genData(100),
       scrollWidth: 1000,
@@ -88,7 +90,7 @@ describe('List.scrollWidth', () => {
       const listRef = React.createRef<ListRef>();
 
       const { container } = await genList({
-        itemHeight: 20,
+        itemHeight: ITEM_HEIGHT,
         height: 100,
         data: genData(100),
         scrollWidth: 1000,
@@ -136,7 +138,7 @@ describe('List.scrollWidth', () => {
       const onVirtualScroll = jest.fn();
 
       const { container } = await genList({
-        itemHeight: 20,
+        itemHeight: ITEM_HEIGHT,
         height: 100,
         data: genData(100),
         scrollWidth: 1000,
@@ -155,7 +157,7 @@ describe('List.scrollWidth', () => {
     const listRef = React.createRef<ListRef>();
 
     await genList({
-      itemHeight: 20,
+      itemHeight: ITEM_HEIGHT,
       height: 100,
       data: genData(100),
       scrollWidth: 1000,
@@ -171,13 +173,22 @@ describe('List.scrollWidth', () => {
 
   it('support extraRender', async () => {
     const { container } = await genList({
-      itemHeight: 20,
+      itemHeight: ITEM_HEIGHT,
       height: 100,
       data: genData(100),
       scrollWidth: 1000,
-      extraRender: () => <div className="bamboo" />,
+      extraRender: ({ getSize }) => {
+        const size = getSize('1', '3');
+        return (
+          <div className="bamboo">
+            {size.top}/{size.bottom}
+          </div>
+        );
+      },
     });
 
-    expect(container.querySelector('.bamboo')).toBeTruthy();
+    expect(container.querySelector('.bamboo').textContent).toEqual(
+      `${ITEM_HEIGHT}/${4 * ITEM_HEIGHT}`,
+    );
   });
 });

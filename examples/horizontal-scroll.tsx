@@ -2,7 +2,7 @@ import * as React from 'react';
 import List from '../src/List';
 
 interface Item {
-  id: number;
+  id: string;
   height: number;
 }
 
@@ -72,7 +72,7 @@ const ForwardMyItem = React.forwardRef(MyItem);
 const data: Item[] = [];
 for (let i = 0; i < 1000; i += 1) {
   data.push({
-    id: i,
+    id: `id_${i}`,
     height: 30 + Math.random() * 10,
   });
 }
@@ -105,12 +105,14 @@ const Demo = () => {
             }}
             extraRender={(info) => {
               const { offsetX, rtl: isRTL } = info;
+              const sizeInfo = info.getSize('id_3', 'id_5');
 
               return (
                 <div
                   style={{
                     position: 'absolute',
-                    top: 100,
+                    top: sizeInfo.top,
+                    height: sizeInfo.bottom - sizeInfo.top,
                     [isRTL ? 'right' : 'left']: 100 - offsetX,
                     background: 'rgba(255,0,0,0.1)',
                   }}
