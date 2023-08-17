@@ -69,9 +69,8 @@ export interface ListProps<T> extends Omit<React.HTMLAttributes<any>, 'children'
   /**
    * Given the virtual offset value.
    * It's the logic offset from start position.
-   * e.g. RTL mode is start at right and `offsetX` starts with 0.
    */
-  onVirtualScroll?: (info: { offsetX: number; offsetY: number }) => void;
+  onVirtualScroll?: (info: { x: number; y: number }) => void;
 
   /** Trigger when render list item changed */
   onVisibleChange?: (visibleList: T[], fullList: T[]) => void;
@@ -301,8 +300,8 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   const triggerScroll = useEvent(() => {
     if (onVirtualScroll) {
       onVirtualScroll({
-        offsetX: offsetLeft,
-        offsetY: offsetTop,
+        x: isRTL ? -offsetLeft : offsetLeft,
+        y: offsetTop,
       });
     }
   });
