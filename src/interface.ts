@@ -22,5 +22,5 @@ export interface ExtraRenderInfo {
 
   rtl: boolean;
 
-  getSize: (key: React.Key) => { top: number; bottom: number };
+  getSize: (startKey: React.Key, endKey?: React.Key) => { top: number; bottom: number };
 }

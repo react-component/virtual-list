@@ -105,15 +105,14 @@ const Demo = () => {
             }}
             extraRender={(info) => {
               const { offsetX, rtl: isRTL } = info;
-              const sizeInfo3 = info.getSize('id_3');
-              const sizeInfo5 = info.getSize('id_5');
+              const sizeInfo = info.getSize('id_3', 'id_5');
 
               return (
                 <div
                   style={{
                     position: 'absolute',
-                    top: sizeInfo3.top,
-                    height: sizeInfo5.bottom - sizeInfo3.top,
+                    top: sizeInfo.top,
+                    height: sizeInfo.bottom - sizeInfo.top,
                     [isRTL ? 'right' : 'left']: 100 - offsetX,
                     background: 'rgba(255,0,0,0.1)',
                   }}

@@ -450,9 +450,10 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   }, [start, end, mergedData]);
 
   // ================================ Extra =================================
-  const getSize = (targetKey: React.Key) => {
+  const getSize = (startKey: React.Key, endKey = startKey) => {
     let top = 0;
     let bottom = 0;
+    let total = 0;
 
     const dataLen = mergedData.length;
     for (let i = 0; i < dataLen; i += 1) {
@@ -460,13 +461,16 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
       const key = getKey(item);
 
       const cacheHeight = heights.get(key) ?? itemHeight;
-      bottom = top + cacheHeight;
+      bottom = total + cacheHeight;
 
-      if (key === targetKey) {
+      if (key === startKey) {
+        top = total;
+      }
+      if (key === endKey) {
         break;
       }
 
-      top = bottom;
+      total = bottom;
     }
 
     return { top, bottom };
