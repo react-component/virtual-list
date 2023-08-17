@@ -109,4 +109,16 @@ describe('List.scrollWidth', () => {
       width: '20px',
     });
   });
+
+  it('support extraRender', () => {
+    const { container } = genList({
+      itemHeight: 20,
+      height: 100,
+      data: genData(100),
+      scrollWidth: 1000,
+      extraRender: () => <div className="bamboo" />,
+    });
+
+    expect(container.querySelector('.bamboo')).toBeTruthy();
+  });
 });

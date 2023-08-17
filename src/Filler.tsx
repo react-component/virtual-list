@@ -21,6 +21,8 @@ interface FillerProps {
   innerProps?: InnerProps;
 
   rtl: boolean;
+
+  extra?: React.ReactNode;
 }
 
 /**
@@ -32,12 +34,12 @@ const Filler = React.forwardRef(
       height,
       offsetY,
       offsetX,
-      scrollWidth,
       children,
       prefixCls,
       onInnerResize,
       innerProps,
       rtl,
+      extra,
     }: FillerProps,
     ref: React.Ref<HTMLDivElement>,
   ) => {
@@ -49,17 +51,17 @@ const Filler = React.forwardRef(
     };
 
     if (offsetY !== undefined) {
+      // Not set `width` since this will break `sticky: right`
       outerStyle = {
         height,
-        width: scrollWidth,
-        minWidth: '100%',
         position: 'relative',
         overflow: 'hidden',
       };
 
       innerStyle = {
         ...innerStyle,
-        transform: `translate(${rtl ? offsetX : -offsetX}px, ${offsetY}px)`,
+        transform: `translateY(${offsetY}px)`,
+        [rtl ? 'marginRight' : 'marginLeft']: -offsetX,
         position: 'absolute',
         left: 0,
         right: 0,
@@ -86,6 +88,8 @@ const Filler = React.forwardRef(
           >
             {children}
           </div>
+
+          {extra}
         </ResizeObserver>
       </div>
     );

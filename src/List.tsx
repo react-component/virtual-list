@@ -7,7 +7,7 @@ import Filler from './Filler';
 import type { InnerProps } from './Filler';
 import type { ScrollBarDirectionType, ScrollBarRef } from './ScrollBar';
 import ScrollBar from './ScrollBar';
-import type { RenderFunc, SharedConfig, GetKey } from './interface';
+import type { RenderFunc, SharedConfig, GetKey, ExtraRenderInfo } from './interface';
 import useChildren from './hooks/useChildren';
 import useHeights from './hooks/useHeights';
 import useScrollTo from './hooks/useScrollTo';
@@ -69,6 +69,9 @@ export interface ListProps<T> extends Omit<React.HTMLAttributes<any>, 'children'
 
   /** Inject to inner container props. Only use when you need pass aria related data */
   innerProps?: InnerProps;
+
+  /** Render extra content into Filler */
+  extraRender?: (info: ExtraRenderInfo) => React.ReactNode;
 }
 
 export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
@@ -89,6 +92,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     onScroll,
     onVisibleChange,
     innerProps,
+    extraRender,
     ...restProps
   } = props;
 
@@ -386,7 +390,23 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   }, [start, end, mergedData]);
 
   // ================================ Render ================================
-  const listChildren = useChildren(mergedData, start, end, setInstanceRef, children, sharedConfig);
+  const listChildren = useChildren(
+    mergedData,
+    start,
+    end,
+    scrollWidth,
+    setInstanceRef,
+    children,
+    sharedConfig,
+  );
+
+  const extraContent = extraRender?.({
+    start,
+    end,
+    virtual: inVirtual,
+    offsetX: offsetLeft,
+    rtl: isRTL,
+  });
 
   let componentStyle: React.CSSProperties = null;
   if (height) {
@@ -438,13 +458,14 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
             ref={fillerInnerRef}
             innerProps={innerProps}
             rtl={isRTL}
+            extra={extraContent}
           >
             {listChildren}
           </Filler>
         </Component>
       </ResizeObserver>
 
-      {useVirtual && scrollHeight > height && (
+      {inVirtual && scrollHeight > height && (
         <ScrollBar
           ref={verticalScrollBarRef}
           prefixCls={prefixCls}
@@ -459,7 +480,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
         />
       )}
 
-      {useVirtual && scrollWidth && (
+      {inVirtual && scrollWidth && (
         <ScrollBar
           ref={horizontalScrollBarRef}
           prefixCls={prefixCls}
