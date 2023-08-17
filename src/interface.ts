@@ -21,4 +21,6 @@ export interface ExtraRenderInfo {
   offsetX: number;
 
   rtl: boolean;
+
+  getSize: (key: React.Key) => { top: number; bottom: number };
 }

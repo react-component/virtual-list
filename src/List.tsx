@@ -449,6 +449,38 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     }
   }, [start, end, mergedData]);
 
+  // ================================ Extra =================================
+  const getSize = (targetKey: React.Key) => {
+    let top = 0;
+    let bottom = 0;
+
+    const dataLen = mergedData.length;
+    for (let i = 0; i < dataLen; i += 1) {
+      const item = mergedData[i];
+      const key = getKey(item);
+
+      const cacheHeight = heights.get(key) ?? itemHeight;
+      bottom = top + cacheHeight;
+
+      if (key === targetKey) {
+        break;
+      }
+
+      top = bottom;
+    }
+
+    return { top, bottom };
+  };
+
+  const extraContent = extraRender?.({
+    start,
+    end,
+    virtual: inVirtual,
+    offsetX: offsetLeft,
+    rtl: isRTL,
+    getSize,
+  });
+
   // ================================ Render ================================
   const listChildren = useChildren(
     mergedData,
@@ -459,14 +491,6 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     children,
     sharedConfig,
   );
-
-  const extraContent = extraRender?.({
-    start,
-    end,
-    virtual: inVirtual,
-    offsetX: offsetLeft,
-    rtl: isRTL,
-  });
 
   let componentStyle: React.CSSProperties = null;
   if (height) {
