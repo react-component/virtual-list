@@ -287,24 +287,37 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   const originScroll = useOriginScroll(isScrollAtTop, isScrollAtBottom);
 
   // ================================ Scroll ================================
+  const lastVirtualScrollInfoRef = useRef<[number, number]>([0, 0]);
+
+  const triggerScroll = useEvent(() => {
+    if (onVirtualScroll) {
+      const x = isRTL ? -offsetLeft : offsetLeft;
+      const y = offsetTop;
+
+      // Trigger when offset changed
+      if (lastVirtualScrollInfoRef.current[0] !== x || lastVirtualScrollInfoRef.current[1] !== y) {
+        onVirtualScroll({
+          x,
+          y,
+        });
+
+        lastVirtualScrollInfoRef.current = [x, y];
+      }
+    }
+  });
+
   function onScrollBar(newScrollOffset: number, horizontal?: boolean) {
     const newOffset = newScrollOffset;
 
     if (horizontal) {
-      setOffsetLeft(newOffset);
+      flushSync(() => {
+        setOffsetLeft(newOffset);
+      });
+      triggerScroll();
     } else {
       syncScrollTop(newOffset);
     }
   }
-
-  const triggerScroll = useEvent(() => {
-    if (onVirtualScroll) {
-      onVirtualScroll({
-        x: isRTL ? -offsetLeft : offsetLeft,
-        y: offsetTop,
-      });
-    }
-  });
 
   // When data size reduce. It may trigger native scroll event back to fit scroll position
   function onFallbackScroll(e: React.UIEvent<HTMLDivElement>) {
