@@ -69,44 +69,79 @@ describe('List.scrollWidth', () => {
     expect(container.querySelector('.rc-virtual-list-scrollbar-horizontal')).toBeTruthy();
   });
 
-  it('trigger offset', async () => {
-    const { container } = genList({
-      itemHeight: 20,
-      height: 100,
-      data: genData(100),
-      scrollWidth: 1000,
+  describe('trigger offset', () => {
+    it('drag scrollbar', async () => {
+      const onVirtualScroll = jest.fn();
+
+      const { container } = genList({
+        itemHeight: 20,
+        height: 100,
+        data: genData(100),
+        scrollWidth: 1000,
+        onVirtualScroll,
+      });
+
+      await act(async () => {
+        onLibResize([
+          {
+            target: container.querySelector('.rc-virtual-list-holder')!,
+          } as ResizeObserverEntry,
+        ]);
+
+        await Promise.resolve();
+      });
+
+      // Drag
+      const thumb = container.querySelector(
+        '.rc-virtual-list-scrollbar-horizontal .rc-virtual-list-scrollbar-thumb',
+      )!;
+
+      pageX = 10;
+      fireEvent.mouseDown(thumb);
+
+      pageX = 100000;
+      fireEvent.mouseMove(window);
+
+      act(() => {
+        jest.runAllTimers();
+      });
+
+      fireEvent.mouseUp(window);
+
+      expect(thumb).toHaveStyle({
+        left: '80px',
+        width: '20px',
+      });
+
+      expect(onVirtualScroll).toHaveBeenCalledWith({ x: 900, y: 0 });
     });
 
-    await act(async () => {
-      onLibResize([
-        {
-          target: container.querySelector('.rc-virtual-list-holder')!,
-        } as ResizeObserverEntry,
-      ]);
+    it('wheel', async () => {
+      const onVirtualScroll = jest.fn();
 
-      await Promise.resolve();
-    });
+      const { container } = genList({
+        itemHeight: 20,
+        height: 100,
+        data: genData(100),
+        scrollWidth: 1000,
+        onVirtualScroll,
+      });
 
-    // Drag
-    const thumb = container.querySelector(
-      '.rc-virtual-list-scrollbar-horizontal .rc-virtual-list-scrollbar-thumb',
-    )!;
+      await act(async () => {
+        onLibResize([
+          {
+            target: container.querySelector('.rc-virtual-list-holder')!,
+          } as ResizeObserverEntry,
+        ]);
 
-    pageX = 10;
-    fireEvent.mouseDown(thumb);
+        await Promise.resolve();
+      });
 
-    pageX = 100000;
-    fireEvent.mouseMove(window);
-
-    act(() => {
-      jest.runAllTimers();
-    });
-
-    fireEvent.mouseUp(window);
-
-    expect(thumb).toHaveStyle({
-      left: '80px',
-      width: '20px',
+      // Wheel
+      fireEvent.wheel(container.querySelector('.rc-virtual-list-holder')!, {
+        deltaX: 123,
+      });
+      expect(onVirtualScroll).toHaveBeenCalledWith({ x: 123, y: 0 });
     });
   });
 

@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { useRef, useState } from 'react';
+import { flushSync } from 'react-dom';
 import classNames from 'classnames';
 import type { ResizeObserverProps } from 'rc-resize-observer';
 import ResizeObserver from 'rc-resize-observer';
@@ -64,6 +65,13 @@ export interface ListProps<T> extends Omit<React.HTMLAttributes<any>, 'children'
   scrollWidth?: number;
 
   onScroll?: React.UIEventHandler<HTMLElement>;
+
+  /**
+   * Given the virtual offset value.
+   * It's the logic offset from start position.
+   */
+  onVirtualScroll?: (info: { x: number; y: number }) => void;
+
   /** Trigger when render list item changed */
   onVisibleChange?: (visibleList: T[], fullList: T[]) => void;
 
@@ -90,6 +98,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     scrollWidth,
     component: Component = 'div',
     onScroll,
+    onVirtualScroll,
     onVisibleChange,
     innerProps,
     extraRender,
@@ -278,11 +287,33 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   const originScroll = useOriginScroll(isScrollAtTop, isScrollAtBottom);
 
   // ================================ Scroll ================================
+  const lastVirtualScrollInfoRef = useRef<[number, number]>([0, 0]);
+
+  const triggerScroll = useEvent(() => {
+    if (onVirtualScroll) {
+      const x = isRTL ? -offsetLeft : offsetLeft;
+      const y = offsetTop;
+
+      // Trigger when offset changed
+      if (lastVirtualScrollInfoRef.current[0] !== x || lastVirtualScrollInfoRef.current[1] !== y) {
+        onVirtualScroll({
+          x,
+          y,
+        });
+
+        lastVirtualScrollInfoRef.current = [x, y];
+      }
+    }
+  });
+
   function onScrollBar(newScrollOffset: number, horizontal?: boolean) {
     const newOffset = newScrollOffset;
 
     if (horizontal) {
-      setOffsetLeft(newOffset);
+      flushSync(() => {
+        setOffsetLeft(newOffset);
+      });
+      triggerScroll();
     } else {
       syncScrollTop(newOffset);
     }
@@ -297,20 +328,26 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
 
     // Trigger origin onScroll
     onScroll?.(e);
+    triggerScroll();
   }
 
-  const onWheelDelta = useEvent((offsetXY, fromHorizontal) => {
+  const onWheelDelta: Parameters<typeof useFrameWheel>[4] = useEvent((offsetXY, fromHorizontal) => {
     if (fromHorizontal) {
       // Horizontal scroll no need sync virtual position
-      setOffsetLeft((left) => {
-        let newLeft = left + offsetXY;
 
-        const max = scrollWidth - size.width;
-        newLeft = Math.max(newLeft, 0);
-        newLeft = Math.min(newLeft, max);
+      flushSync(() => {
+        setOffsetLeft((left) => {
+          let newLeft = left + (isRTL ? -offsetXY : offsetXY);
 
-        return newLeft;
+          const max = scrollWidth - size.width;
+          newLeft = Math.max(newLeft, 0);
+          newLeft = Math.min(newLeft, max);
+
+          return newLeft;
+        });
       });
+
+      triggerScroll();
     } else {
       syncScrollTop((top) => {
         const newTop = top + offsetXY;
