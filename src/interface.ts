@@ -19,4 +19,6 @@ export interface ExtraRenderInfo {
   virtual: boolean;
   /** Used for `scrollWidth` tell the horizontal offset */
   offsetX: number;
+
+  rtl: boolean;
 }

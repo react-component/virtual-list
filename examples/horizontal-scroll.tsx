@@ -104,14 +104,14 @@ const Demo = () => {
               boxSizing: 'border-box',
             }}
             extraRender={(info) => {
-              const { offsetX } = info;
+              const { offsetX, rtl: isRTL } = info;
 
               return (
                 <div
                   style={{
                     position: 'absolute',
                     top: 100,
-                    left: 100 - offsetX,
+                    [isRTL ? 'right' : 'left']: 100 - offsetX,
                     background: 'rgba(255,0,0,0.1)',
                   }}
                 >

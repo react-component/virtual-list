@@ -400,7 +400,13 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     sharedConfig,
   );
 
-  const extraContent = extraRender?.({ start, end, virtual: inVirtual, offsetX: offsetLeft });
+  const extraContent = extraRender?.({
+    start,
+    end,
+    virtual: inVirtual,
+    offsetX: offsetLeft,
+    rtl: isRTL,
+  });
 
   let componentStyle: React.CSSProperties = null;
   if (height) {
