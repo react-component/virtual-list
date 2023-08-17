@@ -11,7 +11,7 @@ import ScrollBar from './ScrollBar';
 import type { RenderFunc, SharedConfig, GetKey, ExtraRenderInfo } from './interface';
 import useChildren from './hooks/useChildren';
 import useHeights from './hooks/useHeights';
-import useScrollTo from './hooks/useScrollTo';
+import useScrollTo, { type ScrollPos, type ScrollTarget } from './hooks/useScrollTo';
 import useDiffItem from './hooks/useDiffItem';
 import useFrameWheel from './hooks/useFrameWheel';
 import useMobileTouchMove from './hooks/useMobileTouchMove';
@@ -27,23 +27,12 @@ const ScrollStyle: React.CSSProperties = {
   overflowAnchor: 'none',
 };
 
-export type ScrollAlign = 'top' | 'bottom' | 'auto';
-export type ScrollConfig =
-  | {
-      index: number;
-      align?: ScrollAlign;
-      offset?: number;
-    }
-  | {
-      key: React.Key;
-      align?: ScrollAlign;
-      offset?: number;
-    };
-
 export interface ScrollInfo {
   x: number;
   y: number;
 }
+
+export type ScrollConfig = ScrollTarget | ScrollPos;
 
 export type ScrollTo = (arg: number | ScrollConfig) => void;
 
@@ -343,19 +332,24 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     triggerScroll();
   }
 
+  const keepInHorizontalRange = (nextOffsetLeft: number) => {
+    let tmpOffsetLeft = nextOffsetLeft;
+    const max = scrollWidth - size.width;
+    tmpOffsetLeft = Math.max(tmpOffsetLeft, 0);
+    tmpOffsetLeft = Math.min(tmpOffsetLeft, max);
+
+    return tmpOffsetLeft;
+  };
+
   const onWheelDelta: Parameters<typeof useFrameWheel>[4] = useEvent((offsetXY, fromHorizontal) => {
     if (fromHorizontal) {
       // Horizontal scroll no need sync virtual position
 
       flushSync(() => {
         setOffsetLeft((left) => {
-          let newLeft = left + (isRTL ? -offsetXY : offsetXY);
+          const nextOffsetLeft = left + (isRTL ? -offsetXY : offsetXY);
 
-          const max = scrollWidth - size.width;
-          newLeft = Math.max(newLeft, 0);
-          newLeft = Math.min(newLeft, max);
-
-          return newLeft;
+          return keepInHorizontalRange(nextOffsetLeft);
         });
       });
 
@@ -426,7 +420,23 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
 
   React.useImperativeHandle(ref, () => ({
     getScrollInfo: getVirtualScrollInfo,
-    scrollTo,
+    scrollTo: (config) => {
+      function isPosScroll(arg: any): arg is ScrollPos {
+        return arg && typeof arg === 'object' && ('x' in arg || 'y' in arg);
+      }
+
+      if (isPosScroll(config)) {
+        // Scroll X
+        if (config.x !== undefined) {
+          setOffsetLeft(keepInHorizontalRange(config.x));
+        }
+
+        // Scroll Y
+        scrollTo(config.y);
+      } else {
+        scrollTo(config);
+      }
+    },
   }));
 
   // ================================ Effect ================================
