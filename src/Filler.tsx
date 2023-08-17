@@ -88,9 +88,9 @@ const Filler = React.forwardRef(
           >
             {children}
           </div>
-
-          {extra}
         </ResizeObserver>
+
+        {extra}
       </div>
     );
   },

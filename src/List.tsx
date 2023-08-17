@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { useRef, useState } from 'react';
+import { flushSync } from 'react-dom';
 import classNames from 'classnames';
 import type { ResizeObserverProps } from 'rc-resize-observer';
 import ResizeObserver from 'rc-resize-observer';
@@ -64,6 +65,14 @@ export interface ListProps<T> extends Omit<React.HTMLAttributes<any>, 'children'
   scrollWidth?: number;
 
   onScroll?: React.UIEventHandler<HTMLElement>;
+
+  /**
+   * Given the virtual offset value.
+   * It's the logic offset from start position.
+   * e.g. RTL mode is start at right and `offsetX` starts with 0.
+   */
+  onVirtualScroll?: (info: { offsetX: number; offsetY: number }) => void;
+
   /** Trigger when render list item changed */
   onVisibleChange?: (visibleList: T[], fullList: T[]) => void;
 
@@ -90,6 +99,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     scrollWidth,
     component: Component = 'div',
     onScroll,
+    onVirtualScroll,
     onVisibleChange,
     innerProps,
     extraRender,
@@ -288,6 +298,15 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     }
   }
 
+  const triggerScroll = useEvent(() => {
+    if (onVirtualScroll) {
+      onVirtualScroll({
+        offsetX: offsetLeft,
+        offsetY: offsetTop,
+      });
+    }
+  });
+
   // When data size reduce. It may trigger native scroll event back to fit scroll position
   function onFallbackScroll(e: React.UIEvent<HTMLDivElement>) {
     const { scrollTop: newScrollTop } = e.currentTarget;
@@ -297,20 +316,26 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
 
     // Trigger origin onScroll
     onScroll?.(e);
+    triggerScroll();
   }
 
-  const onWheelDelta = useEvent((offsetXY, fromHorizontal) => {
+  const onWheelDelta: Parameters<typeof useFrameWheel>[4] = useEvent((offsetXY, fromHorizontal) => {
     if (fromHorizontal) {
       // Horizontal scroll no need sync virtual position
-      setOffsetLeft((left) => {
-        let newLeft = left + offsetXY;
 
-        const max = scrollWidth - size.width;
-        newLeft = Math.max(newLeft, 0);
-        newLeft = Math.min(newLeft, max);
+      flushSync(() => {
+        setOffsetLeft((left) => {
+          let newLeft = left + (isRTL ? -offsetXY : offsetXY);
 
-        return newLeft;
+          const max = scrollWidth - size.width;
+          newLeft = Math.max(newLeft, 0);
+          newLeft = Math.min(newLeft, max);
+
+          return newLeft;
+        });
       });
+
+      triggerScroll();
     } else {
       syncScrollTop((top) => {
         const newTop = top + offsetXY;
