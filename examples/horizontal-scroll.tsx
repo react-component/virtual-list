@@ -70,7 +70,7 @@ const MyItem: React.ForwardRefRenderFunction<
 const ForwardMyItem = React.forwardRef(MyItem);
 
 const data: Item[] = [];
-for (let i = 0; i < 100; i += 1) {
+for (let i = 0; i < 1000; i += 1) {
   data.push({
     id: i,
     height: 30 + Math.random() * 10,
@@ -102,6 +102,22 @@ const Demo = () => {
             style={{
               border: '1px solid red',
               boxSizing: 'border-box',
+            }}
+            extraRender={(info) => {
+              const { offsetX } = info;
+
+              return (
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: 100,
+                    left: 100 - offsetX,
+                    background: 'rgba(255,0,0,0.1)',
+                  }}
+                >
+                  Extra
+                </div>
+              );
             }}
             onScroll={(e) => {
               // console.log('Scroll:', e);
