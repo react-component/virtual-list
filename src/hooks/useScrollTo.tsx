@@ -7,8 +7,8 @@ import type CacheMap from '../utils/CacheMap';
 export type ScrollAlign = 'top' | 'bottom' | 'auto';
 
 export type ScrollPos = {
-  x?: number;
-  y?: number;
+  left?: number;
+  top?: number;
 };
 
 export type ScrollTarget =

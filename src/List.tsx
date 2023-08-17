@@ -422,17 +422,17 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     getScrollInfo: getVirtualScrollInfo,
     scrollTo: (config) => {
       function isPosScroll(arg: any): arg is ScrollPos {
-        return arg && typeof arg === 'object' && ('x' in arg || 'y' in arg);
+        return arg && typeof arg === 'object' && ('left' in arg || 'top' in arg);
       }
 
       if (isPosScroll(config)) {
         // Scroll X
-        if (config.x !== undefined) {
-          setOffsetLeft(keepInHorizontalRange(config.x));
+        if (config.left !== undefined) {
+          setOffsetLeft(keepInHorizontalRange(config.left));
         }
 
         // Scroll Y
-        scrollTo(config.y);
+        scrollTo(config.top);
       } else {
         scrollTo(config);
       }

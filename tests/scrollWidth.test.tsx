@@ -162,7 +162,7 @@ describe('List.scrollWidth', () => {
       ref: listRef,
     });
 
-    listRef.current.scrollTo({ x: 135 });
+    listRef.current.scrollTo({ left: 135 });
     expect(listRef.current.getScrollInfo()).toEqual({ x: 135, y: 0 });
   });
 
