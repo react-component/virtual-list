@@ -2,6 +2,7 @@ import React from 'react';
 import { act, fireEvent, render } from '@testing-library/react';
 import { spyElementPrototypes } from 'rc-util/lib/test/domHook';
 import {} from 'rc-resize-observer';
+import type { ListRef } from '../src';
 import List, { type ListProps } from '../src';
 import { _rs as onLibResize } from 'rc-resize-observer/lib/utils/observerUtil';
 import '@testing-library/jest-dom';
@@ -50,16 +51,28 @@ describe('List.scrollWidth', () => {
     jest.useRealTimers();
   });
 
-  function genList(props: Partial<ListProps<any>>) {
-    return render(
+  async function genList(props: Partial<ListProps<any>> & { ref?: any }) {
+    const ret = render(
       <List component="ul" itemKey="id" {...(props as any)}>
         {({ id }) => <li>{id}</li>}
       </List>,
     );
+
+    await act(async () => {
+      onLibResize([
+        {
+          target: ret.container.querySelector('.rc-virtual-list-holder')!,
+        } as ResizeObserverEntry,
+      ]);
+
+      await Promise.resolve();
+    });
+
+    return ret;
   }
 
-  it('work', () => {
-    const { container } = genList({
+  it('work', async () => {
+    const { container } = await genList({
       itemHeight: 20,
       height: 100,
       data: genData(100),
@@ -72,13 +85,15 @@ describe('List.scrollWidth', () => {
   describe('trigger offset', () => {
     it('drag scrollbar', async () => {
       const onVirtualScroll = jest.fn();
+      const listRef = React.createRef<ListRef>();
 
-      const { container } = genList({
+      const { container } = await genList({
         itemHeight: 20,
         height: 100,
         data: genData(100),
         scrollWidth: 1000,
         onVirtualScroll,
+        ref: listRef,
       });
 
       await act(async () => {
@@ -114,27 +129,18 @@ describe('List.scrollWidth', () => {
       });
 
       expect(onVirtualScroll).toHaveBeenCalledWith({ x: 900, y: 0 });
+      expect(listRef.current.getScrollInfo()).toEqual({ x: 900, y: 0 });
     });
 
     it('wheel', async () => {
       const onVirtualScroll = jest.fn();
 
-      const { container } = genList({
+      const { container } = await genList({
         itemHeight: 20,
         height: 100,
         data: genData(100),
         scrollWidth: 1000,
         onVirtualScroll,
-      });
-
-      await act(async () => {
-        onLibResize([
-          {
-            target: container.querySelector('.rc-virtual-list-holder')!,
-          } as ResizeObserverEntry,
-        ]);
-
-        await Promise.resolve();
       });
 
       // Wheel
@@ -145,8 +151,26 @@ describe('List.scrollWidth', () => {
     });
   });
 
-  it('support extraRender', () => {
-    const { container } = genList({
+  it('ref scrollTo', async () => {
+    const listRef = React.createRef<ListRef>();
+
+    await genList({
+      itemHeight: 20,
+      height: 100,
+      data: genData(100),
+      scrollWidth: 1000,
+      ref: listRef,
+    });
+
+    listRef.current.scrollTo({ left: 135 });
+    expect(listRef.current.getScrollInfo()).toEqual({ x: 135, y: 0 });
+
+    listRef.current.scrollTo({ left: -99 });
+    expect(listRef.current.getScrollInfo()).toEqual({ x: 0, y: 0 });
+  });
+
+  it('support extraRender', async () => {
+    const { container } = await genList({
       itemHeight: 20,
       height: 100,
       data: genData(100),
