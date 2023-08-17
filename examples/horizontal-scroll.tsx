@@ -6,7 +6,7 @@ interface Item {
   height: number;
 }
 
-const Rect = ({ style }: any) => (
+const Rect = ({ style }: { style?: React.CSSProperties }) => (
   <div
     style={{
       position: 'sticky',
