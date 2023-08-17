@@ -2,6 +2,7 @@ import React from 'react';
 import { act, fireEvent, render } from '@testing-library/react';
 import { spyElementPrototypes } from 'rc-util/lib/test/domHook';
 import {} from 'rc-resize-observer';
+import type { ListRef} from '../src';
 import List, { type ListProps } from '../src';
 import { _rs as onLibResize } from 'rc-resize-observer/lib/utils/observerUtil';
 import '@testing-library/jest-dom';
@@ -72,6 +73,7 @@ describe('List.scrollWidth', () => {
   describe('trigger offset', () => {
     it('drag scrollbar', async () => {
       const onVirtualScroll = jest.fn();
+      const listRef = React.createRef<ListRef>();
 
       const { container } = genList({
         itemHeight: 20,
@@ -79,6 +81,7 @@ describe('List.scrollWidth', () => {
         data: genData(100),
         scrollWidth: 1000,
         onVirtualScroll,
+        ref: listRef,
       });
 
       await act(async () => {
@@ -114,6 +117,7 @@ describe('List.scrollWidth', () => {
       });
 
       expect(onVirtualScroll).toHaveBeenCalledWith({ x: 900, y: 0 });
+      expect(listRef.current.getScrollInfo()).toEqual({ x: 900, y: 0 });
     });
 
     it('wheel', async () => {

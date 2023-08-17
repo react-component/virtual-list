@@ -39,9 +39,17 @@ export type ScrollConfig =
       align?: ScrollAlign;
       offset?: number;
     };
+
+export interface ScrollInfo {
+  x: number;
+  y: number;
+}
+
 export type ScrollTo = (arg: number | ScrollConfig) => void;
+
 export type ListRef = {
   scrollTo: ScrollTo;
+  getScrollInfo: () => ScrollInfo;
 };
 
 export interface ListProps<T> extends Omit<React.HTMLAttributes<any>, 'children'> {
@@ -70,7 +78,7 @@ export interface ListProps<T> extends Omit<React.HTMLAttributes<any>, 'children'
    * Given the virtual offset value.
    * It's the logic offset from start position.
    */
-  onVirtualScroll?: (info: { x: number; y: number }) => void;
+  onVirtualScroll?: (info: ScrollInfo) => void;
 
   /** Trigger when render list item changed */
   onVisibleChange?: (visibleList: T[], fullList: T[]) => void;
@@ -287,21 +295,25 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   const originScroll = useOriginScroll(isScrollAtTop, isScrollAtBottom);
 
   // ================================ Scroll ================================
-  const lastVirtualScrollInfoRef = useRef<[number, number]>([0, 0]);
+  const getVirtualScrollInfo = () => ({
+    x: isRTL ? -offsetLeft : offsetLeft,
+    y: offsetTop,
+  });
+
+  const lastVirtualScrollInfoRef = useRef(getVirtualScrollInfo());
 
   const triggerScroll = useEvent(() => {
     if (onVirtualScroll) {
-      const x = isRTL ? -offsetLeft : offsetLeft;
-      const y = offsetTop;
+      const nextInfo = getVirtualScrollInfo();
 
       // Trigger when offset changed
-      if (lastVirtualScrollInfoRef.current[0] !== x || lastVirtualScrollInfoRef.current[1] !== y) {
-        onVirtualScroll({
-          x,
-          y,
-        });
+      if (
+        lastVirtualScrollInfoRef.current.x !== nextInfo.x ||
+        lastVirtualScrollInfoRef.current.y !== nextInfo.y
+      ) {
+        onVirtualScroll(nextInfo);
 
-        lastVirtualScrollInfoRef.current = [x, y];
+        lastVirtualScrollInfoRef.current = nextInfo;
       }
     }
   });
@@ -413,6 +425,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   );
 
   React.useImperativeHandle(ref, () => ({
+    getScrollInfo: getVirtualScrollInfo,
     scrollTo,
   }));
 
