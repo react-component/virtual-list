@@ -11,7 +11,8 @@ import ScrollBar from './ScrollBar';
 import type { RenderFunc, SharedConfig, GetKey, ExtraRenderInfo } from './interface';
 import useChildren from './hooks/useChildren';
 import useHeights from './hooks/useHeights';
-import useScrollTo, { type ScrollPos, type ScrollTarget } from './hooks/useScrollTo';
+import useScrollTo from './hooks/useScrollTo';
+import type { ScrollPos, ScrollTarget } from './hooks/useScrollTo';
 import useDiffItem from './hooks/useDiffItem';
 import useFrameWheel from './hooks/useFrameWheel';
 import useMobileTouchMove from './hooks/useMobileTouchMove';
@@ -255,14 +256,14 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   const verticalScrollBarRef = useRef<ScrollBarRef>();
   const horizontalScrollBarRef = useRef<ScrollBarRef>();
 
-  const horizontalScrollBarSpinSize = React.useMemo(
-    () => getSpinSize(size.width, scrollWidth),
-    [size.width, scrollWidth],
-  );
-  const verticalScrollBarSpinSize = React.useMemo(
-    () => getSpinSize(size.height, scrollHeight),
-    [size.height, scrollHeight],
-  );
+  const horizontalScrollBarSpinSize = React.useMemo(() => getSpinSize(size.width, scrollWidth), [
+    size.width,
+    scrollWidth,
+  ]);
+  const verticalScrollBarSpinSize = React.useMemo(() => getSpinSize(size.height, scrollHeight), [
+    size.height,
+    scrollHeight,
+  ]);
 
   // =============================== In Range ===============================
   const maxScrollHeight = scrollHeight - height;
