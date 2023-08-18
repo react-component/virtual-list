@@ -104,17 +104,20 @@ const Demo = () => {
               boxSizing: 'border-box',
             }}
             extraRender={(info) => {
-              const { offsetX, rtl: isRTL } = info;
+              const { offsetX, offsetY, rtl: isRTL } = info;
               const sizeInfo = info.getSize('id_3', 'id_5');
 
               return (
                 <div
                   style={{
                     position: 'absolute',
-                    top: sizeInfo.top,
+                    // top: -offsetY,
+                    top: -offsetY + sizeInfo.top,
                     height: sizeInfo.bottom - sizeInfo.top,
-                    [isRTL ? 'right' : 'left']: 100 - offsetX,
+                    // [isRTL ? 'right' : 'left']: 100 - offsetX,
+                    [isRTL ? 'right' : 'left']: 100,
                     background: 'rgba(255,0,0,0.1)',
+                    zIndex: 999,
                   }}
                 >
                   Extra
