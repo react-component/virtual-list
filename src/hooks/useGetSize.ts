@@ -1,5 +1,6 @@
 import type CacheMap from '../utils/CacheMap';
 import type { GetKey, GetSize } from '../interface';
+import * as React from 'react';
 
 /**
  * Size info need loop query for the `heights` which will has the perf issue.
@@ -11,8 +12,9 @@ export function useGetSize<T>(
   heights: CacheMap,
   itemHeight: number,
 ) {
-  const key2Index = new Map<React.Key, number>();
-  const bottomList: number[] = [];
+  const [key2Index, bottomList] = React.useMemo<
+    [key2Index: Map<React.Key, number>, bottomList: number[]]
+  >(() => [new Map(), []], [mergedData, heights.id, itemHeight]);
 
   const getSize: GetSize = (startKey, endKey = startKey) => {
     // Get from cache first
