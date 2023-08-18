@@ -10,6 +10,8 @@ export interface SharedConfig<T> {
 
 export type GetKey<T> = (item: T) => React.Key;
 
+export type GetSize = (startKey: React.Key, endKey?: React.Key) => { top: number; bottom: number };
+
 export interface ExtraRenderInfo {
   /** Virtual list start line */
   start: number;
@@ -23,5 +25,5 @@ export interface ExtraRenderInfo {
 
   rtl: boolean;
 
-  getSize: (startKey: React.Key, endKey?: React.Key) => { top: number; bottom: number };
+  getSize: GetSize;
 }

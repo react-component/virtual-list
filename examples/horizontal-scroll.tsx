@@ -71,7 +71,7 @@ const MyItem: React.ForwardRefRenderFunction<
 const ForwardMyItem = React.forwardRef(MyItem);
 
 const data: Item[] = [];
-for (let i = 0; i < 1000; i += 1) {
+for (let i = 0; i < 10000; i += 1) {
   data.push({
     id: `id_${i}`,
     height: 30 + Math.random() * 10,
@@ -105,17 +105,15 @@ const Demo = () => {
               boxSizing: 'border-box',
             }}
             extraRender={(info) => {
-              const { offsetX, offsetY, rtl: isRTL } = info;
-              const sizeInfo = info.getSize('id_3', 'id_5');
+              const { offsetY, rtl: isRTL } = info;
+              const sizeInfo = info.getSize('id_5', 'id_10');
 
               return (
                 <div
                   style={{
                     position: 'absolute',
-                    // top: -offsetY,
                     top: -offsetY + sizeInfo.top,
                     height: sizeInfo.bottom - sizeInfo.top,
-                    // [isRTL ? 'right' : 'left']: 100 - offsetX,
                     [isRTL ? 'right' : 'left']: 100,
                     background: 'rgba(255,0,0,0.9)',
                     zIndex: 1,
