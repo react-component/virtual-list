@@ -187,6 +187,7 @@ describe('List.scrollWidth', () => {
       },
     });
 
+    expect(container.querySelector('.rc-virtual-list-holder-inner .bamboo')).toBeTruthy();
     expect(container.querySelector('.bamboo').textContent).toEqual(
       `${ITEM_HEIGHT}/${4 * ITEM_HEIGHT}`,
     );

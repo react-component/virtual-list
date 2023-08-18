@@ -14,6 +14,7 @@ const Rect = ({ style }: { style?: React.CSSProperties }) => (
       background: 'blue',
       flex: 'none',
       borderInline: `1px solid red`,
+      zIndex: 2,
       ...style,
     }}
   >
@@ -104,17 +105,20 @@ const Demo = () => {
               boxSizing: 'border-box',
             }}
             extraRender={(info) => {
-              const { offsetX, rtl: isRTL } = info;
+              const { offsetX, offsetY, rtl: isRTL } = info;
               const sizeInfo = info.getSize('id_3', 'id_5');
 
               return (
                 <div
                   style={{
                     position: 'absolute',
-                    top: sizeInfo.top,
+                    // top: -offsetY,
+                    top: -offsetY + sizeInfo.top,
                     height: sizeInfo.bottom - sizeInfo.top,
-                    [isRTL ? 'right' : 'left']: 100 - offsetX,
-                    background: 'rgba(255,0,0,0.1)',
+                    // [isRTL ? 'right' : 'left']: 100 - offsetX,
+                    [isRTL ? 'right' : 'left']: 100,
+                    background: 'rgba(255,0,0,0.9)',
+                    zIndex: 1,
                   }}
                 >
                   Extra

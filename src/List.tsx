@@ -174,7 +174,12 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   );
 
   // ========================== Visible Calculation =========================
-  const { scrollHeight, start, end, offset } = React.useMemo(() => {
+  const {
+    scrollHeight,
+    start,
+    end,
+    offset: fillerOffset,
+  } = React.useMemo(() => {
     if (!useVirtual) {
       return {
         scrollHeight: undefined,
@@ -482,6 +487,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     end,
     virtual: inVirtual,
     offsetX: offsetLeft,
+    offsetY: fillerOffset,
     rtl: isRTL,
     getSize,
   });
@@ -541,7 +547,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
             prefixCls={prefixCls}
             height={scrollHeight}
             offsetX={offsetLeft}
-            offsetY={offset}
+            offsetY={fillerOffset}
             scrollWidth={scrollWidth}
             onInnerResize={collectHeight}
             ref={fillerInnerRef}
