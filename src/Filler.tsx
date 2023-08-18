@@ -86,8 +86,8 @@ const Filler = React.forwardRef(
             ref={ref}
             {...innerProps}
           >
-            {extra}
             {children}
+            {extra}
           </div>
         </ResizeObserver>
       </div>
