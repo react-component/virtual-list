@@ -14,6 +14,7 @@ const Rect = ({ style }: { style?: React.CSSProperties }) => (
       background: 'blue',
       flex: 'none',
       borderInline: `1px solid red`,
+      zIndex: 2,
       ...style,
     }}
   >
@@ -116,8 +117,8 @@ const Demo = () => {
                     height: sizeInfo.bottom - sizeInfo.top,
                     // [isRTL ? 'right' : 'left']: 100 - offsetX,
                     [isRTL ? 'right' : 'left']: 100,
-                    background: 'rgba(255,0,0,0.1)',
-                    zIndex: 999,
+                    background: 'rgba(255,0,0,0.9)',
+                    zIndex: 1,
                   }}
                 >
                   Extra
