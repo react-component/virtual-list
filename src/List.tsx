@@ -20,6 +20,7 @@ import useOriginScroll from './hooks/useOriginScroll';
 import useLayoutEffect from 'rc-util/lib/hooks/useLayoutEffect';
 import { getSpinSize } from './utils/scrollbarUtil';
 import { useEvent } from 'rc-util';
+import { useGetSize } from './hooks/useGetSize';
 
 const EMPTY_DATA = [];
 
@@ -261,14 +262,14 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   const verticalScrollBarRef = useRef<ScrollBarRef>();
   const horizontalScrollBarRef = useRef<ScrollBarRef>();
 
-  const horizontalScrollBarSpinSize = React.useMemo(() => getSpinSize(size.width, scrollWidth), [
-    size.width,
-    scrollWidth,
-  ]);
-  const verticalScrollBarSpinSize = React.useMemo(() => getSpinSize(size.height, scrollHeight), [
-    size.height,
-    scrollHeight,
-  ]);
+  const horizontalScrollBarSpinSize = React.useMemo(
+    () => getSpinSize(size.width, scrollWidth),
+    [size.width, scrollWidth],
+  );
+  const verticalScrollBarSpinSize = React.useMemo(
+    () => getSpinSize(size.height, scrollHeight),
+    [size.height, scrollHeight],
+  );
 
   // =============================== In Range ===============================
   const maxScrollHeight = scrollHeight - height;
@@ -456,31 +457,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   }, [start, end, mergedData]);
 
   // ================================ Extra =================================
-  const getSize = (startKey: React.Key, endKey = startKey) => {
-    let top = 0;
-    let bottom = 0;
-    let total = 0;
-
-    const dataLen = mergedData.length;
-    for (let i = 0; i < dataLen; i += 1) {
-      const item = mergedData[i];
-      const key = getKey(item);
-
-      const cacheHeight = heights.get(key) ?? itemHeight;
-      bottom = total + cacheHeight;
-
-      if (key === startKey) {
-        top = total;
-      }
-      if (key === endKey) {
-        break;
-      }
-
-      total = bottom;
-    }
-
-    return { top, bottom };
-  };
+  const getSize = useGetSize(mergedData, getKey, heights, itemHeight);
 
   const extraContent = extraRender?.({
     start,
