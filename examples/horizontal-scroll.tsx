@@ -124,7 +124,7 @@ const Demo = () => {
               );
             }}
             onVirtualScroll={(e) => {
-              console.warn('Scroll:', e);
+              // console.warn('Scroll:', e);
             }}
           >
             {(item, _, props) => <ForwardMyItem {...item} {...props} />}

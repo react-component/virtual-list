@@ -124,6 +124,12 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
     };
   }, []);
 
+  // Pass to effect
+  const enableScrollRangeRef = React.useRef<number>();
+  enableScrollRangeRef.current = enableScrollRange;
+  const enableOffsetRangeRef = React.useRef<number>();
+  enableOffsetRangeRef.current = enableOffsetRange;
+
   React.useEffect(() => {
     if (dragging) {
       let moveRafId: number;
@@ -146,11 +152,14 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
             newTop += offset;
           }
 
-          const ptg: number = enableOffsetRange ? newTop / enableOffsetRange : 0;
+          const tmpEnableScrollRange = enableScrollRangeRef.current;
+          const tmpEnableOffsetRange = enableOffsetRangeRef.current;
 
-          let newScrollTop = Math.ceil(ptg * enableScrollRange);
+          const ptg: number = tmpEnableOffsetRange ? newTop / tmpEnableOffsetRange : 0;
+
+          let newScrollTop = Math.ceil(ptg * tmpEnableScrollRange);
           newScrollTop = Math.max(newScrollTop, 0);
-          newScrollTop = Math.min(newScrollTop, enableScrollRange);
+          newScrollTop = Math.min(newScrollTop, tmpEnableScrollRange);
 
           moveRafId = raf(() => {
             onScroll(newScrollTop, horizontal);
