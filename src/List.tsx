@@ -239,7 +239,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     }
 
     // Give cache to improve scroll experience
-    endIndex = Math.min(endIndex + 1, mergedData.length);
+    endIndex = Math.min(endIndex + 1, mergedData.length - 1);
 
     return {
       scrollHeight: itemTop,

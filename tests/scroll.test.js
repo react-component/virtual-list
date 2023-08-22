@@ -336,4 +336,34 @@ describe('List.Scroll', () => {
 
     expect(spyPreventDefault).toHaveBeenCalled();
   });
+
+  it('scroll to end should not has wrong extraRender', () => {
+    const extraRender = jest.fn(({ start, end }) => {
+      return null;
+    });
+
+    jest.useFakeTimers();
+    const { container } = genList(
+      {
+        itemHeight: 20,
+        height: 100,
+        data: genData(100),
+        extraRender,
+      },
+      render,
+    );
+
+    const holder = container.querySelector('ul');
+
+    const event = createEvent.wheel(holder, {
+      deltaY: 99999999999999999999,
+    });
+    fireEvent(holder, event);
+
+    act(() => {
+      jest.runAllTimers();
+    });
+
+    expect(extraRender).toHaveBeenCalledWith(expect.objectContaining({ end: 99 }));
+  });
 });
