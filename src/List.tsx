@@ -60,6 +60,7 @@ export interface ListProps<T> extends Omit<React.HTMLAttributes<any>, 'children'
    * By default `scrollWidth` is same as container.
    * When set this, it will show the horizontal scrollbar and
    * `scrollWidth` will be used as the real width instead of container width.
+   * When set, `virtual` will always be enabled.
    */
   scrollWidth?: number;
 
@@ -106,7 +107,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
 
   // ================================= MISC =================================
   const useVirtual = !!(virtual !== false && height && itemHeight);
-  const inVirtual = useVirtual && data && itemHeight * data.length > height;
+  const inVirtual = useVirtual && data && (itemHeight * data.length > height || !!scrollWidth);
   const isRTL = direction === 'rtl';
 
   const mergedClassName = classNames(prefixCls, { [`${prefixCls}-rtl`]: isRTL }, className);

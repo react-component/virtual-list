@@ -70,16 +70,29 @@ const MyItem: React.ForwardRefRenderFunction<
 
 const ForwardMyItem = React.forwardRef(MyItem);
 
-const data: Item[] = [];
-for (let i = 0; i < 10000; i += 1) {
-  data.push({
-    id: `id_${i}`,
-    height: 30 + Math.random() * 10,
-  });
+function getData(count: number) {
+  const data: Item[] = [];
+  for (let i = 0; i < count; i += 1) {
+    data.push({
+      id: `id_${i}`,
+      height: Math.round(30 + Math.random() * 10),
+    });
+  }
+  return data;
 }
 
 const Demo = () => {
   const [rtl, setRTL] = React.useState(false);
+  const [count, setCount] = React.useState('1000');
+  const [data, setData] = React.useState<Item[]>([]);
+
+  React.useEffect(() => {
+    const num = Number(count);
+    if (!Number.isNaN(num)) {
+      setData(getData(num));
+    }
+  }, [count]);
+
   return (
     <React.StrictMode>
       <div>
@@ -91,8 +104,19 @@ const Demo = () => {
           RTL: {String(rtl)}
         </button>
 
+        <input
+          type="number"
+          value={count}
+          onChange={(e) => {
+            const num = e.target.value;
+
+            setCount(num);
+          }}
+        />
+
         <div style={{ width: 500, margin: 64 }}>
           <List
+            fullHeight={false}
             direction={rtl ? 'rtl' : 'ltr'}
             data={data}
             height={300}
