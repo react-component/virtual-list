@@ -28,10 +28,9 @@ export default function useFrameWheel(
   // Scroll status sync
   const originScroll = useOriginScroll(isScrollAtTop, isScrollAtBottom);
 
-  function onWheelY(event: WheelEvent) {
+  function onWheelY(event: WheelEvent, deltaY: number) {
     raf.cancel(nextFrameRef.current);
 
-    const { deltaY } = event;
     offsetRef.current += deltaY;
     wheelValueRef.current = deltaY;
 
@@ -52,9 +51,7 @@ export default function useFrameWheel(
     });
   }
 
-  function onWheelX(event: WheelEvent) {
-    const { deltaX } = event;
-
+  function onWheelX(event: WheelEvent, deltaX: number) {
     onWheelDelta(deltaX, true);
 
     if (!isFF) {
@@ -62,8 +59,8 @@ export default function useFrameWheel(
     }
   }
 
-  // Check for which direction does wheel do
-  const wheelDirectionRef = useRef<'x' | 'y' | null>(null);
+  // Check for which direction does wheel do. `sx` means `shift + wheel`
+  const wheelDirectionRef = useRef<'x' | 'y' | 'sx' | null>(null);
   const wheelDirectionCleanRef = useRef<number>(null);
 
   function onWheel(event: WheelEvent) {
@@ -75,18 +72,32 @@ export default function useFrameWheel(
       wheelDirectionRef.current = null;
     }, 2);
 
-    const { deltaX, deltaY } = event;
-    const absX = Math.abs(deltaX);
-    const absY = Math.abs(deltaY);
+    const { deltaX, deltaY, shiftKey } = event;
+
+    let mergedDeltaX = deltaX;
+    let mergedDeltaY = deltaY;
+
+    if (
+      wheelDirectionRef.current === 'sx' ||
+      (!wheelDirectionRef.current && (shiftKey || false) && deltaY && !deltaX)
+    ) {
+      mergedDeltaX = deltaY;
+      mergedDeltaY = 0;
+
+      wheelDirectionRef.current = 'sx';
+    }
+
+    const absX = Math.abs(mergedDeltaX);
+    const absY = Math.abs(mergedDeltaY);
 
     if (wheelDirectionRef.current === null) {
       wheelDirectionRef.current = horizontalScroll && absX > absY ? 'x' : 'y';
     }
 
-    if (wheelDirectionRef.current === 'x') {
-      onWheelX(event);
+    if (wheelDirectionRef.current === 'y') {
+      onWheelY(event, mergedDeltaY);
     } else {
-      onWheelY(event);
+      onWheelX(event, mergedDeltaX);
     }
   }
 
