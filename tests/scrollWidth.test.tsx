@@ -151,6 +151,25 @@ describe('List.scrollWidth', () => {
       });
       expect(onVirtualScroll).toHaveBeenCalledWith({ x: 123, y: 0 });
     });
+
+    it('shift wheel', async () => {
+      const onVirtualScroll = jest.fn();
+
+      const { container } = await genList({
+        itemHeight: ITEM_HEIGHT,
+        height: 100,
+        data: genData(100),
+        scrollWidth: 1000,
+        onVirtualScroll,
+      });
+
+      // Wheel
+      fireEvent.wheel(container.querySelector('.rc-virtual-list-holder')!, {
+        deltaY: 123,
+        shiftKey: true,
+      });
+      expect(onVirtualScroll).toHaveBeenCalledWith({ x: 123, y: 0 });
+    });
   });
 
   it('ref scrollTo', async () => {
