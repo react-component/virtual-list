@@ -3,6 +3,8 @@ import * as React from 'react';
 import raf from 'rc-util/lib/raf';
 import type { GetKey } from '../interface';
 import type CacheMap from '../utils/CacheMap';
+import { MEASURE, STABLE } from '../utils/scrollToCacheState';
+import type { ScrollToCacheState } from '../utils/scrollToCacheState';
 
 export type ScrollAlign = 'top' | 'bottom' | 'auto';
 
@@ -32,6 +34,7 @@ export default function useScrollTo<T>(
   collectHeight: () => void,
   syncScrollTop: (newTop: number) => void,
   triggerFlash: () => void,
+  setScrollToCacheState: (state: ScrollToCacheState) => void,
 ): (arg: number | ScrollTarget) => void {
   const scrollRef = React.useRef<number>();
 
@@ -62,6 +65,15 @@ export default function useScrollTo<T>(
       // We will retry 3 times in case dynamic height shaking
       const syncScroll = (times: number, targetAlign?: 'top' | 'bottom') => {
         if (times < 0 || !containerRef.current) return;
+
+        // ================== switch cacheState ===================
+        if (times === 3) {
+          setScrollToCacheState(MEASURE);
+        } else if (times === 0) {
+          setScrollToCacheState(STABLE);
+        }
+
+        // ================== calculate targetTop =================
 
         const height = containerRef.current.clientHeight;
         let needCollectHeight = false;

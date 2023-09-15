@@ -9,7 +9,7 @@ import type { InnerProps } from './Filler';
 import type { ScrollBarDirectionType, ScrollBarRef } from './ScrollBar';
 import ScrollBar from './ScrollBar';
 import type { RenderFunc, SharedConfig, GetKey, ExtraRenderInfo } from './interface';
-import useChildren from './hooks/useChildren';
+import renderChildren from './utils/renderChildren';
 import useHeights from './hooks/useHeights';
 import useScrollTo from './hooks/useScrollTo';
 import type { ScrollPos, ScrollTarget } from './hooks/useScrollTo';
@@ -21,6 +21,9 @@ import useLayoutEffect from 'rc-util/lib/hooks/useLayoutEffect';
 import { getSpinSize } from './utils/scrollbarUtil';
 import { useEvent } from 'rc-util';
 import { useGetSize } from './hooks/useGetSize';
+import type { ScrollToCacheState } from './utils/scrollToCacheState';
+import { MEASURE, STABLE } from './utils/scrollToCacheState';
+import { useCalcuPosition } from './hooks/useCalcuPosition';
 
 const EMPTY_DATA = [];
 
@@ -144,6 +147,16 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   };
 
   // ================================ Scroll ================================
+  // If the scrollTo function is triggered to scroll to a location where nodes haven't cached their heights, the state needs to be switched to measure it.
+  const [scrollToCacheState, setScrollToCacheState] = React.useState<ScrollToCacheState>(STABLE);
+
+  useLayoutEffect(() => {
+    // componentRef shouldn't reset offsetTop when `scrollTo` is measuring
+    if (scrollToCacheState === STABLE && componentRef.current) {
+      componentRef.current.scrollTop = offsetTop;
+    }
+  }, [offsetTop, scrollToCacheState]);
+
   function syncScrollTop(newTop: number | ((prev: number) => number)) {
     setOffsetTop((origin) => {
       let value: number;
@@ -154,8 +167,6 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
       }
 
       const alignedTop = keepInRange(value);
-
-      componentRef.current.scrollTop = alignedTop;
       return alignedTop;
     });
   }
@@ -176,79 +187,27 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   );
 
   // ========================== Visible Calculation =========================
-  const {
+  const [
     scrollHeight,
     start,
     end,
-    offset: fillerOffset,
-  } = React.useMemo(() => {
-    if (!useVirtual) {
-      return {
-        scrollHeight: undefined,
-        start: 0,
-        end: mergedData.length - 1,
-        offset: undefined,
-      };
-    }
-
-    // Always use virtual scroll bar in avoid shaking
-    if (!inVirtual) {
-      return {
-        scrollHeight: fillerInnerRef.current?.offsetHeight || 0,
-        start: 0,
-        end: mergedData.length - 1,
-        offset: undefined,
-      };
-    }
-
-    let itemTop = 0;
-    let startIndex: number;
-    let startOffset: number;
-    let endIndex: number;
-
-    const dataLen = mergedData.length;
-    for (let i = 0; i < dataLen; i += 1) {
-      const item = mergedData[i];
-      const key = getKey(item);
-
-      const cacheHeight = heights.get(key);
-      const currentItemBottom = itemTop + (cacheHeight === undefined ? itemHeight : cacheHeight);
-
-      // Check item top in the range
-      if (currentItemBottom >= offsetTop && startIndex === undefined) {
-        startIndex = i;
-        startOffset = itemTop;
-      }
-
-      // Check item bottom in the range. We will render additional one item for motion usage
-      if (currentItemBottom > offsetTop + height && endIndex === undefined) {
-        endIndex = i;
-      }
-
-      itemTop = currentItemBottom;
-    }
-
-    // When scrollTop at the end but data cut to small count will reach this
-    if (startIndex === undefined) {
-      startIndex = 0;
-      startOffset = 0;
-
-      endIndex = Math.ceil(height / itemHeight);
-    }
-    if (endIndex === undefined) {
-      endIndex = mergedData.length - 1;
-    }
-
-    // Give cache to improve scroll experience
-    endIndex = Math.min(endIndex + 1, mergedData.length - 1);
-
-    return {
-      scrollHeight: itemTop,
-      start: startIndex,
-      end: endIndex,
-      offset: startOffset,
-    };
-  }, [inVirtual, useVirtual, offsetTop, mergedData, heightUpdatedMark, height]);
+    lastStartIndex,
+    lastEndIndex,
+    fillerOffset,
+    maxScrollHeight,
+  ] = useCalcuPosition(
+    scrollToCacheState,
+    fillerInnerRef,
+    getKey,
+    inVirtual,
+    heights,
+    itemHeight,
+    useVirtual,
+    offsetTop,
+    mergedData,
+    heightUpdatedMark,
+    height,
+  );
 
   rangeRef.current.start = start;
   rangeRef.current.end = end;
@@ -263,31 +222,27 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   const verticalScrollBarRef = useRef<ScrollBarRef>();
   const horizontalScrollBarRef = useRef<ScrollBarRef>();
 
-  const horizontalScrollBarSpinSize = React.useMemo(
-    () => getSpinSize(size.width, scrollWidth),
-    [size.width, scrollWidth],
-  );
-  const verticalScrollBarSpinSize = React.useMemo(
-    () => getSpinSize(size.height, scrollHeight),
-    [size.height, scrollHeight],
-  );
+  const horizontalScrollBarSpinSize = React.useMemo(() => getSpinSize(size.width, scrollWidth), [
+    size.width,
+    scrollWidth,
+  ]);
+  const verticalScrollBarSpinSize = React.useMemo(() => getSpinSize(size.height, scrollHeight), [
+    size.height,
+    scrollHeight,
+  ]);
 
   // =============================== In Range ===============================
-  const maxScrollHeight = scrollHeight - height;
-  const maxScrollHeightRef = useRef(maxScrollHeight);
-  maxScrollHeightRef.current = maxScrollHeight;
-
   function keepInRange(newScrollTop: number) {
     let newTop = newScrollTop;
-    if (!Number.isNaN(maxScrollHeightRef.current)) {
-      newTop = Math.min(newTop, maxScrollHeightRef.current);
+    if (!Number.isNaN(maxScrollHeight.current)) {
+      newTop = Math.min(newTop, maxScrollHeight.current);
     }
     newTop = Math.max(newTop, 0);
     return newTop;
   }
 
   const isScrollAtTop = offsetTop <= 0;
-  const isScrollAtBottom = offsetTop >= maxScrollHeight;
+  const isScrollAtBottom = offsetTop >= maxScrollHeight.current;
 
   const originScroll = useOriginScroll(isScrollAtTop, isScrollAtBottom);
 
@@ -424,6 +379,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     collectHeight,
     syncScrollTop,
     delayHideScrollBar,
+    setScrollToCacheState,
   );
 
   React.useImperativeHandle(ref, () => ({
@@ -471,7 +427,44 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   });
 
   // ================================ Render ================================
-  const listChildren = useChildren(
+  const listChidren = React.useMemo(() => {
+    const nextChildren = renderChildren(
+      mergedData,
+      start,
+      end,
+      scrollWidth,
+      setInstanceRef,
+      children,
+      sharedConfig,
+    );
+
+    if (scrollToCacheState === STABLE || start === lastStartIndex) {
+      return nextChildren;
+    } else {
+      // ========== measure `cachHeight` =============
+      const nextChldren = renderChildren(
+        mergedData,
+        lastStartIndex,
+        lastEndIndex,
+        scrollWidth,
+        setInstanceRef,
+        children,
+        sharedConfig,
+      );
+
+      const childrenKey = new Set(nextChldren.map((item) => item.key));
+      // de-duplicate to avoid `react` to render wrong nodes
+      nextChildren.forEach((item) => {
+        if (!childrenKey.has(item.key)) {
+          nextChldren.push(item);
+        }
+      });
+
+      // last children is always put on top, which due to `Filler`'s nodes is offseted by top,
+      return nextChldren;
+    }
+  }, [
+    scrollToCacheState,
     mergedData,
     start,
     end,
@@ -479,7 +472,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     setInstanceRef,
     children,
     sharedConfig,
-  );
+  ]);
 
   let componentStyle: React.CSSProperties = null;
   if (height) {
@@ -533,7 +526,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
             rtl={isRTL}
             extra={extraContent}
           >
-            {listChildren}
+            {listChidren}
           </Filler>
         </Component>
       </ResizeObserver>
@@ -542,7 +535,8 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
         <ScrollBar
           ref={verticalScrollBarRef}
           prefixCls={prefixCls}
-          scrollOffset={offsetTop}
+          // if need cache height, just use last scrollTop
+          scrollOffset={scrollToCacheState === MEASURE ? componentRef.current.scrollTop : offsetTop}
           scrollRange={scrollHeight}
           rtl={isRTL}
           onScroll={onScrollBar}

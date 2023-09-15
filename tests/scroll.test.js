@@ -15,7 +15,8 @@ describe('List.Scroll', () => {
   beforeAll(() => {
     mockElement = spyElementPrototypes(HTMLElement, {
       offsetHeight: {
-        get: () => 20,
+        // to imitate cacheHeight
+        get: () => 25,
       },
       clientHeight: {
         get: () => 100,
@@ -24,6 +25,10 @@ describe('List.Scroll', () => {
         width: 100,
         height: 100,
       }),
+      // make `collectHeight` work
+      offsetParent: {
+        get: () => true,
+      },
     });
   });
 
@@ -79,6 +84,28 @@ describe('List.Scroll', () => {
   });
 
   describe('scroll to object', () => {
+    // scorllTops shouldn't have other values with `cacheHeight` pre-measure
+    const allowScrollTops = new Set([640, 2005, 0, 580, 800, 655]);
+    const passedScrollTops = new Set();
+    let scrollTop = 0;
+    let scrollTopSpy;
+
+    beforeAll(() => {
+      scrollTopSpy = spyElementPrototypes(HTMLElement, {
+        scrollTop: {
+          get: () => scrollTop,
+          set(_, val) {
+            passedScrollTops.add(val);
+            scrollTop = val;
+          },
+        },
+      });
+    });
+
+    afterAll(() => {
+      scrollTopSpy.mockRestore();
+    });
+
     const listRef = React.createRef();
     const wrapper = genList({ itemHeight: 20, height: 100, data: genData(100), ref: listRef });
 
@@ -86,7 +113,7 @@ describe('List.Scroll', () => {
       it('work', () => {
         listRef.current.scrollTo({ index: 30, align: 'top' });
         jest.runAllTimers();
-        expect(wrapper.find('ul').instance().scrollTop).toEqual(600);
+        expect(wrapper.find('ul').instance().scrollTop).toEqual(640);
       });
 
       it('out of range should not crash', () => {
@@ -106,19 +133,24 @@ describe('List.Scroll', () => {
     it('key scroll', () => {
       listRef.current.scrollTo({ key: '30', align: 'bottom' });
       jest.runAllTimers();
-      expect(wrapper.find('ul').instance().scrollTop).toEqual(520);
+      expect(wrapper.find('ul').instance().scrollTop).toEqual(580);
     });
 
     it('smart', () => {
       listRef.current.scrollTo(0);
       listRef.current.scrollTo({ index: 30 });
       jest.runAllTimers();
-      expect(wrapper.find('ul').instance().scrollTop).toEqual(520);
+      expect(wrapper.find('ul').instance().scrollTop).toEqual(580);
 
       listRef.current.scrollTo(800);
       listRef.current.scrollTo({ index: 30 });
       jest.runAllTimers();
-      expect(wrapper.find('ul').instance().scrollTop).toEqual(600);
+      // already got cacheHeight from bottom, so `scorllTop` is deifferent from `640`
+      expect(wrapper.find('ul').instance().scrollTop).toEqual(655);
+    });
+
+    it('should have not other scorllTop', () => {
+      expect(Array.from(passedScrollTops)).toEqual(Array.from(allowScrollTops));
     });
   });
 

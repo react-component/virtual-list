@@ -2,7 +2,7 @@ import * as React from 'react';
 import type { SharedConfig, RenderFunc } from '../interface';
 import { Item } from '../Item';
 
-export default function useChildren<T>(
+export default function renderChildren<T>(
   list: T[],
   startIndex: number,
   endIndex: number,
