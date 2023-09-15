@@ -194,7 +194,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     lastStartIndex,
     lastEndIndex,
     fillerOffset,
-    maxScrollHeight,
+    maxScrollHeightRef,
   ] = useCalcuPosition(
     scrollToCacheState,
     fillerInnerRef,
@@ -234,15 +234,15 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   // =============================== In Range ===============================
   function keepInRange(newScrollTop: number) {
     let newTop = newScrollTop;
-    if (!Number.isNaN(maxScrollHeight.current)) {
-      newTop = Math.min(newTop, maxScrollHeight.current);
+    if (!Number.isNaN(maxScrollHeightRef.current)) {
+      newTop = Math.min(newTop, maxScrollHeightRef.current);
     }
     newTop = Math.max(newTop, 0);
     return newTop;
   }
 
   const isScrollAtTop = offsetTop <= 0;
-  const isScrollAtBottom = offsetTop >= maxScrollHeight.current;
+  const isScrollAtBottom = offsetTop >= maxScrollHeightRef.current;
 
   const originScroll = useOriginScroll(isScrollAtTop, isScrollAtBottom);
 
