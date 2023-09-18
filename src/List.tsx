@@ -255,7 +255,21 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
 
   // ================================= Size =================================
   const [size, setSize] = React.useState({ width: 0, height });
+
+  const keepInHorizontalRange = (nextOffsetLeft: number) => {
+    let tmpOffsetLeft = nextOffsetLeft;
+    const max = scrollWidth - size.width;
+    tmpOffsetLeft = Math.max(tmpOffsetLeft, 0);
+    tmpOffsetLeft = Math.min(tmpOffsetLeft, max);
+
+    return tmpOffsetLeft;
+  };
+
   const onHolderResize: ResizeObserverProps['onResize'] = (sizeInfo) => {
+    setOffsetLeft((left) => {
+      return keepInHorizontalRange(left);
+    });
+
     setSize(sizeInfo);
   };
 
@@ -339,15 +353,6 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     onScroll?.(e);
     triggerScroll();
   }
-
-  const keepInHorizontalRange = (nextOffsetLeft: number) => {
-    let tmpOffsetLeft = nextOffsetLeft;
-    const max = scrollWidth - size.width;
-    tmpOffsetLeft = Math.max(tmpOffsetLeft, 0);
-    tmpOffsetLeft = Math.min(tmpOffsetLeft, max);
-
-    return tmpOffsetLeft;
-  };
 
   const onWheelDelta: Parameters<typeof useFrameWheel>[4] = useEvent((offsetXY, fromHorizontal) => {
     if (fromHorizontal) {
