@@ -9,7 +9,12 @@ export default function useHeights<T>(
   getKey: GetKey<T>,
   onItemAdd?: (item: T) => void,
   onItemRemove?: (item: T) => void,
-): [(item: T, instance: HTMLElement) => void, () => void, CacheMap, number] {
+): [
+  setInstanceRef: (item: T, instance: HTMLElement) => void,
+  collectHeight: (sync?: boolean) => void,
+  cacheMap: CacheMap,
+  updatedMark: number,
+] {
   const [updatedMark, setUpdatedMark] = React.useState(0);
   const instanceRef = useRef(new Map<React.Key, HTMLElement>());
   const heightsRef = useRef(new CacheMap());
@@ -19,10 +24,10 @@ export default function useHeights<T>(
     raf.cancel(collectRafRef.current);
   }
 
-  function collectHeight() {
+  function collectHeight(sync = false) {
     cancelRaf();
 
-    collectRafRef.current = raf(() => {
+    const doCollect = () => {
       instanceRef.current.forEach((element, key) => {
         if (element && element.offsetParent) {
           const htmlElement = findDOMNode<HTMLElement>(element);
@@ -35,7 +40,13 @@ export default function useHeights<T>(
 
       // Always trigger update mark to tell parent that should re-calculate heights when resized
       setUpdatedMark((c) => c + 1);
-    });
+    };
+
+    if (sync) {
+      doCollect();
+    } else {
+      collectRafRef.current = raf(doCollect);
+    }
   }
 
   function setInstanceRef(item: T, instance: HTMLElement) {

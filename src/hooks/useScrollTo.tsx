@@ -4,8 +4,9 @@ import raf from 'rc-util/lib/raf';
 import type { GetKey } from '../interface';
 import type CacheMap from '../utils/CacheMap';
 import useLayoutEffect from 'rc-util/lib/hooks/useLayoutEffect';
+import { warning } from 'rc-util';
 
-const MAX_TIMES = 3;
+const MAX_TIMES = 10;
 
 export type ScrollAlign = 'top' | 'bottom' | 'auto';
 
@@ -48,12 +49,15 @@ export default function useScrollTo<T>(
 
   // ========================== Sync Scroll ==========================
   useLayoutEffect(() => {
+    console.log('🚨 Effect!', syncState?.times, '~~~~~~~~~~~~~~~~~');
     if (syncState && syncState.times < MAX_TIMES) {
       // Never reach
       if (!containerRef.current) {
         setSyncState((ori) => ({ ...ori }));
         return;
       }
+
+      collectHeight();
 
       const { targetAlign, originAlign, index, offset } = syncState;
 
@@ -79,9 +83,22 @@ export default function useScrollTo<T>(
           itemBottom = itemTop + (cacheHeight === undefined ? itemHeight : cacheHeight);
 
           stackTop = itemBottom;
+        }
 
-          if (i === index && cacheHeight === undefined) {
+        // Check if need sync height (visible range has item not record height)
+        let leftHeight = height;
+        for (let i = maxLen; i >= 0; i -= 1) {
+          const key = getKey(data[i]);
+          const cacheHeight = heights.get(key);
+
+          if (cacheHeight === undefined) {
             needCollectHeight = true;
+            break;
+          }
+
+          leftHeight -= cacheHeight;
+          if (leftHeight <= 0) {
+            break;
           }
         }
 
@@ -107,21 +124,30 @@ export default function useScrollTo<T>(
           }
         }
 
-        if (targetTop !== null && targetTop !== containerRef.current.scrollTop) {
+        console.log('sync top:', targetTop, containerRef.current.scrollTop);
+
+        if (targetTop !== null) {
+          console.log('sss!');
           syncScrollTop(targetTop);
+        } else {
+          needCollectHeight = true;
         }
       }
 
+      console.log('Need?', needCollectHeight);
       // Trigger next effect
       if (needCollectHeight) {
-        collectHeight();
+        setSyncState((ori) => ({
+          ...ori,
+          times: ori.times + 1,
+          targetAlign: newTargetAlign,
+        }));
       }
-
-      setSyncState((ori) => ({
-        ...ori,
-        times: ori.times + 1,
-        targetAlign: newTargetAlign,
-      }));
+    } else if (process.env.NODE_ENV !== 'production' && syncState?.times === MAX_TIMES) {
+      warning(
+        false,
+        'Seems `scrollTo` with `rc-virtual-list` reach toe max limitation. Please fire issue for us. Thanks.',
+      );
     }
   }, [syncState, containerRef.current]);
 

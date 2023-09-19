@@ -431,7 +431,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     heights,
     itemHeight,
     getKey,
-    collectHeight,
+    () => collectHeight(true),
     syncScrollTop,
     delayHideScrollBar,
   );
