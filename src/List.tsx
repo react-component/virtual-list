@@ -207,6 +207,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
 
   // ================================= Size =================================
   const [size, setSize] = React.useState({ width: 0, height });
+
   const onHolderResize: ResizeObserverProps['onResize'] = (sizeInfo) => {
     setSize(sizeInfo);
   };
@@ -356,6 +357,15 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
       componentEle.removeEventListener('MozMousePixelScroll', onMozMousePixelScroll as any);
     };
   }, [useVirtual]);
+
+  // Sync scroll left
+  useLayoutEffect(() => {
+    if (scrollWidth) {
+      setOffsetLeft((left) => {
+        return keepInHorizontalRange(left);
+      });
+    }
+  }, [size.width, scrollWidth]);
 
   // ================================= Ref ==================================
   const delayHideScrollBar = () => {

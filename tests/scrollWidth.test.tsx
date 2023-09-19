@@ -1,7 +1,6 @@
 import React from 'react';
 import { act, fireEvent, render } from '@testing-library/react';
 import { spyElementPrototypes } from 'rc-util/lib/test/domHook';
-import {} from 'rc-resize-observer';
 import type { ListRef } from '../src';
 import List, { type ListProps } from '../src';
 import { _rs as onLibResize } from 'rc-resize-observer/lib/utils/observerUtil';
@@ -18,16 +17,18 @@ describe('List.scrollWidth', () => {
   let mockMouseEvent;
   let pageX: number;
 
+  let holderWidth = 100;
+
   beforeAll(() => {
     mockElement = spyElementPrototypes(HTMLElement, {
       offsetHeight: {
         get: () => ITEM_HEIGHT,
       },
       clientHeight: {
-        get: () => 100,
+        get: () => holderWidth,
       },
       getBoundingClientRect: () => ({
-        width: 100,
+        width: holderWidth,
         height: 100,
       }),
     });
@@ -45,6 +46,7 @@ describe('List.scrollWidth', () => {
   });
 
   beforeEach(() => {
+    holderWidth = 100;
     jest.useFakeTimers();
   });
 
@@ -228,5 +230,35 @@ describe('List.scrollWidth', () => {
     expect(container.querySelector('.bamboo').textContent).toEqual(
       `${ITEM_HEIGHT}/${4 * ITEM_HEIGHT}`,
     );
+  });
+
+  it('resize should back of scrollLeft', async () => {
+    const { container } = await genList({
+      itemHeight: ITEM_HEIGHT,
+      height: 100,
+      data: genData(100),
+      scrollWidth: 1000,
+    });
+
+    // Wheel
+    fireEvent.wheel(container.querySelector('.rc-virtual-list-holder')!, {
+      deltaX: 9999999,
+    });
+
+    holderWidth = 200;
+
+    await act(async () => {
+      onLibResize([
+        {
+          target: container.querySelector('.rc-virtual-list-holder')!,
+        } as ResizeObserverEntry,
+      ]);
+
+      await Promise.resolve();
+    });
+
+    expect(container.querySelector('.rc-virtual-list-holder-inner')).toHaveStyle({
+      marginLeft: '-800px',
+    });
   });
 });
