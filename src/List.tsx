@@ -23,7 +23,7 @@ import { useEvent } from 'rc-util';
 import { useGetSize } from './hooks/useGetSize';
 import type { ScrollToCacheState } from './utils/scrollToCacheState';
 import { MEASURE, STABLE } from './utils/scrollToCacheState';
-import { useCalcuPosition } from './hooks/useCalcuPosition';
+import useCalcPosition from './hooks/useCalcPosition';
 
 const EMPTY_DATA = [];
 
@@ -187,27 +187,20 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   );
 
   // ========================== Visible Calculation =========================
-  const [
-    scrollHeight,
-    start,
-    end,
-    lastStartIndex,
-    lastEndIndex,
-    fillerOffset,
-    maxScrollHeightRef,
-  ] = useCalcuPosition(
-    scrollToCacheState,
-    fillerInnerRef,
-    getKey,
-    inVirtual,
-    heights,
-    itemHeight,
-    useVirtual,
-    offsetTop,
-    mergedData,
-    heightUpdatedMark,
-    height,
-  );
+  const [scrollHeight, start, end, lastStartIndex, lastEndIndex, fillerOffset, maxScrollHeightRef] =
+    useCalcPosition(
+      scrollToCacheState,
+      fillerInnerRef,
+      getKey,
+      inVirtual,
+      heights,
+      itemHeight,
+      useVirtual,
+      offsetTop,
+      mergedData,
+      heightUpdatedMark,
+      height,
+    );
 
   rangeRef.current.start = start;
   rangeRef.current.end = end;
@@ -222,14 +215,14 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   const verticalScrollBarRef = useRef<ScrollBarRef>();
   const horizontalScrollBarRef = useRef<ScrollBarRef>();
 
-  const horizontalScrollBarSpinSize = React.useMemo(() => getSpinSize(size.width, scrollWidth), [
-    size.width,
-    scrollWidth,
-  ]);
-  const verticalScrollBarSpinSize = React.useMemo(() => getSpinSize(size.height, scrollHeight), [
-    size.height,
-    scrollHeight,
-  ]);
+  const horizontalScrollBarSpinSize = React.useMemo(
+    () => getSpinSize(size.width, scrollWidth),
+    [size.width, scrollWidth],
+  );
+  const verticalScrollBarSpinSize = React.useMemo(
+    () => getSpinSize(size.height, scrollHeight),
+    [size.height, scrollHeight],
+  );
 
   // =============================== In Range ===============================
   function keepInRange(newScrollTop: number) {

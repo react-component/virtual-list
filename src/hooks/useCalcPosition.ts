@@ -3,7 +3,7 @@ import type { ScrollToCacheState } from '../utils/scrollToCacheState';
 import { MEASURE } from '../utils/scrollToCacheState';
 import React, { useRef } from 'react';
 
-export function useCalcuPosition<T>(
+export default function useCalcPosition<T>(
   scrollToCacheState: ScrollToCacheState,
   fillerInnerRef: React.MutableRefObject<HTMLDivElement>,
   getKey: (item: T) => React.Key,
@@ -17,16 +17,17 @@ export function useCalcuPosition<T>(
   height: number,
 ): [number, number, number, number, number, number, React.MutableRefObject<number>] {
   const lastScrollInfos = useRef<[number, number, number, number]>([0, 0, 0, 0]);
-  const [
-    lastScrollHeight,
-    lastfillerOffset,
-    lastStartIndex,
-    lastEndIndex,
-  ] = lastScrollInfos.current;
+  const [lastScrollHeight, lastFillerOffset, lastStartIndex, lastEndIndex] =
+    lastScrollInfos.current;
 
   const maxScrollHeightRef = useRef(-1);
 
-  const { scrollHeight, start, end, offset: fillerOffset } = React.useMemo(() => {
+  const {
+    scrollHeight,
+    start,
+    end,
+    offset: fillerOffset,
+  } = React.useMemo(() => {
     if (!useVirtual) {
       return {
         scrollHeight: undefined,
@@ -101,7 +102,7 @@ export function useCalcuPosition<T>(
 
       return {
         ...result,
-        offset: lastfillerOffset,
+        offset: lastFillerOffset,
         scrollHeight: lastScrollHeight,
       };
     }
