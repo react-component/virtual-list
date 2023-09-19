@@ -86,7 +86,7 @@ export default function useScrollTo<T>(
         }
 
         // Check if need sync height (visible range has item not record height)
-        let leftHeight = height;
+        let leftHeight = mergedAlign === 'top' ? offset : height - offset;
         for (let i = maxLen; i >= 0; i -= 1) {
           const key = getKey(data[i]);
           const cacheHeight = heights.get(key);
@@ -104,6 +104,7 @@ export default function useScrollTo<T>(
 
         // Scroll to
         let targetTop: number | null = null;
+        let inView = false;
 
         switch (mergedAlign) {
           case 'top':
@@ -120,16 +121,25 @@ export default function useScrollTo<T>(
               newTargetAlign = 'top';
             } else if (itemBottom > scrollBottom) {
               newTargetAlign = 'bottom';
+            } else {
+              // No need to collect since already in view
+              inView = true;
             }
           }
         }
 
-        console.log('sync top:', targetTop, containerRef.current.scrollTop);
+        console.log(
+          'sync top:',
+          targetTop,
+          containerRef.current.scrollTop,
+          mergedAlign,
+          newTargetAlign,
+        );
 
         if (targetTop !== null) {
           console.log('sss!');
           syncScrollTop(targetTop);
-        } else {
+        } else if (!inView) {
           needCollectHeight = true;
         }
       }
