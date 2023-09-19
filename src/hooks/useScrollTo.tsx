@@ -49,7 +49,6 @@ export default function useScrollTo<T>(
 
   // ========================== Sync Scroll ==========================
   useLayoutEffect(() => {
-    console.log('🚨 Effect!', syncState?.times, '~~~~~~~~~~~~~~~~~');
     if (syncState && syncState.times < MAX_TIMES) {
       // Never reach
       if (!containerRef.current) {
@@ -128,23 +127,13 @@ export default function useScrollTo<T>(
           }
         }
 
-        console.log(
-          'sync top:',
-          targetTop,
-          containerRef.current.scrollTop,
-          mergedAlign,
-          newTargetAlign,
-        );
-
         if (targetTop !== null) {
-          console.log('sss!');
           syncScrollTop(targetTop);
         } else if (!inView) {
           needCollectHeight = true;
         }
       }
 
-      console.log('Need?', needCollectHeight);
       // Trigger next effect
       if (needCollectHeight) {
         setSyncState((ori) => ({
