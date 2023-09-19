@@ -137,7 +137,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
       if (typeof itemKey === 'function') {
         return itemKey(item);
       }
-      return item?.[itemKey];
+      return item?.[itemKey as string];
     },
     [itemKey],
   );
@@ -430,7 +430,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   });
 
   // ================================ Render ================================
-  const listChidren = React.useMemo(() => {
+  const listChildren = React.useMemo(() => {
     const nextChildren = renderChildren(
       mergedData,
       start,
@@ -444,8 +444,8 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     if (scrollToCacheState === STABLE || start === lastStartIndex) {
       return nextChildren;
     } else {
-      // ========== measure `cachHeight` =============
-      const nextChldren = renderChildren(
+      // ========== measure `cacheHeight` =============
+      const nextChildrenWithScrollMeasure = renderChildren(
         mergedData,
         lastStartIndex,
         lastEndIndex,
@@ -455,16 +455,16 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
         sharedConfig,
       );
 
-      const childrenKey = new Set(nextChldren.map((item) => item.key));
+      const childrenKey = new Set(nextChildrenWithScrollMeasure.map((item) => item.key));
       // de-duplicate to avoid `react` to render wrong nodes
       nextChildren.forEach((item) => {
         if (!childrenKey.has(item.key)) {
-          nextChldren.push(item);
+          nextChildrenWithScrollMeasure.push(item);
         }
       });
 
       // last children is always put on top, which due to `Filler`'s nodes is offseted by top,
-      return nextChldren;
+      return nextChildrenWithScrollMeasure;
     }
   }, [
     scrollToCacheState,
@@ -529,7 +529,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
             rtl={isRTL}
             extra={extraContent}
           >
-            {listChidren}
+            {listChildren}
           </Filler>
         </Component>
       </ResizeObserver>
