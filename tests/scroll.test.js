@@ -82,17 +82,38 @@ describe('List.Scroll', () => {
     const listRef = React.createRef();
     const wrapper = genList({ itemHeight: 20, height: 100, data: genData(100), ref: listRef });
 
+    function presetList() {
+      const ref = React.createRef();
+
+      const result = genList({ itemHeight: 20, height: 100, data: genData(100), ref }, render);
+
+      return {
+        ...result,
+        ref,
+      };
+    }
+
     describe('index scroll', () => {
-      it('work', () => {
-        listRef.current.scrollTo({ index: 30, align: 'top' });
-        jest.runAllTimers();
-        expect(wrapper.find('ul').instance().scrollTop).toEqual(600);
+      it('work in range', () => {
+        const { ref, container } = presetList();
+
+        ref.current.scrollTo({ index: 30, align: 'top' });
+
+        act(() => {
+          jest.runAllTimers();
+        });
+
+        expect(container.querySelector('ul').scrollTop).toEqual(600);
       });
 
       it('out of range should not crash', () => {
         expect(() => {
-          listRef.current.scrollTo({ index: 99999999999, align: 'top' });
-          jest.runAllTimers();
+          const { ref } = presetList();
+          ref.current.scrollTo({ index: 99999999999, align: 'top' });
+
+          act(() => {
+            jest.runAllTimers();
+          });
         }).not.toThrow();
       });
     });
