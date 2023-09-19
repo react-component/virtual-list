@@ -79,9 +79,6 @@ describe('List.Scroll', () => {
   });
 
   describe('scroll to object', () => {
-    const listRef = React.createRef();
-    const wrapper = genList({ itemHeight: 20, height: 100, data: genData(100), ref: listRef });
-
     function presetList() {
       const ref = React.createRef();
 
@@ -90,56 +87,55 @@ describe('List.Scroll', () => {
       return {
         ...result,
         ref,
+        scrollTo: (...args) => {
+          ref.current.scrollTo(...args);
+
+          act(() => {
+            jest.runAllTimers();
+          });
+        },
       };
     }
 
     describe('index scroll', () => {
       it('work in range', () => {
-        const { ref, container } = presetList();
+        const { scrollTo, container } = presetList();
 
-        ref.current.scrollTo({ index: 30, align: 'top' });
-
-        act(() => {
-          jest.runAllTimers();
-        });
+        scrollTo({ index: 30, align: 'top' });
 
         expect(container.querySelector('ul').scrollTop).toEqual(600);
       });
 
       it('out of range should not crash', () => {
         expect(() => {
-          const { ref } = presetList();
-          ref.current.scrollTo({ index: 99999999999, align: 'top' });
-
-          act(() => {
-            jest.runAllTimers();
-          });
+          const { scrollTo } = presetList();
+          scrollTo({ index: 99999999999, align: 'top' });
         }).not.toThrow();
       });
     });
 
     it('scroll top should not out of range', () => {
-      listRef.current.scrollTo({ index: 0, align: 'bottom' });
+      const { scrollTo, container } = presetList();
+      scrollTo({ index: 0, align: 'bottom' });
       jest.runAllTimers();
-      expect(wrapper.find('ul').instance().scrollTop).toEqual(0);
+      expect(container.querySelector('ul').scrollTop).toEqual(0);
     });
 
     it('key scroll', () => {
-      listRef.current.scrollTo({ key: '30', align: 'bottom' });
-      jest.runAllTimers();
-      expect(wrapper.find('ul').instance().scrollTop).toEqual(520);
+      const { scrollTo, container } = presetList();
+      scrollTo({ key: '30', align: 'bottom' });
+      expect(container.querySelector('ul').scrollTop).toEqual(520);
     });
 
     it('smart', () => {
-      listRef.current.scrollTo(0);
-      listRef.current.scrollTo({ index: 30 });
-      jest.runAllTimers();
-      expect(wrapper.find('ul').instance().scrollTop).toEqual(520);
+      const { scrollTo, container } = presetList();
+      scrollTo(0);
+      scrollTo({ index: 30 });
+      expect(container.querySelector('ul').scrollTop).toEqual(520);
 
-      listRef.current.scrollTo(800);
-      listRef.current.scrollTo({ index: 30 });
-      jest.runAllTimers();
-      expect(wrapper.find('ul').instance().scrollTop).toEqual(600);
+      scrollTo(800);
+      scrollTo({ index: 30 });
+      expect(container.querySelector('ul').scrollTop).toEqual(600);
     });
   });
 
