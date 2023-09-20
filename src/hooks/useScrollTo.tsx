@@ -145,7 +145,7 @@ export default function useScrollTo<T>(
     } else if (process.env.NODE_ENV !== 'production' && syncState?.times === MAX_TIMES) {
       warning(
         false,
-        'Seems `scrollTo` with `rc-virtual-list` reach toe max limitation. Please fire issue for us. Thanks.',
+        'Seems `scrollTo` with `rc-virtual-list` reach the max limitation. Please fire issue for us. Thanks.',
       );
     }
   }, [syncState, containerRef.current]);
