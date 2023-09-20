@@ -4,6 +4,7 @@ import { mount } from 'enzyme';
 import { spyElementPrototypes } from './utils/domHook';
 import List from '../src';
 import { createEvent, fireEvent, render } from '@testing-library/react';
+import { resetWarned } from 'rc-util/lib/warning';
 
 function genData(count) {
   return new Array(count).fill(null).map((_, index) => ({ id: String(index) }));
@@ -24,6 +25,9 @@ describe('List.Scroll', () => {
         width: 100,
         height: 100,
       }),
+      offsetParent: {
+        get: () => document.body,
+      },
     });
   });
 
@@ -136,6 +140,20 @@ describe('List.Scroll', () => {
       scrollTo(800);
       scrollTo({ index: 30 });
       expect(container.querySelector('ul').scrollTop).toEqual(600);
+    });
+
+    it('exceed should not warning', () => {
+      resetWarned();
+      const errSpy = jest.spyOn(console, 'error');
+
+      const { scrollTo } = presetList();
+      scrollTo({ index: 9999999999, align: 'top' });
+
+      errSpy.mock.calls.forEach((msgs) => {
+        expect(msgs[0]).not.toContain('max limitation');
+      });
+
+      errSpy.mockRestore();
     });
   });
 

@@ -45,6 +45,7 @@ export default function useScrollTo<T>(
     offset: number;
     originAlign: ScrollAlign;
     targetAlign?: 'top' | 'bottom';
+    lastTop?: number;
   }>(null);
 
   // ========================== Sync Scroll ==========================
@@ -63,6 +64,7 @@ export default function useScrollTo<T>(
       const height = containerRef.current.clientHeight;
       let needCollectHeight = false;
       let newTargetAlign: 'top' | 'bottom' | null = targetAlign;
+      let targetTop: number | null = null;
 
       // Go to next frame if height not exist
       if (height) {
@@ -73,7 +75,7 @@ export default function useScrollTo<T>(
         let itemTop = 0;
         let itemBottom = 0;
 
-        const maxLen = Math.min(data.length, index);
+        const maxLen = Math.min(data.length - 1, index);
 
         for (let i = 0; i <= maxLen; i += 1) {
           const key = getKey(data[i]);
@@ -102,9 +104,6 @@ export default function useScrollTo<T>(
         }
 
         // Scroll to
-        let targetTop: number | null = null;
-        let inView = false;
-
         switch (mergedAlign) {
           case 'top':
             targetTop = itemTop - offset;
@@ -120,16 +119,16 @@ export default function useScrollTo<T>(
               newTargetAlign = 'top';
             } else if (itemBottom > scrollBottom) {
               newTargetAlign = 'bottom';
-            } else {
-              // No need to collect since already in view
-              inView = true;
             }
           }
         }
 
         if (targetTop !== null) {
           syncScrollTop(targetTop);
-        } else if (!inView) {
+        }
+
+        // One more time for sync
+        if (targetTop !== syncState.lastTop) {
           needCollectHeight = true;
         }
       }
@@ -140,12 +139,13 @@ export default function useScrollTo<T>(
           ...ori,
           times: ori.times + 1,
           targetAlign: newTargetAlign,
+          lastTop: targetTop,
         }));
       }
     } else if (process.env.NODE_ENV !== 'production' && syncState?.times === MAX_TIMES) {
       warning(
         false,
-        'Seems `scrollTo` with `rc-virtual-list` reach toe max limitation. Please fire issue for us. Thanks.',
+        'Seems `scrollTo` with `rc-virtual-list` reach the max limitation. Please fire issue for us. Thanks.',
       );
     }
   }, [syncState, containerRef.current]);
