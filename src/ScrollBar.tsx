@@ -13,7 +13,8 @@ export interface ScrollBarProps {
   onStartMove: () => void;
   onStopMove: () => void;
   horizontal?: boolean;
-
+  style?: React.CSSProperties;
+  thumbStyle?: React.CSSProperties;
   spinSize: number;
   containerSize: number;
 }
@@ -42,6 +43,8 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
     horizontal,
     spinSize,
     containerSize,
+    style,
+    thumbStyle: propsThumbStyle,
   } = props;
 
   const [dragging, setDragging] = React.useState(false);
@@ -204,6 +207,7 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
   const containerStyle: React.CSSProperties = {
     position: 'absolute',
     visibility: visible && canScroll ? null : 'hidden',
+    ...style,
   };
 
   const thumbStyle: React.CSSProperties = {
@@ -212,6 +216,7 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
     borderRadius: 99,
     cursor: 'pointer',
     userSelect: 'none',
+    ...propsThumbStyle,
   };
 
   if (horizontal) {
