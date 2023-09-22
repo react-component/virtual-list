@@ -64,6 +64,13 @@ export interface ListProps<T> extends Omit<React.HTMLAttributes<any>, 'children'
    */
   scrollWidth?: number;
 
+  styles?: {
+    horizontalScrollBar?: React.CSSProperties;
+    horizontalScrollBarThumb?: React.CSSProperties;
+    verticalScrollBar?: React.CSSProperties;
+    verticalScrollBarThumb?: React.CSSProperties;
+  };
+
   onScroll?: React.UIEventHandler<HTMLElement>;
 
   /**
@@ -102,6 +109,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     onVisibleChange,
     innerProps,
     extraRender,
+    styles,
     ...restProps
   } = props;
 
@@ -560,6 +568,8 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
           onStopMove={onScrollbarStopMove}
           spinSize={verticalScrollBarSpinSize}
           containerSize={size.height}
+          style={styles?.verticalScrollBar}
+          thumbStyle={styles?.verticalScrollBarThumb}
         />
       )}
 
@@ -576,6 +586,8 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
           spinSize={horizontalScrollBarSpinSize}
           containerSize={size.width}
           horizontal
+          style={styles?.horizontalScrollBar}
+          thumbStyle={styles?.horizontalScrollBarThumb}
         />
       )}
     </div>

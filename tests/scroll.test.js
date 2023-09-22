@@ -401,4 +401,39 @@ describe('List.Scroll', () => {
 
     expect(extraRender).toHaveBeenCalledWith(expect.objectContaining({ end: 99 }));
   });
+
+  it('scrollbar styles should work', () => {
+    const { container } = genList(
+      {
+        itemHeight: 20,
+        height: 100,
+        data: genData(100),
+        scrollWidth: 1000,
+        styles: {
+          horizontalScrollBar: { background: 'red' },
+          horizontalScrollBarThumb: { background: 'green' },
+          verticalScrollBar: { background: 'orange' },
+          verticalScrollBarThumb: { background: 'blue' },
+        },
+      },
+      render,
+    );
+
+    expect(
+      container.querySelector('.rc-virtual-list-scrollbar-horizontal').style.background,
+    ).toEqual('red');
+    expect(
+      container.querySelector(
+        '.rc-virtual-list-scrollbar-horizontal .rc-virtual-list-scrollbar-thumb',
+      ).style.background,
+    ).toEqual('green');
+    expect(container.querySelector('.rc-virtual-list-scrollbar-vertical').style.background).toEqual(
+      'orange',
+    );
+    expect(
+      container.querySelector(
+        '.rc-virtual-list-scrollbar-vertical .rc-virtual-list-scrollbar-thumb',
+      ).style.background,
+    ).toEqual('blue');
+  });
 });
