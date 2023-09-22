@@ -39,6 +39,7 @@ export type ScrollConfig = ScrollTarget | ScrollPos;
 export type ScrollTo = (arg: number | ScrollConfig) => void;
 
 export type ListRef = {
+  list: React.MutableRefObject<HTMLDivElement>;
   scrollTo: ScrollTo;
   getScrollInfo: () => ScrollInfo;
 };
@@ -112,6 +113,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
 
   const mergedClassName = classNames(prefixCls, { [`${prefixCls}-rtl`]: isRTL }, className);
   const mergedData = data || EMPTY_DATA;
+  const listRef = useRef<HTMLDivElement>();
   const componentRef = useRef<HTMLDivElement>();
   const fillerInnerRef = useRef<HTMLDivElement>();
 
@@ -437,6 +439,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   );
 
   React.useImperativeHandle(ref, () => ({
+    list: listRef,
     getScrollInfo: getVirtualScrollInfo,
     scrollTo: (config) => {
       function isPosScroll(arg: any): arg is ScrollPos {
@@ -515,6 +518,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
 
   return (
     <div
+      ref={listRef}
       style={{
         ...style,
         position: 'relative',
