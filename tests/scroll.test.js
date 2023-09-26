@@ -5,6 +5,8 @@ import { spyElementPrototypes } from './utils/domHook';
 import List from '../src';
 import { createEvent, fireEvent, render } from '@testing-library/react';
 import { resetWarned } from 'rc-util/lib/warning';
+import { _rs as onLibResize } from 'rc-resize-observer/lib/utils/observerUtil';
+import '@testing-library/jest-dom';
 
 function genData(count) {
   return new Array(count).fill(null).map((_, index) => ({ id: String(index) }));
@@ -12,6 +14,10 @@ function genData(count) {
 
 describe('List.Scroll', () => {
   let mockElement;
+  let boundingRect = {
+    width: 100,
+    height: 100,
+  };
 
   beforeAll(() => {
     mockElement = spyElementPrototypes(HTMLElement, {
@@ -21,10 +27,7 @@ describe('List.Scroll', () => {
       clientHeight: {
         get: () => 100,
       },
-      getBoundingClientRect: () => ({
-        width: 100,
-        height: 100,
-      }),
+      getBoundingClientRect: () => boundingRect,
       offsetParent: {
         get: () => document.body,
       },
@@ -36,6 +39,10 @@ describe('List.Scroll', () => {
   });
 
   beforeEach(() => {
+    boundingRect = {
+      width: 100,
+      height: 100,
+    };
     jest.useFakeTimers();
   });
 
@@ -435,5 +442,35 @@ describe('List.Scroll', () => {
         '.rc-virtual-list-scrollbar-vertical .rc-virtual-list-scrollbar-thumb',
       ).style.background,
     ).toEqual('blue');
+  });
+
+  it('scrollbar size should correct', async () => {
+    boundingRect = {
+      width: 0,
+      height: 0,
+    };
+
+    const { container } = genList(
+      {
+        itemHeight: 20,
+        height: 100,
+        data: genData(100),
+      },
+      render,
+    );
+
+    await act(async () => {
+      onLibResize([
+        {
+          target: container.querySelector('.rc-virtual-list-holder'),
+        },
+      ]);
+
+      await Promise.resolve();
+    });
+
+    expect(container.querySelector('.rc-virtual-list-scrollbar-thumb')).toHaveStyle({
+      height: `10px`,
+    });
   });
 });

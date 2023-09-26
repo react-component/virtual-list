@@ -265,7 +265,10 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   const [size, setSize] = React.useState({ width: 0, height });
 
   const onHolderResize: ResizeObserverProps['onResize'] = (sizeInfo) => {
-    setSize(sizeInfo);
+    setSize({
+      width: sizeInfo.width || sizeInfo.offsetWidth,
+      height: sizeInfo.height || sizeInfo.offsetHeight,
+    });
   };
 
   // Hack on scrollbar to enable flash call
