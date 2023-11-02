@@ -135,12 +135,12 @@ export default function useScrollTo<T>(
 
       // Trigger next effect
       if (needCollectHeight) {
-        setSyncState((ori) => ({
-          ...ori,
-          times: ori.times + 1,
+        setSyncState({
+          ...syncState,
+          times: syncState.times + 1,
           targetAlign: newTargetAlign,
           lastTop: targetTop,
-        }));
+        });
       }
     } else if (process.env.NODE_ENV !== 'production' && syncState?.times === MAX_TIMES) {
       warning(
