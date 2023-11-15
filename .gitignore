@@ -1,4 +1,3 @@
-.storybook
 .doc
 node_modules
 coverage/
@@ -9,8 +8,8 @@ yarn.lock
 package-lock.json
 !tests/__mocks__/rc-util/lib
 
-# umi
-.umi
-.umi-production
-.umi-test
+# dumi
+.dumi/tmp
+.dumi/tmp-test
+.dumi/tmp-production
 .env.local

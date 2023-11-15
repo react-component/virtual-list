@@ -1,3 +1,8 @@
-## height
+---
+title: height
+nav:
+  title: Demo
+  path: /demo
+---
 
-<code src="../../examples/height.tsx">
+<code src="../../examples/height.tsx"></code>
