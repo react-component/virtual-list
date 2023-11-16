@@ -43,6 +43,7 @@
     "react-dom": "*"
   },
   "devDependencies": {
+    "@rc-component/father-plugin": "^1.0.0",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^12.1.5",
     "@types/classnames": "^2.2.10",
@@ -51,6 +52,7 @@
     "@types/react": "^18.0.8",
     "@types/react-dom": "^18.0.3",
     "@types/warning": "^3.0.0",
+    "@umijs/fabric": "^3.0.0",
     "cross-env": "^5.2.0",
     "dumi": "^2.0.0",
     "enzyme": "^3.1.0",
