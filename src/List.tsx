@@ -121,8 +121,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   const mergedData = data || EMPTY_DATA;
   const componentRef = useRef<HTMLDivElement>();
   const fillerInnerRef = useRef<HTMLDivElement>();
-  const inVirtual = useVirtual && data && (itemHeight * data.length > height || fillerInnerRef?.current?.clientHeight > height || !!scrollWidth);
-  console.log("useVirtual: ", useVirtual, inVirtual, data?.length);
+  const inVirtual = useVirtual && data && (fillerInnerRef?.current?.clientHeight > height || !!scrollWidth);
 
   // =============================== Item Key ===============================
 
