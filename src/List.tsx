@@ -115,13 +115,14 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
 
   // ================================= MISC =================================
   const useVirtual = !!(virtual !== false && height && itemHeight);
-  const inVirtual = useVirtual && data && (itemHeight * data.length > height || !!scrollWidth);
   const isRTL = direction === 'rtl';
 
   const mergedClassName = classNames(prefixCls, { [`${prefixCls}-rtl`]: isRTL }, className);
   const mergedData = data || EMPTY_DATA;
   const componentRef = useRef<HTMLDivElement>();
   const fillerInnerRef = useRef<HTMLDivElement>();
+  const inVirtual = useVirtual && data && (itemHeight * data.length > height || fillerInnerRef?.current?.clientHeight > height || !!scrollWidth);
+  console.log("useVirtual: ", useVirtual, inVirtual, data?.length);
 
   // =============================== Item Key ===============================
 
