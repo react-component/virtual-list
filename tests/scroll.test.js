@@ -51,9 +51,10 @@ describe('List.Scroll', () => {
   });
 
   function genList(props, func = mount) {
+    const { itemStyle, ...otherProps } = props;
     let node = (
-      <List component="ul" itemKey="id" {...props}>
-        {({ id }) => <li>{id}</li>}
+      <List component="ul" itemKey="id" {...otherProps}>
+        {({ id }) => <li style={itemStyle}>{id}</li>}
       </List>
     );
 
@@ -472,5 +473,33 @@ describe('List.Scroll', () => {
     expect(container.querySelector('.rc-virtual-list-scrollbar-thumb')).toHaveStyle({
       height: `10px`,
     });
+  });
+  it('scrollbar thumb should show up', async () => {
+    boundingRect = {
+      width: 0,
+      height: 0,
+    };
+
+    const { container } = genList(
+      {
+        itemHeight: 10,
+        height: 120,
+        data: genData(10),
+        itemStyle: { margin: '10px 0' },
+      },
+      render,
+    );
+
+    await act(async () => {
+      onLibResize([
+        {
+          target: container.querySelector('.rc-virtual-list-holder'),
+        },
+      ]);
+
+      await Promise.resolve();
+    });
+
+    expect(container.querySelector('.rc-virtual-list-scrollbar-thumb')).toBeVisible();
   });
 });
