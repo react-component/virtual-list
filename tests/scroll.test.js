@@ -474,6 +474,7 @@ describe('List.Scroll', () => {
       height: `10px`,
     });
   });
+
   it('scrollbar thumb should show up', async () => {
     boundingRect = {
       width: 0,
