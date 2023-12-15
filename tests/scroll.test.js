@@ -1,12 +1,12 @@
+import '@testing-library/jest-dom';
+import { createEvent, fireEvent, render } from '@testing-library/react';
+import { mount } from 'enzyme';
+import { _rs as onLibResize } from 'rc-resize-observer/lib/utils/observerUtil';
+import { resetWarned } from 'rc-util/lib/warning';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mount } from 'enzyme';
-import { spyElementPrototypes } from './utils/domHook';
 import List from '../src';
-import { createEvent, fireEvent, render } from '@testing-library/react';
-import { resetWarned } from 'rc-util/lib/warning';
-import { _rs as onLibResize } from 'rc-resize-observer/lib/utils/observerUtil';
-import '@testing-library/jest-dom';
+import { spyElementPrototypes } from './utils/domHook';
 
 function genData(count) {
   return new Array(count).fill(null).map((_, index) => ({ id: String(index) }));
@@ -181,13 +181,20 @@ describe('List.Scroll', () => {
     expect(preventDefault).toHaveBeenCalled();
   });
 
-  describe('scrollbar', () => {
-    it('moving', () => {
+  const genScrollbarMovingTestFn = (direction) => {
+    return () => {
       const listRef = React.createRef();
-      const wrapper = genList({ itemHeight: 20, height: 100, data: genData(100), ref: listRef });
+      const wrapper = genList({
+        itemHeight: 20,
+        height: 100,
+        data: genData(100),
+        ref: listRef,
+        direction,
+        scrollWidth: 1000,
+      });
 
       // Mouse down
-      wrapper.find('.rc-virtual-list-scrollbar-thumb').simulate('mousedown', {
+      wrapper.find('.rc-virtual-list-scrollbar-thumb').first().simulate('mousedown', {
         pageY: 0,
       });
 
@@ -211,7 +218,11 @@ describe('List.Scroll', () => {
       });
 
       expect(wrapper.find('ul').instance().scrollTop > 10).toBeTruthy();
-    });
+    };
+  };
+
+  describe('scrollbar', () => {
+    it('moving', genScrollbarMovingTestFn());
 
     describe('not show scrollbar when disabled virtual', () => {
       [
@@ -236,6 +247,10 @@ describe('List.Scroll', () => {
         });
       });
     });
+  });
+
+  describe('scrollbar rtl', () => {
+    it('moving', genScrollbarMovingTestFn('rtl'));
   });
 
   it('no bubble', () => {
