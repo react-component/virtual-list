@@ -238,6 +238,45 @@ describe('List.Scroll', () => {
     });
   });
 
+  describe('scrollbar rtl', () => {
+    it('moving', () => {
+      const listRef = React.createRef();
+      const wrapper = genList({
+        itemHeight: 20,
+        height: 100,
+        data: genData(100),
+        ref: listRef,
+        direction: 'rtl',
+      });
+
+      // Mouse down
+      wrapper.find('.rc-virtual-list-scrollbar-thumb').simulate('mousedown', {
+        pageY: 0,
+      });
+
+      // Mouse move
+      act(() => {
+        const mouseMoveEvent = new Event('mousemove');
+        mouseMoveEvent.pageY = 10;
+        window.dispatchEvent(mouseMoveEvent);
+      });
+
+      expect(wrapper.find('.rc-virtual-list-holder').props().style.pointerEvents).toEqual('none');
+
+      act(() => {
+        jest.runAllTimers();
+      });
+
+      // Mouse up
+      act(() => {
+        const mouseUpEvent = new Event('mouseup');
+        window.dispatchEvent(mouseUpEvent);
+      });
+
+      expect(wrapper.find('ul').instance().scrollTop > 10).toBeTruthy();
+    });
+  });
+
   it('no bubble', () => {
     const wrapper = genList({ itemHeight: 20, height: 100, data: genData(100) });
 
