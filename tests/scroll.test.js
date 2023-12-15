@@ -190,7 +190,7 @@ describe('List.Scroll', () => {
         data: genData(100),
         ref: listRef,
         direction,
-        scrollWidth: 1000,
+        scrollWidth: 10,
       });
 
       // Mouse down
