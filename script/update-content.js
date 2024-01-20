@@ -13,9 +13,14 @@ paths.forEach(path => {
   const name = path.split('/').pop().split('.')[0];
   fs.writeFile(
     `./docs/demo/${name}.md`,
-    `## ${name}
+    `---
+title: ${name}
+nav:
+  title: Demo
+  path: /demo
+---
 
-<code src="../../examples/${name}.tsx">
+<code src="../../examples/${name}.tsx"></code>
 `,
     'utf8',
     function(error) {
