@@ -73,6 +73,9 @@ export interface ListProps<T> extends Omit<React.HTMLAttributes<any>, 'children'
 
   onScroll?: React.UIEventHandler<HTMLElement>;
 
+  onScrollToEnd?: React.UIEventHandler<HTMLElement>;
+  scrollEndOffset?: number;
+
   /**
    * Given the virtual offset value.
    * It's the logic offset from start position.
@@ -110,6 +113,8 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     innerProps,
     extraRender,
     styles,
+    scrollEndOffset = 0,
+    onScrollToEnd,
     ...restProps
   } = props;
 
@@ -342,9 +347,18 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
 
   // When data size reduce. It may trigger native scroll event back to fit scroll position
   function onFallbackScroll(e: React.UIEvent<HTMLDivElement>) {
-    const { scrollTop: newScrollTop } = e.currentTarget;
+    const {
+      scrollTop: newScrollTop,
+      offsetHeight,
+      scrollHeight: newScrollHeight,
+    } = e.currentTarget;
+
     if (newScrollTop !== offsetTop) {
       syncScrollTop(newScrollTop);
+    }
+
+    if (useVirtual && newScrollTop + offsetHeight + scrollEndOffset >= newScrollHeight) {
+      onScrollToEnd?.(e);
     }
 
     // Trigger origin onScroll

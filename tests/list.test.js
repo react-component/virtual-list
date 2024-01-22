@@ -101,6 +101,27 @@ describe('List.Basic', () => {
       expect(onVisibleChange.mock.calls[0][0]).toHaveLength(6);
       expect(onVisibleChange.mock.calls[0][1]).toHaveLength(100);
     });
+
+    it('support onScrollToEnd and offset', () => {
+      const onScrollToEnd = jest.fn();
+      const scrollEndOffset = 200;
+
+      const wrapper = genList({
+        itemHeight: 20,
+        height: 100,
+        data: genData(100),
+        scrollEndOffset,
+        onScrollToEnd,
+      });
+
+      // offsetHeight is 20, so add 80
+      scrollTop = 2000 - 100 - scrollEndOffset + 80;
+      wrapper.find('ul').simulate('scroll', {
+        scrollTop,
+      });
+
+      expect(onScrollToEnd).toBeCalled();
+    });
   });
 
   describe('status switch', () => {
