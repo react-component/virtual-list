@@ -61,8 +61,7 @@ import List from 'rc-virtual-list';
 | itemHeight | Item minium height                                      | number                                                                                                                                                                                | -       |
 | itemKey    | Match key with item                                     | string                                                                                                                                                                                | -       |
 | styles     | style                                                   | { horizontalScrollBar?: React.CSSProperties; horizontalScrollBarThumb?: React.CSSProperties; verticalScrollBar?: React.CSSProperties; verticalScrollBarThumb?: React.CSSProperties; } | -       |
-| scrollEndOffset    | Scroll to end offset                                    | number                                                                                                                                                                        | 0       |
-| onScrollToEnd    | Scroll to bottom event                                     | `(e: React.UIEvent<HTMLDivElement>) => void`                                                                                                                                                                                | -       |
+| onScroll   | Support scroll to end parameter     | `(e: React.UIEvent<HTMLDivElement>, info: { end: boolean }) => void` 
 
 `children` provides additional `props` argument to support IE 11 scroll shaking.
 It will set `style` to `visibility: hidden` when measuring. You can ignore this if no requirement on IE.

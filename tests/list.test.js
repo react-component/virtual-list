@@ -102,25 +102,24 @@ describe('List.Basic', () => {
       expect(onVisibleChange.mock.calls[0][1]).toHaveLength(100);
     });
 
-    it('support onScrollToEnd and offset', () => {
-      const onScrollToEnd = jest.fn();
-      const scrollEndOffset = 200;
+    it('onScrll support end', (done) => {
+      const onScroll = jest.fn((_, info) => {
+        expect(info.end).toBe(true);
+        done();
+      });
 
       const wrapper = genList({
         itemHeight: 20,
         height: 100,
         data: genData(100),
-        scrollEndOffset,
-        onScrollToEnd,
+        onScroll,
       });
 
       // offsetHeight is 20, so add 80
-      scrollTop = 2000 - 100 - scrollEndOffset + 80;
+      scrollTop = 2000 - 100 + 80;
       wrapper.find('ul').simulate('scroll', {
         scrollTop,
       });
-
-      expect(onScrollToEnd).toBeCalled();
     });
   });
 

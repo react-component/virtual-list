@@ -43,7 +43,7 @@ export type ListRef = {
   getScrollInfo: () => ScrollInfo;
 };
 
-export interface ListProps<T> extends Omit<React.HTMLAttributes<any>, 'children'> {
+export interface ListProps<T> extends Omit<React.HTMLAttributes<any>, 'children' | 'onScroll'> {
   prefixCls?: string;
   children: RenderFunc<T>;
   data: T[];
@@ -71,10 +71,12 @@ export interface ListProps<T> extends Omit<React.HTMLAttributes<any>, 'children'
     verticalScrollBarThumb?: React.CSSProperties;
   };
 
-  onScroll?: React.UIEventHandler<HTMLElement>;
-
-  onScrollToEnd?: React.UIEventHandler<HTMLElement>;
-  scrollEndOffset?: number;
+  onScroll?: (
+    e: React.UIEvent<HTMLDivElement>,
+    info: {
+      end: boolean;
+    },
+  ) => void;
 
   /**
    * Given the virtual offset value.
@@ -113,8 +115,6 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     innerProps,
     extraRender,
     styles,
-    scrollEndOffset = 0,
-    onScrollToEnd,
     ...restProps
   } = props;
 
@@ -352,17 +352,20 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
       offsetHeight,
       scrollHeight: newScrollHeight,
     } = e.currentTarget;
+    let isScrollEnd = false;
 
     if (newScrollTop !== offsetTop) {
       syncScrollTop(newScrollTop);
     }
 
-    if (useVirtual && newScrollTop + offsetHeight + scrollEndOffset >= newScrollHeight) {
-      onScrollToEnd?.(e);
+    if (useVirtual && newScrollTop + offsetHeight >= newScrollHeight) {
+      isScrollEnd = true;
     }
 
     // Trigger origin onScroll
-    onScroll?.(e);
+    onScroll?.(e, {
+      end: isScrollEnd,
+    });
     triggerScroll();
   }
 
