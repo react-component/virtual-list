@@ -576,7 +576,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
         />
       )}
 
-      {inVirtual && scrollWidth && (
+      {inVirtual && scrollWidth > size.width && (
         <ScrollBar
           ref={horizontalScrollBarRef}
           prefixCls={prefixCls}
