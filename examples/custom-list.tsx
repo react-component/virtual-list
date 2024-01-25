@@ -34,7 +34,6 @@ const ForwardMyItem = React.forwardRef(MyItem);
 
 const data: Item[] = [];
 for (let i = 0; i < 10; i += 1) {
-  // data.push({ id: i, noUnMount: i === 9 || i === 0 });
   data.push({ id: i });
 }
 
