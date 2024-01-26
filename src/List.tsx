@@ -43,7 +43,9 @@ export type ListRef = {
   getScrollInfo: () => ScrollInfo;
 };
 
-export interface ListProps<T> extends Omit<React.HTMLAttributes<any>, 'children'> {
+export interface ListProps<T> {
+  className?: string;
+  style?: React.CSSProperties;
   prefixCls?: string;
   children: RenderFunc<T>;
   data: T[];
@@ -52,6 +54,7 @@ export interface ListProps<T> extends Omit<React.HTMLAttributes<any>, 'children'
   /** If not match virtual scroll condition, Set List still use height of container. */
   fullHeight?: boolean;
   itemKey: React.Key | ((item: T) => React.Key);
+  holderItem?: (item: T) => boolean;
   component?: string | React.FC<any> | React.ComponentClass<any>;
   /** Set `false` will always use real scroll instead of virtual one */
   virtual?: boolean;
@@ -110,6 +113,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     innerProps,
     extraRender,
     styles,
+    holderItem,
     ...restProps
   } = props;
 
@@ -149,6 +153,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
 
   const sharedConfig: SharedConfig<T> = {
     getKey,
+    holderItem,
   };
 
   // ================================ Scroll ================================
@@ -184,12 +189,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   );
 
   // ========================== Visible Calculation =========================
-  const {
-    scrollHeight,
-    start,
-    end,
-    offset: fillerOffset,
-  } = React.useMemo(() => {
+  const { scrollHeight, start, end, offset: fillerOffset } = React.useMemo(() => {
     if (!useVirtual) {
       return {
         scrollHeight: undefined,
@@ -275,14 +275,14 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   const verticalScrollBarRef = useRef<ScrollBarRef>();
   const horizontalScrollBarRef = useRef<ScrollBarRef>();
 
-  const horizontalScrollBarSpinSize = React.useMemo(
-    () => getSpinSize(size.width, scrollWidth),
-    [size.width, scrollWidth],
-  );
-  const verticalScrollBarSpinSize = React.useMemo(
-    () => getSpinSize(size.height, scrollHeight),
-    [size.height, scrollHeight],
-  );
+  const horizontalScrollBarSpinSize = React.useMemo(() => getSpinSize(size.width, scrollWidth), [
+    size.width,
+    scrollWidth,
+  ]);
+  const verticalScrollBarSpinSize = React.useMemo(() => getSpinSize(size.height, scrollHeight), [
+    size.height,
+    scrollHeight,
+  ]);
 
   // =============================== In Range ===============================
   const maxScrollHeight = scrollHeight - height;

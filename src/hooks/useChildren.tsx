@@ -9,9 +9,15 @@ export default function useChildren<T>(
   scrollWidth: number,
   setNodeRef: (item: T, element: HTMLElement) => void,
   renderFunc: RenderFunc<T>,
-  { getKey }: SharedConfig<T>,
+  { getKey, holderItem }: SharedConfig<T>,
 ) {
-  return list.slice(startIndex, endIndex + 1).map((item, index) => {
+  const baseList = list.slice(startIndex, endIndex + 1);
+
+  const noMountList = list.filter((item, index) => {
+    return holderItem(item) && (index < startIndex || index > endIndex);
+  });
+
+  return [...baseList, ...noMountList].map((item, index) => {
     const eleIndex = startIndex + index;
     const node = renderFunc(item, eleIndex, {
       style: {
