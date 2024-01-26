@@ -26,6 +26,7 @@ const MyItem: React.ForwardRefRenderFunction<HTMLElement, { item?: Item; onOpen?
       onClick={() => onOpen()}
     >
       {id}
+      <input />
     </span>
   );
 };
@@ -48,10 +49,11 @@ const Demo = () => {
         itemKey="id"
         style={{ border: '1px solid red', boxSizing: 'border-box' }}
         customListRender={(list, startIndex, endIndex) => {
-          const _list = list.filter(
-            (item, index) => item.noUnMount || (index >= startIndex && index <= endIndex),
+          const baseList = list.slice(startIndex, endIndex + 1);
+          const noMountList = list.filter(
+            (item, index) => item.noUnMount && (index < startIndex || index > endIndex),
           );
-          return _list;
+          return [...baseList, ...noMountList];
         }}
       >
         {(item) => (
