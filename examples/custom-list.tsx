@@ -48,15 +48,9 @@ const Demo = () => {
         itemKey="id"
         style={{ border: '1px solid red', boxSizing: 'border-box' }}
         customListRender={(list, startIndex, endIndex) => {
-          const _list = list.filter((item, index) => {
-            if (item.noUnMount) {
-              return true;
-            }
-            if (index < startIndex || index > endIndex) {
-              return false;
-            }
-            return true;
-          });
+          const _list = list.filter(
+            (item, index) => item.noUnMount || (index >= startIndex && index <= endIndex),
+          );
           return _list;
         }}
       >
