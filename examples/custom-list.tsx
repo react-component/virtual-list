@@ -48,12 +48,16 @@ const Demo = () => {
         itemKey="id"
         style={{ border: '1px solid red', boxSizing: 'border-box' }}
         customListRender={(list, startIndex, endIndex) => {
-          const baseList = list.slice(startIndex, endIndex + 1);
-          const noMountList = list
-            .filter((item) => item.noUnMount)
-            .filter((item) => !baseList.find((item2) => item2.id === item.id));
-
-          return [...baseList, ...noMountList];
+          const _list = list.filter((item, index) => {
+            if (item.noUnMount) {
+              return true;
+            }
+            if (index < startIndex || index > endIndex) {
+              return false;
+            }
+            return true;
+          });
+          return _list;
         }}
       >
         {(item) => (
