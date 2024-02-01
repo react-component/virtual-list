@@ -1,3 +1,3 @@
 ## height
 
-<code src="../../examples/height.tsx">
+<code src="../../examples/height.tsx"></code>

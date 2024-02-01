@@ -1,3 +1,3 @@
 ## switch
 
-<code src="../../examples/switch.tsx">
+<code src="../../examples/switch.tsx"></code>

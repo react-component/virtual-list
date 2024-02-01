@@ -1,3 +1,3 @@
 ## no-virtual
 
-<code src="../../examples/no-virtual.tsx">
+<code src="../../examples/no-virtual.tsx"></code>
