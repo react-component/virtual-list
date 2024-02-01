@@ -22,8 +22,7 @@
   "files": [
     "lib",
     "es",
-    "dist",
-    "assets/*.css"
+    "assets"
   ],
   "license": "MIT",
   "main": "./lib/index",
