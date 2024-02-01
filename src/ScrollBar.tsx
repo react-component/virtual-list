@@ -74,9 +74,6 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
   const enableScrollRange = scrollRange - containerSize || 0;
   const enableOffsetRange = containerSize - spinSize || 0;
 
-  // `scrollWidth` < `clientWidth` means no need to show scrollbar
-  const canScroll = enableScrollRange > 0;
-
   // ========================= Top ==========================
   const top = React.useMemo(() => {
     if (scrollOffset === 0 || enableScrollRange === 0) {
@@ -87,7 +84,7 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
   }, [scrollOffset, enableScrollRange, enableOffsetRange]);
 
   // ====================== Container =======================
-  const onContainerMouseDown: React.MouseEventHandler = (e) => {
+  const onContainerMouseDown: React.MouseEventHandler = e => {
     e.stopPropagation();
     e.preventDefault();
   };
@@ -206,7 +203,7 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
 
   const containerStyle: React.CSSProperties = {
     position: 'absolute',
-    visibility: visible && canScroll ? null : 'hidden',
+    visibility: visible ? null : 'hidden',
   };
 
   const thumbStyle: React.CSSProperties = {

@@ -470,7 +470,7 @@ describe('List.Scroll', () => {
     });
 
     expect(container.querySelector('.rc-virtual-list-scrollbar-thumb')).toHaveStyle({
-      height: `10px`,
+      height: `20px`,
     });
   });
 });
