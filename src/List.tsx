@@ -6,6 +6,7 @@ import type { ResizeObserverProps } from 'rc-resize-observer';
 import ResizeObserver from 'rc-resize-observer';
 import Filler from './Filler';
 import type { InnerProps } from './Filler';
+export type { InnerProps } from './Filler';
 import type { ScrollBarDirectionType, ScrollBarRef } from './ScrollBar';
 import ScrollBar from './ScrollBar';
 import type { RenderFunc, SharedConfig, GetKey, ExtraRenderInfo } from './interface';
