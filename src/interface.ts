@@ -1,3 +1,5 @@
+import type { ListProps } from '.';
+
 export type RenderFunc<T> = (
   item: T,
   index: number,
@@ -6,6 +8,7 @@ export type RenderFunc<T> = (
 
 export interface SharedConfig<T> {
   getKey: (item: T) => React.Key;
+  holderItem?: ListProps<T>['holderItem'];
 }
 
 export type GetKey<T> = (item: T) => React.Key;
