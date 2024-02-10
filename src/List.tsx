@@ -43,7 +43,9 @@ export type ListRef = {
   getScrollInfo: () => ScrollInfo;
 };
 
-export interface ListProps<T> extends Omit<React.HTMLAttributes<any>, 'children'> {
+export interface ListProps<T> {
+  className?: string;
+  style?: React.CSSProperties;
   prefixCls?: string;
   children: RenderFunc<T>;
   data: T[];
@@ -87,6 +89,8 @@ export interface ListProps<T> extends Omit<React.HTMLAttributes<any>, 'children'
 
   /** Render extra content into Filler */
   extraRender?: (info: ExtraRenderInfo) => React.ReactNode;
+
+  customListRender?: (data: T[], startIndex: number, endIndex: number) => T[];
 }
 
 export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
@@ -110,6 +114,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     innerProps,
     extraRender,
     styles,
+    customListRender,
     ...restProps
   } = props;
 
@@ -184,12 +189,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   );
 
   // ========================== Visible Calculation =========================
-  const {
-    scrollHeight,
-    start,
-    end,
-    offset: fillerOffset,
-  } = React.useMemo(() => {
+  const { scrollHeight, start, end, offset: fillerOffset } = React.useMemo(() => {
     if (!useVirtual) {
       return {
         scrollHeight: undefined,
@@ -275,14 +275,14 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   const verticalScrollBarRef = useRef<ScrollBarRef>();
   const horizontalScrollBarRef = useRef<ScrollBarRef>();
 
-  const horizontalScrollBarSpinSize = React.useMemo(
-    () => getSpinSize(size.width, scrollWidth),
-    [size.width, scrollWidth],
-  );
-  const verticalScrollBarSpinSize = React.useMemo(
-    () => getSpinSize(size.height, scrollHeight),
-    [size.height, scrollHeight],
-  );
+  const horizontalScrollBarSpinSize = React.useMemo(() => getSpinSize(size.width, scrollWidth), [
+    size.width,
+    scrollWidth,
+  ]);
+  const verticalScrollBarSpinSize = React.useMemo(() => getSpinSize(size.height, scrollHeight), [
+    size.height,
+    scrollHeight,
+  ]);
 
   // =============================== In Range ===============================
   const maxScrollHeight = scrollHeight - height;
@@ -500,6 +500,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     setInstanceRef,
     children,
     sharedConfig,
+    customListRender,
   );
 
   let componentStyle: React.CSSProperties = null;
