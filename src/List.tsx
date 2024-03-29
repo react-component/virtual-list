@@ -307,7 +307,9 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   // ================================ Scroll ================================
   const getVirtualScrollInfo = () => ({
     x: isRTL ? -offsetLeft : offsetLeft,
+    maxScrollWidth: scrollWidth - size.width,
     y: offsetTop,
+    maxScrollHeight,
   });
 
   const lastVirtualScrollInfoRef = useRef(getVirtualScrollInfo());
