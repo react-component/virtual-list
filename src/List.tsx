@@ -307,7 +307,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   // ================================ Scroll ================================
   const getVirtualScrollInfo = () => ({
     x: isRTL ? -offsetLeft : offsetLeft,
-    maxScrollWidth: scrollWidth - size.width,
+    maxScrollWidth: !!scrollWidth ? scrollWidth - size.width : 0,
     y: offsetTop,
     maxScrollHeight,
   });
@@ -357,7 +357,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
 
   const keepInHorizontalRange = (nextOffsetLeft: number) => {
     let tmpOffsetLeft = nextOffsetLeft;
-    const max = scrollWidth - size.width;
+    const max = !!scrollWidth ? scrollWidth - size.width : 0;
     tmpOffsetLeft = Math.max(tmpOffsetLeft, 0);
     tmpOffsetLeft = Math.min(tmpOffsetLeft, max);
 
