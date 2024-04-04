@@ -473,4 +473,24 @@ describe('List.Scroll', () => {
       height: `20px`,
     });
   });
+
+  it('show scrollbar when actual height is larger than container height', async () => {
+    jest.useRealTimers();
+    const { container } = genList(
+      { 
+        itemHeight: 8, 
+        height: 100, 
+        data: genData(10) 
+      }, 
+      render,
+    );
+    
+    await act(async () => {
+      await new Promise((resolve) => {
+        setTimeout(resolve, 10);
+      });
+    });
+
+    expect(container.querySelector('.rc-virtual-list-scrollbar-thumb')).toBeVisible()
+  });
 });
