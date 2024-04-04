@@ -133,7 +133,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
 
   // ================================= MISC =================================
   const useVirtual = !!(virtual !== false && height && itemHeight);
-  const containerHeight = React.useMemo(() =>  Object.values(heights.maps).reduce((total, curr) => total + curr, 0), [heights.id])
+  const containerHeight = React.useMemo(() =>  Object.values(heights.maps).reduce((total, curr) => total + curr, 0), [heights.id, heights.maps]);
   const inVirtual = useVirtual && data && (Math.max(itemHeight * data.length, containerHeight) > height || !!scrollWidth);
   const isRTL = direction === 'rtl';
 
@@ -307,9 +307,9 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   // ================================ Scroll ================================
   const getVirtualScrollInfo = () => ({
     x: isRTL ? -offsetLeft : offsetLeft,
-    maxScrollWidth: !!scrollWidth ? scrollWidth - size.width : 0,
     y: offsetTop,
-    maxScrollHeight,
+    maxScrollWidth: !!scrollWidth ? scrollWidth - size.width : 0,
+    maxScrollHeight: scrollHeight > height ? maxScrollHeight : 0,
   });
 
   const lastVirtualScrollInfoRef = useRef(getVirtualScrollInfo());
