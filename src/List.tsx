@@ -113,9 +113,28 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     ...restProps
   } = props;
 
+  // =============================== Item Key ===============================
+  const getKey = React.useCallback<GetKey<T>>(
+    (item: T) => {
+      if (typeof itemKey === 'function') {
+        return itemKey(item);
+      }
+      return item?.[itemKey as string];
+    },
+    [itemKey],
+  );
+
+  // ================================ Height ================================
+  const [setInstanceRef, collectHeight, heights, heightUpdatedMark] = useHeights(
+    getKey,
+    null,
+    null,
+  );
+
   // ================================= MISC =================================
   const useVirtual = !!(virtual !== false && height && itemHeight);
-  const inVirtual = useVirtual && data && (itemHeight * data.length > height || !!scrollWidth);
+  const containerHeight = React.useMemo(() =>  Object.values(heights.maps).reduce((total, curr) => total + curr, 0), [heights.id, heights.maps]);
+  const inVirtual = useVirtual && data && (Math.max(itemHeight * data.length, containerHeight) > height || !!scrollWidth);
   const isRTL = direction === 'rtl';
 
   const mergedClassName = classNames(prefixCls, { [`${prefixCls}-rtl`]: isRTL }, className);
@@ -135,17 +154,6 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   const onScrollbarStopMove = () => {
     setScrollMoving(false);
   };
-
-  // =============================== Item Key ===============================
-  const getKey = React.useCallback<GetKey<T>>(
-    (item: T) => {
-      if (typeof itemKey === 'function') {
-        return itemKey(item);
-      }
-      return item?.[itemKey as string];
-    },
-    [itemKey],
-  );
 
   const sharedConfig: SharedConfig<T> = {
     getKey,
@@ -175,13 +183,6 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   const diffItemRef = useRef<T>();
   const [diffItem] = useDiffItem(mergedData, getKey);
   diffItemRef.current = diffItem;
-
-  // ================================ Height ================================
-  const [setInstanceRef, collectHeight, heights, heightUpdatedMark] = useHeights(
-    getKey,
-    null,
-    null,
-  );
 
   // ========================== Visible Calculation =========================
   const {
@@ -307,6 +308,8 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   const getVirtualScrollInfo = () => ({
     x: isRTL ? -offsetLeft : offsetLeft,
     y: offsetTop,
+    maxScrollWidth: !!scrollWidth ? scrollWidth - size.width : 0,
+    maxScrollHeight: scrollHeight > height ? maxScrollHeight : 0,
   });
 
   const lastVirtualScrollInfoRef = useRef(getVirtualScrollInfo());
@@ -354,7 +357,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
 
   const keepInHorizontalRange = (nextOffsetLeft: number) => {
     let tmpOffsetLeft = nextOffsetLeft;
-    const max = scrollWidth - size.width;
+    const max = !!scrollWidth ? scrollWidth - size.width : 0;
     tmpOffsetLeft = Math.max(tmpOffsetLeft, 0);
     tmpOffsetLeft = Math.min(tmpOffsetLeft, max);
 
