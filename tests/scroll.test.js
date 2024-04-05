@@ -477,6 +477,7 @@ describe('List.Scroll', () => {
   it('show scrollbar when actual height is larger than container height', async () => {
     jest.useRealTimers();
     const { container } = genList(
+      // set itemHeight * data.length < height, but sum of actual height > height
       { 
         itemHeight: 8, 
         height: 100, 
