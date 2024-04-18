@@ -132,8 +132,8 @@ describe('List.scrollWidth', () => {
         width: '20px',
       });
 
-      expect(onVirtualScroll).toHaveBeenCalledWith({ x: 900, y: 0, maxScrollWidth: 900, maxScrollHeight: 1900 });
-      expect(listRef.current.getScrollInfo()).toEqual({ x: 900, y: 0, maxScrollWidth: 900, maxScrollHeight: 1900 });
+      expect(onVirtualScroll).toHaveBeenCalledWith({ x: 900, y: 0 });
+      expect(listRef.current.getScrollInfo()).toEqual({ x: 900, y: 0 });
     });
 
     it('wheel', async () => {
@@ -151,7 +151,7 @@ describe('List.scrollWidth', () => {
       fireEvent.wheel(container.querySelector('.rc-virtual-list-holder')!, {
         deltaX: 123,
       });
-      expect(onVirtualScroll).toHaveBeenCalledWith({ x: 123, y: 0, maxScrollWidth: 900, maxScrollHeight: 1900 });
+      expect(onVirtualScroll).toHaveBeenCalledWith({ x: 123, y: 0 });
     });
 
     it('trigger event when less count', async () => {
@@ -169,7 +169,7 @@ describe('List.scrollWidth', () => {
       fireEvent.wheel(container.querySelector('.rc-virtual-list-holder')!, {
         deltaX: 123,
       });
-      expect(onVirtualScroll).toHaveBeenCalledWith({ x: 123, y: 0, maxScrollWidth: 900, maxScrollHeight: 0 });
+      expect(onVirtualScroll).toHaveBeenCalledWith({ x: 123, y: 0 });
     });
 
     it('shift wheel', async () => {
@@ -188,7 +188,7 @@ describe('List.scrollWidth', () => {
         deltaY: 123,
         shiftKey: true,
       });
-      expect(onVirtualScroll).toHaveBeenCalledWith({ x: 123, y: 0, maxScrollWidth: 900, maxScrollHeight: 1900 });
+      expect(onVirtualScroll).toHaveBeenCalledWith({ x: 123, y: 0 });
     });
   });
 
@@ -204,10 +204,10 @@ describe('List.scrollWidth', () => {
     });
 
     listRef.current.scrollTo({ left: 135 });
-    expect(listRef.current.getScrollInfo()).toEqual({ x: 135, y: 0, maxScrollWidth: 900, maxScrollHeight: 1900 });
+    expect(listRef.current.getScrollInfo()).toEqual({ x: 135, y: 0 });
 
     listRef.current.scrollTo({ left: -99 });
-    expect(listRef.current.getScrollInfo()).toEqual({ x: 0, y: 0, maxScrollWidth: 900, maxScrollHeight: 1900 });
+    expect(listRef.current.getScrollInfo()).toEqual({ x: 0, y: 0 });
   });
 
   it('support extraRender', async () => {
