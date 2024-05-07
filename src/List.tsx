@@ -301,6 +301,8 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
 
   const isScrollAtTop = offsetTop <= 0;
   const isScrollAtBottom = offsetTop >= maxScrollHeight;
+  const isScrollAtLeft = !scrollWidth || (isRTL ? size.width + offsetLeft >= scrollWidth : offsetLeft <= 0)
+  const isScrollAtRight = !scrollWidth || (isRTL ? offsetLeft <= 0 : size.width + offsetLeft >= scrollWidth)
 
   const originScroll = useOriginScroll(isScrollAtTop, isScrollAtBottom);
 
@@ -362,7 +364,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     return tmpOffsetLeft;
   };
 
-  const onWheelDelta: Parameters<typeof useFrameWheel>[4] = useEvent((offsetXY, fromHorizontal) => {
+  const onWheelDelta: Parameters<typeof useFrameWheel>[6] = useEvent((offsetXY, fromHorizontal) => {
     if (fromHorizontal) {
       // Horizontal scroll no need sync virtual position
 
@@ -388,6 +390,8 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     useVirtual,
     isScrollAtTop,
     isScrollAtBottom,
+    isScrollAtLeft,
+    isScrollAtRight,
     !!scrollWidth,
     onWheelDelta,
   );
