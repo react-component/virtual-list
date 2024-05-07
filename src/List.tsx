@@ -301,8 +301,8 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
 
   const isScrollAtTop = offsetTop <= 0;
   const isScrollAtBottom = offsetTop >= maxScrollHeight;
-  const isScrollAtLeft = !scrollWidth || (isRTL ? size.width + offsetLeft >= scrollWidth : offsetLeft <= 0)
-  const isScrollAtRight = !scrollWidth || (isRTL ? offsetLeft <= 0 : size.width + offsetLeft >= scrollWidth)
+  const isScrollAtLeft = !scrollWidth || (isRTL ? size.width + offsetLeft >= scrollWidth : offsetLeft <= 0);
+  const isScrollAtRight = !scrollWidth || (isRTL ? offsetLeft <= 0 : size.width + offsetLeft >= scrollWidth);
 
   const originScroll = useOriginScroll(isScrollAtTop, isScrollAtBottom);
 

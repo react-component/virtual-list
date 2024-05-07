@@ -56,7 +56,7 @@ export default function useFrameWheel(
   function onWheelX(event: WheelEvent, deltaX: number) {
     // Do nothing when scroll at the edge
     if (isScrollAtLeft || isScrollAtRight) {
-      return 
+      return;
     }
 
     onWheelDelta(deltaX, true);
