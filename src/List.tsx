@@ -1,26 +1,26 @@
-import * as React from 'react';
-import { useRef, useState } from 'react';
-import { flushSync } from 'react-dom';
 import classNames from 'classnames';
 import type { ResizeObserverProps } from 'rc-resize-observer';
 import ResizeObserver from 'rc-resize-observer';
-import Filler from './Filler';
+import { useEvent } from 'rc-util';
+import useLayoutEffect from 'rc-util/lib/hooks/useLayoutEffect';
+import * as React from 'react';
+import { useRef, useState } from 'react';
+import { flushSync } from 'react-dom';
 import type { InnerProps } from './Filler';
-import type { ScrollBarDirectionType, ScrollBarRef } from './ScrollBar';
-import ScrollBar from './ScrollBar';
-import type { RenderFunc, SharedConfig, GetKey, ExtraRenderInfo } from './interface';
+import Filler from './Filler';
 import useChildren from './hooks/useChildren';
-import useHeights from './hooks/useHeights';
-import useScrollTo from './hooks/useScrollTo';
-import type { ScrollPos, ScrollTarget } from './hooks/useScrollTo';
 import useDiffItem from './hooks/useDiffItem';
 import useFrameWheel from './hooks/useFrameWheel';
+import { useGetSize } from './hooks/useGetSize';
+import useHeights from './hooks/useHeights';
 import useMobileTouchMove from './hooks/useMobileTouchMove';
 import useOriginScroll from './hooks/useOriginScroll';
-import useLayoutEffect from 'rc-util/lib/hooks/useLayoutEffect';
+import type { ScrollPos, ScrollTarget } from './hooks/useScrollTo';
+import useScrollTo from './hooks/useScrollTo';
+import type { ExtraRenderInfo, GetKey, RenderFunc, SharedConfig } from './interface';
+import type { ScrollBarDirectionType, ScrollBarRef } from './ScrollBar';
+import ScrollBar from './ScrollBar';
 import { getSpinSize } from './utils/scrollbarUtil';
-import { useEvent } from 'rc-util';
-import { useGetSize } from './hooks/useGetSize';
 
 const EMPTY_DATA = [];
 
@@ -133,8 +133,14 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
 
   // ================================= MISC =================================
   const useVirtual = !!(virtual !== false && height && itemHeight);
-  const containerHeight = React.useMemo(() =>  Object.values(heights.maps).reduce((total, curr) => total + curr, 0), [heights.id, heights.maps]);
-  const inVirtual = useVirtual && data && (Math.max(itemHeight * data.length, containerHeight) > height || !!scrollWidth);
+  const containerHeight = React.useMemo(
+    () => Object.values(heights.maps).reduce((total, curr) => total + curr, 0),
+    [heights.id, heights.maps],
+  );
+  const inVirtual =
+    useVirtual &&
+    data &&
+    (Math.max(itemHeight * data.length, containerHeight) > height || !!scrollWidth);
   const isRTL = direction === 'rtl';
 
   const mergedClassName = classNames(prefixCls, { [`${prefixCls}-rtl`]: isRTL }, className);
@@ -312,9 +318,9 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
 
   const lastVirtualScrollInfoRef = useRef(getVirtualScrollInfo());
 
-  const triggerScroll = useEvent(() => {
+  const triggerScroll = useEvent((params?: { x?: number; y?: number }) => {
     if (onVirtualScroll) {
-      const nextInfo = getVirtualScrollInfo();
+      const nextInfo = { ...getVirtualScrollInfo(), ...params };
 
       // Trigger when offset changed
       if (
@@ -425,9 +431,9 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   // Sync scroll left
   useLayoutEffect(() => {
     if (scrollWidth) {
-      setOffsetLeft((left) => {
-        return keepInHorizontalRange(left);
-      });
+      const newOffsetLeft = keepInHorizontalRange(offsetLeft);
+      setOffsetLeft(newOffsetLeft);
+      triggerScroll({ x: newOffsetLeft });
     }
   }, [size.width, scrollWidth]);
 

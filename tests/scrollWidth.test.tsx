@@ -1,10 +1,10 @@
-import React from 'react';
+import '@testing-library/jest-dom';
 import { act, fireEvent, render } from '@testing-library/react';
+import { _rs as onLibResize } from 'rc-resize-observer/lib/utils/observerUtil';
 import { spyElementPrototypes } from 'rc-util/lib/test/domHook';
+import React from 'react';
 import type { ListRef } from '../src';
 import List, { type ListProps } from '../src';
-import { _rs as onLibResize } from 'rc-resize-observer/lib/utils/observerUtil';
-import '@testing-library/jest-dom';
 
 const ITEM_HEIGHT = 20;
 
@@ -91,14 +91,16 @@ describe('List.scrollWidth', () => {
       const onVirtualScroll = jest.fn();
       const listRef = React.createRef<ListRef>();
 
-      const { container } = await genList({
+      const props = {
         itemHeight: ITEM_HEIGHT,
         height: 100,
         data: genData(100),
         scrollWidth: 1000,
         onVirtualScroll,
         ref: listRef,
-      });
+      };
+
+      const { container, rerender } = await genList(props);
 
       await act(async () => {
         onLibResize([
@@ -134,6 +136,16 @@ describe('List.scrollWidth', () => {
 
       expect(onVirtualScroll).toHaveBeenCalledWith({ x: 900, y: 0 });
       expect(listRef.current.getScrollInfo()).toEqual({ x: 900, y: 0 });
+
+      act(() => {
+        rerender(
+          <List component="ul" itemKey="id" {...props} scrollWidth={600}>
+            {({ id }) => <li>{id}</li>}
+          </List>,
+        );
+      });
+      expect(onVirtualScroll).toHaveBeenCalledWith({ x: 500, y: 0 });
+      expect(listRef.current.getScrollInfo()).toEqual({ x: 500, y: 0 });
     });
 
     it('wheel', async () => {
