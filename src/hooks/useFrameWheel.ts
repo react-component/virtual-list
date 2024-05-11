@@ -12,6 +12,8 @@ export default function useFrameWheel(
   inVirtual: boolean,
   isScrollAtTop: boolean,
   isScrollAtBottom: boolean,
+  isScrollAtLeft: boolean,
+  isScrollAtRight: boolean,
   horizontalScroll: boolean,
   /***
    * Return `true` when you need to prevent default event
@@ -52,6 +54,11 @@ export default function useFrameWheel(
   }
 
   function onWheelX(event: WheelEvent, deltaX: number) {
+    // Do nothing when scroll at the edge
+    if (isScrollAtLeft || isScrollAtRight) {
+      return;
+    }
+
     onWheelDelta(deltaX, true);
 
     if (!isFF) {
