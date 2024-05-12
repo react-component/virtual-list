@@ -39,6 +39,7 @@ export type ScrollConfig = ScrollTarget | ScrollPos;
 export type ScrollTo = (arg: number | ScrollConfig) => void;
 
 export type ListRef = {
+  clientWidth: number;
   scrollTo: ScrollTo;
   getScrollInfo: () => ScrollInfo;
 };
@@ -455,6 +456,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   );
 
   React.useImperativeHandle(ref, () => ({
+    clientWidth: size.width,
     getScrollInfo: getVirtualScrollInfo,
     scrollTo: (config) => {
       function isPosScroll(arg: any): arg is ScrollPos {

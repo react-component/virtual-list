@@ -204,6 +204,20 @@ describe('List.scrollWidth', () => {
     });
   });
 
+  it('ref clientWidth', async () => {
+    const listRef = React.createRef<ListRef>();
+
+    await genList({
+      itemHeight: ITEM_HEIGHT,
+      height: 100,
+      data: genData(100),
+      scrollWidth: 1000,
+      ref: listRef,
+    });
+
+    expect(listRef.current.clientWidth).toBe(100);
+  });
+
   it('ref scrollTo', async () => {
     const listRef = React.createRef<ListRef>();
 
