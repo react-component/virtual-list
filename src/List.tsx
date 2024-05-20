@@ -504,6 +504,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     start,
     end,
     scrollWidth,
+    offsetLeft,
     setInstanceRef,
     children,
     sharedConfig,

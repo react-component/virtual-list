@@ -1,7 +1,7 @@
 export type RenderFunc<T> = (
   item: T,
   index: number,
-  props: { style?: React.CSSProperties },
+  props: { style: React.CSSProperties; offsetX: number },
 ) => React.ReactNode;
 
 export interface SharedConfig<T> {
