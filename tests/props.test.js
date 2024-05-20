@@ -40,4 +40,17 @@ describe('Props', () => {
 
     expect(wrapper.find('.prefix-holder-inner').length).toBeTruthy();
   });
+
+  it('offsetX in renderFn', () => {
+    let scrollLeft;
+    mount(
+      <List data={[0]} itemKey={id => id} prefixCls="prefix">
+        {(id, _, { offsetX }) => { 
+          scrollLeft = offsetX;
+          return <div>{id}</div>}}
+      </List>,
+    );
+
+    expect(scrollLeft).toEqual(0);
+  });
 });
