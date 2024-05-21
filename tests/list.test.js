@@ -226,4 +226,10 @@ describe('List.Basic', () => {
 
     expect(wrapper.find('div#my_list').prop('role')).toEqual('listbox');
   });
+
+  it('nativeElement', () => {
+    const ref = React.createRef();
+    genList({ data: genData(1), ref });
+    expect(ref.current.nativeElement instanceof Element).toBeTruthy();
+  });
 });
