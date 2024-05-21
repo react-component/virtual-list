@@ -17,10 +17,6 @@ describe('List.Basic', () => {
       </List>
     );
 
-    if (props.ref) {
-      node = <div>{node}</div>;
-    }
-
     return mount(node);
   }
 
@@ -229,7 +225,7 @@ describe('List.Basic', () => {
 
   it('nativeElement', () => {
     const ref = React.createRef();
-    genList({ data: genData(1), ref });
-    expect(ref.current.nativeElement instanceof Element).toBeTruthy();
+    const wrapper = genList({ data: genData(1), ref });
+    expect(ref.current.nativeElement).toBe(wrapper.getDOMNode());
   });
 });
