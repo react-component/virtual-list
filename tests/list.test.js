@@ -17,10 +17,6 @@ describe('List.Basic', () => {
       </List>
     );
 
-    if (props.ref) {
-      node = <div>{node}</div>;
-    }
-
     return mount(node);
   }
 
@@ -225,5 +221,11 @@ describe('List.Basic', () => {
     });
 
     expect(wrapper.find('div#my_list').prop('role')).toEqual('listbox');
+  });
+
+  it('nativeElement', () => {
+    const ref = React.createRef();
+    const wrapper = genList({ data: genData(1), ref });
+    expect(ref.current.nativeElement).toBe(wrapper.getDOMNode());
   });
 });
