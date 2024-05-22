@@ -27,7 +27,7 @@ export default function useMobileTouchMove(
       const currentY = Math.ceil(e.touches[0].pageY);
       let offsetX = touchXRef.current - currentX;
       let offsetY = touchYRef.current - currentY;
-      const isHorizontal = Math.abs(offsetX) >= Math.abs(offsetY);
+      const isHorizontal = Math.abs(offsetX) > Math.abs(offsetY);
       if (isHorizontal) {
         touchXRef.current = currentX;
       } else {
