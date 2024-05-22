@@ -309,8 +309,15 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
 
   const isScrollAtTop = offsetTop <= 0;
   const isScrollAtBottom = offsetTop >= maxScrollHeight;
+  const isScrollAtLeft = offsetLeft <= 0;
+  const isScrollAtRight = offsetLeft >= scrollWidth;
 
-  const originScroll = useOriginScroll(isScrollAtTop, isScrollAtBottom);
+  const originScroll = useOriginScroll(
+    isScrollAtTop,
+    isScrollAtBottom,
+    isScrollAtLeft,
+    isScrollAtRight,
+  );
 
   // ================================ Scroll ================================
   const getVirtualScrollInfo = () => ({
@@ -370,7 +377,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     return tmpOffsetLeft;
   };
 
-  const onWheelDelta: Parameters<typeof useFrameWheel>[4] = useEvent((offsetXY, fromHorizontal) => {
+  const onWheelDelta: Parameters<typeof useFrameWheel>[6] = useEvent((offsetXY, fromHorizontal) => {
     if (fromHorizontal) {
       // Horizontal scroll no need sync virtual position
 
@@ -396,17 +403,23 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     useVirtual,
     isScrollAtTop,
     isScrollAtBottom,
+    isScrollAtLeft,
+    isScrollAtRight,
     !!scrollWidth,
     onWheelDelta,
   );
 
   // Mobile touch move
-  useMobileTouchMove(useVirtual, componentRef, (deltaY, smoothOffset) => {
-    if (originScroll(deltaY, smoothOffset)) {
+  useMobileTouchMove(useVirtual, componentRef, (isHorizontal, delta, smoothOffset) => {
+    if (originScroll(isHorizontal, delta, smoothOffset)) {
       return false;
     }
 
-    onRawWheel({ preventDefault() {}, deltaY } as WheelEvent);
+    onRawWheel({
+      preventDefault() {},
+      deltaX: isHorizontal ? delta : 0,
+      deltaY: isHorizontal ? 0 : delta,
+    } as WheelEvent);
     return true;
   });
 

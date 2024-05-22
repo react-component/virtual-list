@@ -1,5 +1,5 @@
-import { useRef } from 'react';
 import raf from 'rc-util/lib/raf';
+import { useRef } from 'react';
 import isFF from '../utils/isFirefox';
 import useOriginScroll from './useOriginScroll';
 
@@ -12,6 +12,8 @@ export default function useFrameWheel(
   inVirtual: boolean,
   isScrollAtTop: boolean,
   isScrollAtBottom: boolean,
+  isScrollAtLeft: boolean,
+  isScrollAtRight: boolean,
   horizontalScroll: boolean,
   /***
    * Return `true` when you need to prevent default event
@@ -26,7 +28,12 @@ export default function useFrameWheel(
   const isMouseScrollRef = useRef<boolean>(false);
 
   // Scroll status sync
-  const originScroll = useOriginScroll(isScrollAtTop, isScrollAtBottom);
+  const originScroll = useOriginScroll(
+    isScrollAtTop,
+    isScrollAtBottom,
+    isScrollAtLeft,
+    isScrollAtRight,
+  );
 
   function onWheelY(event: WheelEvent, deltaY: number) {
     raf.cancel(nextFrameRef.current);
@@ -35,7 +42,7 @@ export default function useFrameWheel(
     wheelValueRef.current = deltaY;
 
     // Do nothing when scroll at the edge, Skip check when is in scroll
-    if (originScroll(deltaY)) return;
+    if (originScroll(false, deltaY)) return;
 
     // Proxy of scroll events
     if (!isFF) {

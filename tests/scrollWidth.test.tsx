@@ -273,4 +273,33 @@ describe('List.scrollWidth', () => {
       marginLeft: '-800px',
     });
   });
+
+  it('touch horizontal', async () => {
+    const { container } = await genList({
+      itemHeight: ITEM_HEIGHT,
+      height: 100,
+      data: genData(100),
+      scrollWidth: 1000,
+    });
+
+    fireEvent.touchStart(container.querySelector('.rc-virtual-list-holder')!, {
+      touches: [{ pageX: 100, pageY: 0 }],
+    });
+
+    fireEvent.touchMove(container.querySelector('.rc-virtual-list-holder')!, {
+      touches: [{ pageX: 0, pageY: 0 }],
+    });
+
+    fireEvent.touchEnd(container.querySelector('.rc-virtual-list-holder')!, {
+      touches: [{ pageX: 0, pageY: 0 }],
+    });
+
+    act(() => {
+      jest.runAllTimers();
+    });
+
+    expect(container.querySelector('.rc-virtual-list-holder-inner')).toHaveStyle({
+      marginLeft: '-900px',
+    });
+  });
 });
