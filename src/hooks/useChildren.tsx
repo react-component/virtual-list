@@ -52,7 +52,7 @@ export default function useChildren<T>(
   ).map((index) => {
     const item = list[index];
     const eleIndex = startIndex + index;
-    const isSticky = shouldStickyIndexesAndTop.some((i) => i.index === index);
+    const stickyInfo = shouldStickyIndexesAndTop.find((i) => i.index === index);
     const node = renderFunc(item, eleIndex, {
       style: {
         ...(scrollWidth
@@ -60,11 +60,11 @@ export default function useChildren<T>(
               width: scrollWidth,
             }
           : {}),
-        ...(isSticky
+        ...(stickyInfo
           ? {
               // Use sticky when it exists, use absolute when it disappears
               position: index >= startIndex && index <= endIndex ? 'sticky' : 'absolute',
-              top: shouldStickyIndexesAndTop.find((i) => i.index === index).top,
+              top: stickyInfo.top,
             }
           : {}),
       },
