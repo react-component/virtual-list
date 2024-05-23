@@ -64,6 +64,7 @@ export interface ListProps<T> extends Omit<React.HTMLAttributes<any>, 'children'
    * When set, `virtual` will always be enabled.
    */
   scrollWidth?: number;
+  stickyIndexes?: number[];
 
   styles?: {
     horizontalScrollBar?: React.CSSProperties;
@@ -104,6 +105,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     virtual,
     direction,
     scrollWidth,
+    stickyIndexes,
     component: Component = 'div',
     onScroll,
     onVirtualScroll,
@@ -521,9 +523,12 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     end,
     scrollWidth,
     offsetLeft,
+    offsetTop,
     setInstanceRef,
     children,
     sharedConfig,
+    heights,
+    stickyIndexes,
   );
 
   let componentStyle: React.CSSProperties = null;
