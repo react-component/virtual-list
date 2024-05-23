@@ -101,6 +101,5 @@ export function generateIndexesWithSticky(
     }
   });
 
-  indexArray.sort((a, b) => a - b);
-  return indexArray;
+  return indexArray.sort((a, b) => a - b);
 }
