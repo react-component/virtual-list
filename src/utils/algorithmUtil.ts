@@ -90,20 +90,17 @@ export function generateIndexesWithSticky(
   endIndex: number,
   stickyIndexes: number[],
 ) {
-  // 生成从 startIndex 到 endIndex 的范围数组
   const indexArray: number[] = [];
   for (let i = startIndex; i <= endIndex; i++) {
     indexArray.push(i);
   }
 
-  // 添加 stickyIndexes 中不在范围内的索引
   stickyIndexes.forEach((index) => {
     if (index < startIndex || index > endIndex) {
       indexArray.push(index);
     }
   });
 
-  // 返回排序后的结果以确保顺序正确
   indexArray.sort((a, b) => a - b);
   return indexArray;
 }
