@@ -292,7 +292,7 @@ describe('List.Scroll', () => {
 
       wrapper.setProps({ data: genData(100) });
 
-      expect(wrapper.find('ScrollBar').props().scrollOffsetRef).toEqual({current: 0});
+      expect(wrapper.find('ScrollBar').props().scrollOffset).toEqual({current: 0});
     });
 
     it('over max height', () => {
@@ -309,7 +309,7 @@ describe('List.Scroll', () => {
 
       wrapper.update();
 
-      expect(wrapper.find('ScrollBar').props().scrollOffsetRef).toEqual({current: 1900});
+      expect(wrapper.find('ScrollBar').props().scrollOffset).toEqual({current: 1900});
     });
 
     it('dynamic large to small', () => {

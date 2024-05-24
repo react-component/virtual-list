@@ -10,7 +10,7 @@ const MyItem: React.ForwardRefRenderFunction<any, Item> = ({ id }, ref) => (
   <span
     ref={ref}
     style={{
-      height: 30 + (id % 2 ? 0 : 10),
+      height: 50,
     }}
     className="fixed-item"
     onClick={() => {
@@ -217,7 +217,7 @@ const Demo = () => {
             id="list"
             ref={listRef}
             data={data}
-            height={200}
+            height={300}
             itemHeight={20}
             itemKey="id"
             style={{
