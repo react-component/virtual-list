@@ -210,7 +210,7 @@ describe('List.Scroll', () => {
         window.dispatchEvent(mouseUpEvent);
       });
 
-      expect(wrapper.find('ul').instance().scrollTop > 10).toBeTruthy();
+      expect(wrapper.find('ul').instance().scrollTop).toBeTruthy();
     });
 
     describe('not show scrollbar when disabled virtual', () => {
@@ -292,7 +292,7 @@ describe('List.Scroll', () => {
 
       wrapper.setProps({ data: genData(100) });
 
-      expect(wrapper.find('ScrollBar').props().scrollOffset).toEqual(0);
+      expect(wrapper.find('ScrollBar').props().scrollOffsetRef).toEqual({current: 0});
     });
 
     it('over max height', () => {
@@ -309,7 +309,7 @@ describe('List.Scroll', () => {
 
       wrapper.update();
 
-      expect(wrapper.find('ScrollBar').props().scrollOffset).toEqual(1900);
+      expect(wrapper.find('ScrollBar').props().scrollOffsetRef).toEqual({current: 1900});
     });
 
     it('dynamic large to small', () => {

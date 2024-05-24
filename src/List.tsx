@@ -9,7 +9,7 @@ import { flushSync } from 'react-dom';
 import type { InnerProps } from './Filler';
 import Filler from './Filler';
 import useChildren from './hooks/useChildren';
-import useDiffItem from './hooks/useDiffItem';
+import useForceUpdate from './hooks/useForceUpdate';
 import useFrameWheel from './hooks/useFrameWheel';
 import { useGetSize } from './hooks/useGetSize';
 import useHeights from './hooks/useHeights';
@@ -152,9 +152,10 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
 
   // =============================== Item Key ===============================
 
-  const [offsetTop, setOffsetTop] = useState(0);
+  const offsetTop = useRef(0);
   const [offsetLeft, setOffsetLeft] = useState(0);
   const [scrollMoving, setScrollMoving] = useState(false);
+  const forceUpdate = useForceUpdate();
 
   const onScrollbarStartMove = () => {
     setScrollMoving(true);
@@ -167,30 +168,55 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     getKey,
   };
 
-  // ================================ Scroll ================================
-  function syncScrollTop(newTop: number | ((prev: number) => number)) {
-    setOffsetTop((origin) => {
-      let value: number;
-      if (typeof newTop === 'function') {
-        value = newTop(origin);
-      } else {
-        value = newTop;
+  const checkRange = () => {
+    let itemTop = 0;
+    let startIndex: number;
+    let startOffset: number;
+    let endIndex: number;
+
+    const dataLen = mergedData.length;
+    for (let i = 0; i < dataLen; i += 1) {
+      const item = mergedData[i];
+      const key = getKey(item);
+
+      const cacheHeight = heights.get(key);
+      const currentItemBottom = itemTop + (cacheHeight === undefined ? itemHeight : cacheHeight);
+
+      // Check item top in the range
+      if (currentItemBottom >= offsetTop.current && startIndex === undefined) {
+        startIndex = i;
+        startOffset = itemTop;
       }
 
-      const alignedTop = keepInRange(value);
+      // Check item bottom in the range. We will render additional one item for motion usage
+      if (currentItemBottom > offsetTop.current + height && endIndex === undefined) {
+        endIndex = i;
+      }
 
-      componentRef.current.scrollTop = alignedTop;
-      return alignedTop;
-    });
-  }
+      itemTop = currentItemBottom;
+    }
 
-  // ================================ Legacy ================================
-  // Put ref here since the range is generate by follow
-  const rangeRef = useRef({ start: 0, end: mergedData.length });
+    // When scrollTop at the end but data cut to small count will reach this
+    if (startIndex === undefined) {
+      startIndex = 0;
+      startOffset = 0;
 
-  const diffItemRef = useRef<T>();
-  const [diffItem] = useDiffItem(mergedData, getKey);
-  diffItemRef.current = diffItem;
+      endIndex = Math.ceil(height / itemHeight);
+    }
+    if (endIndex === undefined) {
+      endIndex = mergedData.length - 1;
+    }
+
+    // Give cache to improve scroll experience
+    endIndex = Math.min(endIndex + 1, mergedData.length - 1);
+
+    return {
+      scrollHeight: itemTop,
+      start: startIndex,
+      end: endIndex,
+      offset: startOffset,
+    };
+  };
 
   // ========================== Visible Calculation =========================
   const {
@@ -218,57 +244,8 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
       };
     }
 
-    let itemTop = 0;
-    let startIndex: number;
-    let startOffset: number;
-    let endIndex: number;
-
-    const dataLen = mergedData.length;
-    for (let i = 0; i < dataLen; i += 1) {
-      const item = mergedData[i];
-      const key = getKey(item);
-
-      const cacheHeight = heights.get(key);
-      const currentItemBottom = itemTop + (cacheHeight === undefined ? itemHeight : cacheHeight);
-
-      // Check item top in the range
-      if (currentItemBottom >= offsetTop && startIndex === undefined) {
-        startIndex = i;
-        startOffset = itemTop;
-      }
-
-      // Check item bottom in the range. We will render additional one item for motion usage
-      if (currentItemBottom > offsetTop + height && endIndex === undefined) {
-        endIndex = i;
-      }
-
-      itemTop = currentItemBottom;
-    }
-
-    // When scrollTop at the end but data cut to small count will reach this
-    if (startIndex === undefined) {
-      startIndex = 0;
-      startOffset = 0;
-
-      endIndex = Math.ceil(height / itemHeight);
-    }
-    if (endIndex === undefined) {
-      endIndex = mergedData.length - 1;
-    }
-
-    // Give cache to improve scroll experience
-    endIndex = Math.min(endIndex + 1, mergedData.length - 1);
-
-    return {
-      scrollHeight: itemTop,
-      start: startIndex,
-      end: endIndex,
-      offset: startOffset,
-    };
-  }, [inVirtual, useVirtual, offsetTop, mergedData, heightUpdatedMark, height]);
-
-  rangeRef.current.start = start;
-  rangeRef.current.end = end;
+    return checkRange();
+  }, [inVirtual, useVirtual, offsetTop.current, mergedData, heightUpdatedMark, height]);
 
   // ================================= Size =================================
   const [size, setSize] = React.useState({ width: 0, height });
@@ -293,6 +270,20 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     [size.height, scrollHeight],
   );
 
+  // ================================ Scroll ================================
+  function syncScrollTop(newTop: number) {
+    const alignedTop = keepInRange(newTop);
+
+    componentRef.current.scrollTop = alignedTop;
+    offsetTop.current = alignedTop;
+
+    const range = checkRange();
+    if (start !== range.start || end !== range.end || scrollHeight !== range.scrollHeight) {
+      forceUpdate();
+    }
+    verticalScrollBarRef.current?.update();
+  }
+
   // =============================== In Range ===============================
   const maxScrollHeight = scrollHeight - height;
   const maxScrollHeightRef = useRef(maxScrollHeight);
@@ -307,14 +298,14 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     return newTop;
   }
 
-  const isScrollAtTop = offsetTop <= 0;
-  const isScrollAtBottom = offsetTop >= maxScrollHeight;
+  const getIsScrollAtTop = () => offsetTop.current <= 0;
+  const getIsScrollAtBottom = () => offsetTop.current >= maxScrollHeightRef.current;
   const isScrollAtLeft = offsetLeft <= 0;
   const isScrollAtRight = offsetLeft >= scrollWidth;
 
   const originScroll = useOriginScroll(
-    isScrollAtTop,
-    isScrollAtBottom,
+    getIsScrollAtTop,
+    getIsScrollAtBottom,
     isScrollAtLeft,
     isScrollAtRight,
   );
@@ -322,7 +313,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   // ================================ Scroll ================================
   const getVirtualScrollInfo = () => ({
     x: isRTL ? -offsetLeft : offsetLeft,
-    y: offsetTop,
+    y: offsetTop.current,
   });
 
   const lastVirtualScrollInfoRef = useRef(getVirtualScrollInfo());
@@ -359,7 +350,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   // When data size reduce. It may trigger native scroll event back to fit scroll position
   function onFallbackScroll(e: React.UIEvent<HTMLDivElement>) {
     const { scrollTop: newScrollTop } = e.currentTarget;
-    if (newScrollTop !== offsetTop) {
+    if (newScrollTop !== offsetTop.current) {
       syncScrollTop(newScrollTop);
     }
 
@@ -391,18 +382,15 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
 
       triggerScroll();
     } else {
-      syncScrollTop((top) => {
-        const newTop = top + offsetXY;
-        return newTop;
-      });
+      syncScrollTop(offsetTop.current + offsetXY);
     }
   });
 
   // Since this added in global,should use ref to keep update
   const [onRawWheel, onFireFoxScroll] = useFrameWheel(
     useVirtual,
-    isScrollAtTop,
-    isScrollAtBottom,
+    getIsScrollAtTop,
+    getIsScrollAtBottom,
     isScrollAtLeft,
     isScrollAtRight,
     !!scrollWidth,

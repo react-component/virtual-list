@@ -10,8 +10,8 @@ interface FireFoxDOMMouseScrollEvent {
 
 export default function useFrameWheel(
   inVirtual: boolean,
-  isScrollAtTop: boolean,
-  isScrollAtBottom: boolean,
+  getIsScrollAtTop: () => boolean,
+  getIsScrollAtBottom: () => boolean,
   isScrollAtLeft: boolean,
   isScrollAtRight: boolean,
   horizontalScroll: boolean,
@@ -29,8 +29,8 @@ export default function useFrameWheel(
 
   // Scroll status sync
   const originScroll = useOriginScroll(
-    isScrollAtTop,
-    isScrollAtBottom,
+    getIsScrollAtTop,
+    getIsScrollAtBottom,
     isScrollAtLeft,
     isScrollAtRight,
   );

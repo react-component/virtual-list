@@ -1,12 +1,13 @@
-import * as React from 'react';
 import classNames from 'classnames';
 import raf from 'rc-util/lib/raf';
+import * as React from 'react';
+import useForceUpdate from './hooks/useForceUpdate';
 
 export type ScrollBarDirectionType = 'ltr' | 'rtl';
 
 export interface ScrollBarProps {
   prefixCls: string;
-  scrollOffset: number;
+  scrollOffset: React.MutableRefObject<number> | number;
   scrollRange: number;
   rtl: boolean;
   onScroll: (scrollOffset: number, horizontal?: boolean) => void;
@@ -21,6 +22,7 @@ export interface ScrollBarProps {
 
 export interface ScrollBarRef {
   delayHidden: () => void;
+  update: () => void;
 }
 
 function getPageXY(
@@ -35,7 +37,7 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
   const {
     prefixCls,
     rtl,
-    scrollOffset,
+    scrollOffset: propsScrollOffset,
     scrollRange,
     onStartMove,
     onStopMove,
@@ -50,6 +52,10 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
   const [dragging, setDragging] = React.useState(false);
   const [pageXY, setPageXY] = React.useState<number | null>(null);
   const [startTop, setStartTop] = React.useState<number | null>(null);
+  const forceUpdate = useForceUpdate();
+
+  const scrollOffset =
+    typeof propsScrollOffset === 'object' ? propsScrollOffset.current : propsScrollOffset;
 
   const isLTR = !rtl;
 
@@ -84,7 +90,7 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
   }, [scrollOffset, enableScrollRange, enableOffsetRange]);
 
   // ====================== Container =======================
-  const onContainerMouseDown: React.MouseEventHandler = e => {
+  const onContainerMouseDown: React.MouseEventHandler = (e) => {
     e.stopPropagation();
     e.preventDefault();
   };
@@ -196,6 +202,7 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
   // ====================== Imperative ======================
   React.useImperativeHandle(ref, () => ({
     delayHidden,
+    update: forceUpdate,
   }));
 
   // ======================== Render ========================
