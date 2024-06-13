@@ -275,8 +275,8 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
 
   const onHolderResize: ResizeObserverProps['onResize'] = (sizeInfo) => {
     setSize({
-      width: sizeInfo.width || sizeInfo.offsetWidth,
-      height: sizeInfo.height || sizeInfo.offsetHeight,
+      width: sizeInfo.offsetWidth,
+      height: sizeInfo.offsetHeight,
     });
   };
 
