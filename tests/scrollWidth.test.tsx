@@ -17,20 +17,35 @@ describe('List.scrollWidth', () => {
   let mockMouseEvent;
   let pageX: number;
 
+  const holderHeight = 100;
   let holderWidth = 100;
 
   beforeAll(() => {
     mockElement = spyElementPrototypes(HTMLElement, {
       offsetHeight: {
-        get: () => ITEM_HEIGHT,
+        get() {
+          if (this.classList.contains('rc-virtual-list-holder')) {
+            return holderHeight;
+          }
+          return ITEM_HEIGHT;
+        },
+      },
+      offsetWidth: {
+        get() {
+          return holderWidth;
+        },
       },
       clientHeight: {
-        get: () => holderWidth,
+        get() {
+          return holderWidth;
+        },
       },
-      getBoundingClientRect: () => ({
-        width: holderWidth,
-        height: 100,
-      }),
+      getBoundingClientRect() {
+        return {
+          width: holderWidth,
+          height: holderHeight,
+        };
+      },
     });
 
     mockMouseEvent = spyElementPrototypes(MouseEvent, {

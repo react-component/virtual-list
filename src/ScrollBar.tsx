@@ -1,6 +1,6 @@
-import * as React from 'react';
 import classNames from 'classnames';
 import raf from 'rc-util/lib/raf';
+import * as React from 'react';
 
 export type ScrollBarDirectionType = 'ltr' | 'rtl';
 
@@ -84,7 +84,7 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
   }, [scrollOffset, enableScrollRange, enableOffsetRange]);
 
   // ====================== Container =======================
-  const onContainerMouseDown: React.MouseEventHandler = e => {
+  const onContainerMouseDown: React.MouseEventHandler = (e) => {
     e.stopPropagation();
     e.preventDefault();
   };
@@ -142,8 +142,10 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
         } = stateRef.current;
         raf.cancel(moveRafId);
 
+        const scale = containerSize / scrollbarRef.current.getBoundingClientRect().height;
+
         if (stateDragging) {
-          const offset = getPageXY(e, horizontal) - statePageY;
+          const offset = (getPageXY(e, horizontal) - statePageY) * scale;
           let newTop = stateStartTop;
 
           if (!isLTR && horizontal) {
