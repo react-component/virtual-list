@@ -193,6 +193,9 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
 
   React.useEffect(() => {
     delayHidden();
+     return () => {
+      clearTimeout(visibleTimeoutRef.current);
+    };
   }, [scrollOffset]);
 
   // ====================== Imperative ======================
