@@ -142,7 +142,8 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
         } = stateRef.current;
         raf.cancel(moveRafId);
 
-        const scale = containerSize / scrollbarRef.current.getBoundingClientRect().height;
+        const rect = scrollbarRef.current.getBoundingClientRect();
+        const scale = containerSize / (horizontal ? rect.width : rect.height);
 
         if (stateDragging) {
           const offset = (getPageXY(e, horizontal) - statePageY) * scale;
@@ -193,7 +194,7 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
 
   React.useEffect(() => {
     delayHidden();
-     return () => {
+    return () => {
       clearTimeout(visibleTimeoutRef.current);
     };
   }, [scrollOffset]);
