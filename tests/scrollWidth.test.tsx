@@ -37,7 +37,7 @@ describe('List.scrollWidth', () => {
       },
       clientHeight: {
         get() {
-          return holderWidth;
+          return holderHeight;
         },
       },
       getBoundingClientRect() {
