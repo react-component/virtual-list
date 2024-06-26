@@ -68,8 +68,8 @@ export default function useMobileTouchMove(
       touchYRef.current = Math.ceil(e.touches[0].pageY);
 
       elementRef.current = e.target as HTMLElement;
-      elementRef.current.addEventListener('touchmove', onTouchMove);
-      elementRef.current.addEventListener('touchend', onTouchEnd);
+      elementRef.current.addEventListener('touchmove', onTouchMove, { passive: false });
+      elementRef.current.addEventListener('touchend', onTouchEnd, { passive: true });
     }
   };
 
@@ -82,7 +82,7 @@ export default function useMobileTouchMove(
 
   useLayoutEffect(() => {
     if (inVirtual) {
-      listRef.current.addEventListener('touchstart', onTouchStart);
+      listRef.current.addEventListener('touchstart', onTouchStart, { passive: true });
     }
 
     return () => {
