@@ -432,9 +432,9 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     }
 
     const componentEle = componentRef.current;
-    componentEle.addEventListener('wheel', onRawWheel);
-    componentEle.addEventListener('DOMMouseScroll', onFireFoxScroll as any);
-    componentEle.addEventListener('MozMousePixelScroll', onMozMousePixelScroll);
+    componentEle.addEventListener('wheel', onRawWheel, { passive: false });
+    componentEle.addEventListener('DOMMouseScroll', onFireFoxScroll as any, { passive: true });
+    componentEle.addEventListener('MozMousePixelScroll', onMozMousePixelScroll, { passive: false });
 
     return () => {
       componentEle.removeEventListener('wheel', onRawWheel);

@@ -115,8 +115,8 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
 
     const scrollbarEle = scrollbarRef.current;
     const thumbEle = thumbRef.current;
-    scrollbarEle.addEventListener('touchstart', onScrollbarTouchStart);
-    thumbEle.addEventListener('touchstart', onThumbMouseDown);
+    scrollbarEle.addEventListener('touchstart', onScrollbarTouchStart, { passive: false });
+    thumbEle.addEventListener('touchstart', onThumbMouseDown, { passive: false });
 
     return () => {
       scrollbarEle.removeEventListener('touchstart', onScrollbarTouchStart);
@@ -176,10 +176,10 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
         onStopMove();
       };
 
-      window.addEventListener('mousemove', onMouseMove);
-      window.addEventListener('touchmove', onMouseMove);
-      window.addEventListener('mouseup', onMouseUp);
-      window.addEventListener('touchend', onMouseUp);
+      window.addEventListener('mousemove', onMouseMove, { passive: true });
+      window.addEventListener('touchmove', onMouseMove, { passive: true });
+      window.addEventListener('mouseup', onMouseUp, { passive: true });
+      window.addEventListener('touchend', onMouseUp, { passive: true });
 
       return () => {
         window.removeEventListener('mousemove', onMouseMove);
