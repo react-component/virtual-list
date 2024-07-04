@@ -1,5 +1,5 @@
-import List, { ListRef, ListProps } from './List';
+import List from './List';
 
-export { ListRef, ListProps };
+export type { ListRef, ListProps } from './List';
 
 export default List;

@@ -1,4 +1,5 @@
-import * as React from 'react';
+import useLayoutEffect from 'rc-util/lib/hooks/useLayoutEffect';
+import type * as React from 'react';
 import { useRef } from 'react';
 
 const SMOOTH_PTG = 14 / 15;
@@ -6,9 +7,10 @@ const SMOOTH_PTG = 14 / 15;
 export default function useMobileTouchMove(
   inVirtual: boolean,
   listRef: React.RefObject<HTMLDivElement>,
-  callback: (offsetY: number, smoothOffset?: boolean) => boolean,
+  callback: (isHorizontal: boolean, offset: number, smoothOffset?: boolean) => boolean,
 ) {
   const touchedRef = useRef(false);
+  const touchXRef = useRef(0);
   const touchYRef = useRef(0);
 
   const elementRef = useRef<HTMLElement>(null);
@@ -16,24 +18,35 @@ export default function useMobileTouchMove(
   // Smooth scroll
   const intervalRef = useRef(null);
 
+  /* eslint-disable prefer-const */
   let cleanUpEvents: () => void;
 
   const onTouchMove = (e: TouchEvent) => {
     if (touchedRef.current) {
+      const currentX = Math.ceil(e.touches[0].pageX);
       const currentY = Math.ceil(e.touches[0].pageY);
+      let offsetX = touchXRef.current - currentX;
       let offsetY = touchYRef.current - currentY;
-      touchYRef.current = currentY;
-
-      if (callback(offsetY)) {
-        e.preventDefault();
+      const isHorizontal = Math.abs(offsetX) > Math.abs(offsetY);
+      if (isHorizontal) {
+        touchXRef.current = currentX;
+      } else {
+        touchYRef.current = currentY;
       }
 
+      if (callback(isHorizontal, isHorizontal ? offsetX : offsetY)) {
+        e.preventDefault();
+      }
       // Smooth interval
       clearInterval(intervalRef.current);
       intervalRef.current = setInterval(() => {
-        offsetY *= SMOOTH_PTG;
-
-        if (!callback(offsetY, true) || Math.abs(offsetY) <= 0.1) {
+        if (isHorizontal) {
+          offsetX *= SMOOTH_PTG;
+        } else {
+          offsetY *= SMOOTH_PTG;
+        }
+        const offset = Math.floor(isHorizontal ? offsetX : offsetY);
+        if (!callback(isHorizontal, offset, true) || Math.abs(offset) <= 0.1) {
           clearInterval(intervalRef.current);
         }
       }, 16);
@@ -51,11 +64,12 @@ export default function useMobileTouchMove(
 
     if (e.touches.length === 1 && !touchedRef.current) {
       touchedRef.current = true;
+      touchXRef.current = Math.ceil(e.touches[0].pageX);
       touchYRef.current = Math.ceil(e.touches[0].pageY);
 
       elementRef.current = e.target as HTMLElement;
-      elementRef.current.addEventListener('touchmove', onTouchMove);
-      elementRef.current.addEventListener('touchend', onTouchEnd);
+      elementRef.current.addEventListener('touchmove', onTouchMove, { passive: false });
+      elementRef.current.addEventListener('touchend', onTouchEnd, { passive: true });
     }
   };
 
@@ -66,13 +80,13 @@ export default function useMobileTouchMove(
     }
   };
 
-  React.useLayoutEffect(() => {
+  useLayoutEffect(() => {
     if (inVirtual) {
-      listRef.current.addEventListener('touchstart', onTouchStart);
+      listRef.current.addEventListener('touchstart', onTouchStart, { passive: true });
     }
 
     return () => {
-      listRef.current.removeEventListener('touchstart', onTouchStart);
+      listRef.current?.removeEventListener('touchstart', onTouchStart);
       cleanUpEvents();
       clearInterval(intervalRef.current);
     };

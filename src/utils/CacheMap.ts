@@ -4,17 +4,21 @@ import type React from 'react';
 class CacheMap {
   maps: Record<string, number>;
 
+  // Used for cache key
+  // `useMemo` no need to update if `id` not change
+  id: number = 0;
+
   constructor() {
-    this.maps = {};
-    this.maps.prototype = null;
+    this.maps = Object.create(null);
   }
 
-  set(key: React.ReactText, value: number) {
-    this.maps[key] = value;
+  set(key: React.Key, value: number) {
+    this.maps[key as string] = value;
+    this.id += 1;
   }
 
-  get(key: React.ReactText) {
-    return this.maps[key];
+  get(key: React.Key) {
+    return this.maps[key as string];
   }
 }
 

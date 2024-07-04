@@ -1,6 +1,7 @@
 import * as React from 'react';
-import { useRef } from 'react';
+import { useRef, useEffect } from 'react';
 import findDOMNode from 'rc-util/lib/Dom/findDOMNode';
+import raf from 'rc-util/lib/raf';
 import type { GetKey } from '../interface';
 import CacheMap from '../utils/CacheMap';
 
@@ -8,20 +9,25 @@ export default function useHeights<T>(
   getKey: GetKey<T>,
   onItemAdd?: (item: T) => void,
   onItemRemove?: (item: T) => void,
-): [(item: T, instance: HTMLElement) => void, () => void, CacheMap, number] {
+): [
+  setInstanceRef: (item: T, instance: HTMLElement) => void,
+  collectHeight: (sync?: boolean) => void,
+  cacheMap: CacheMap,
+  updatedMark: number,
+] {
   const [updatedMark, setUpdatedMark] = React.useState(0);
   const instanceRef = useRef(new Map<React.Key, HTMLElement>());
   const heightsRef = useRef(new CacheMap());
-  const heightUpdateIdRef = useRef(0);
+  const collectRafRef = useRef<number>();
 
-  function collectHeight() {
-    heightUpdateIdRef.current += 1;
-    const currentId = heightUpdateIdRef.current;
+  function cancelRaf() {
+    raf.cancel(collectRafRef.current);
+  }
 
-    Promise.resolve().then(() => {
-      // Only collect when it's latest call
-      if (currentId !== heightUpdateIdRef.current) return;
+  function collectHeight(sync = false) {
+    cancelRaf();
 
+    const doCollect = () => {
       instanceRef.current.forEach((element, key) => {
         if (element && element.offsetParent) {
           const htmlElement = findDOMNode<HTMLElement>(element);
@@ -33,8 +39,14 @@ export default function useHeights<T>(
       });
 
       // Always trigger update mark to tell parent that should re-calculate heights when resized
-      setUpdatedMark(c => c + 1);
-    });
+      setUpdatedMark((c) => c + 1);
+    };
+
+    if (sync) {
+      doCollect();
+    } else {
+      collectRafRef.current = raf(doCollect);
+    }
   }
 
   function setInstanceRef(item: T, instance: HTMLElement) {
@@ -57,6 +69,10 @@ export default function useHeights<T>(
       }
     }
   }
+
+  useEffect(() => {
+    return cancelRaf;
+  }, []);
 
   return [setInstanceRef, collectHeight, heightsRef.current, updatedMark];
 }
