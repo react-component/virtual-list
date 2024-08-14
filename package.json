@@ -63,7 +63,8 @@
     "rc-test": "^7.0.15",
     "react": "^v16.9.0-alpha.0",
     "react-dom": "^v16.9.0-alpha.0",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "cheerio": "1.0.0-rc.12"
   },
   "dependencies": {
     "@babel/runtime": "^7.20.0",
