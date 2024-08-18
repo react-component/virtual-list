@@ -5,7 +5,6 @@ import { _rs as onLibResize } from 'rc-resize-observer/lib/utils/observerUtil';
 import { resetWarned } from 'rc-util/lib/warning';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { TextEncoder } from 'util';
 import List from '../src';
 import { spyElementPrototypes } from './utils/domHook';
 
@@ -33,8 +32,6 @@ describe('List.Scroll', () => {
         get: () => document.body,
       },
     });
-
-    global.TextEncoder = TextEncoder;
   });
 
   afterAll(() => {
