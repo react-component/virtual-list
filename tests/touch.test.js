@@ -1,7 +1,8 @@
-import React from 'react';
+import { act, fireEvent, render } from '@testing-library/react';
 import { mount } from 'enzyme';
-import { spyElementPrototypes } from './utils/domHook';
+import React from 'react';
 import List from '../src';
+import { spyElementPrototypes } from './utils/domHook';
 
 function genData(count) {
   return new Array(count).fill(null).map((_, index) => ({ id: String(index) }));
@@ -123,11 +124,55 @@ describe('List.Touch', () => {
 
     const touchEvent = new Event('touchstart');
     touchEvent.preventDefault = preventDefault;
-    wrapper
-      .find('.rc-virtual-list-scrollbar')
-      .instance()
-      .dispatchEvent(touchEvent);
+    wrapper.find('.rc-virtual-list-scrollbar').instance().dispatchEvent(touchEvent);
 
     expect(preventDefault).toHaveBeenCalled();
+  });
+
+  it('nest touch', async () => {
+    const { container } = render(
+      <List component="ul" itemHeight={20} height={100} data={genData(100)}>
+        {({ id }) =>
+          id === '0' ? (
+            <li>
+              <List component="ul" itemKey="id" itemHeight={20} height={100} data={genData(100)}>
+                {({ id }) => <li>{id}</li>}
+              </List>
+            </li>
+          ) : (
+            <li />
+          )
+        }
+      </List>,
+    );
+
+    const targetLi = container.querySelector('ul ul li');
+
+    fireEvent.touchStart(targetLi, {
+      touches: [{ pageY: 0 }],
+    });
+
+    fireEvent.touchMove(targetLi, {
+      touches: [{ pageY: -1 }],
+    });
+
+    await act(async () => {
+      jest.advanceTimersByTime(1000000);
+      await Promise.resolve();
+    });
+
+    expect(container.querySelectorAll('[data-dev-offset-top]')[0]).toHaveAttribute(
+      'data-dev-offset-top',
+      '0',
+    );
+
+    // inner not to be 0
+    expect(container.querySelectorAll('[data-dev-offset-top]')[1]).toHaveAttribute(
+      'data-dev-offset-top',
+    );
+    expect(container.querySelectorAll('[data-dev-offset-top]')[1]).not.toHaveAttribute(
+      'data-dev-offset-top',
+      '0',
+    );
   });
 });

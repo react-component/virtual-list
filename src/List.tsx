@@ -408,8 +408,6 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     onWheelDelta,
   );
 
-  const onDeduplicatedRawWheel = onRawWheel;
-
   // Mobile touch move
   useMobileTouchMove(useVirtual, componentRef, (isHorizontal, delta, smoothOffset, e) => {
     const event = e as TouchEvent & {
@@ -426,7 +424,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
         event._virtualHandled = true;
       }
 
-      onDeduplicatedRawWheel({
+      onRawWheel({
         preventDefault() {},
         deltaX: isHorizontal ? delta : 0,
         deltaY: isHorizontal ? 0 : delta,
@@ -447,12 +445,12 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     }
 
     const componentEle = componentRef.current;
-    componentEle.addEventListener('wheel', onDeduplicatedRawWheel, { passive: false });
+    componentEle.addEventListener('wheel', onRawWheel, { passive: false });
     componentEle.addEventListener('DOMMouseScroll', onFireFoxScroll as any, { passive: true });
     componentEle.addEventListener('MozMousePixelScroll', onMozMousePixelScroll, { passive: false });
 
     return () => {
-      componentEle.removeEventListener('wheel', onDeduplicatedRawWheel);
+      componentEle.removeEventListener('wheel', onRawWheel);
       componentEle.removeEventListener('DOMMouseScroll', onFireFoxScroll as any);
       componentEle.removeEventListener('MozMousePixelScroll', onMozMousePixelScroll as any);
     };
