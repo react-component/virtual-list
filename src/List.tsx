@@ -563,6 +563,10 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     containerProps.dir = 'rtl';
   }
 
+  if (process.env.NODE_ENV !== 'production') {
+    containerProps['data-dev-offset-top'] = offsetTop;
+  }
+
   return (
     <div
       ref={containerRef}

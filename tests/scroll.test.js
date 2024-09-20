@@ -1,10 +1,9 @@
 import '@testing-library/jest-dom';
-import { createEvent, fireEvent, render } from '@testing-library/react';
+import { act, createEvent, fireEvent, render } from '@testing-library/react';
 import { mount } from 'enzyme';
 import { _rs as onLibResize } from 'rc-resize-observer/lib/utils/observerUtil';
 import { resetWarned } from 'rc-util/lib/warning';
 import React from 'react';
-import { act } from 'react-dom/test-utils';
 import List from '../src';
 import { spyElementPrototypes } from './utils/domHook';
 
@@ -51,11 +50,13 @@ describe('List.Scroll', () => {
   });
 
   function genList(props, func = mount) {
-    let node = (
-      <List component="ul" itemKey="id" {...props}>
-        {({ id }) => <li>{id}</li>}
-      </List>
-    );
+    const mergedProps = {
+      component: 'ul',
+      itemKey: 'id',
+      children: ({ id }) => <li>{id}</li>,
+      ...props,
+    };
+    let node = <List {...mergedProps} />;
 
     if (props.ref) {
       node = <div>{node}</div>;
@@ -493,5 +494,44 @@ describe('List.Scroll', () => {
     });
 
     expect(container.querySelector('.rc-virtual-list-scrollbar-thumb')).toBeVisible();
+  });
+
+  it('nest scroll', async () => {
+    const { container } = genList(
+      {
+        itemHeight: 20,
+        height: 100,
+        data: genData(100),
+        children: ({ id }) =>
+          id === '0' ? (
+            <li>
+              <List component="ul" itemKey="id" itemHeight={20} height={100} data={genData(100)}>
+                {({ id }) => <li>{id}</li>}
+              </List>
+            </li>
+          ) : (
+            <li />
+          ),
+      },
+      render,
+    );
+
+    fireEvent.wheel(container.querySelector('ul ul li'), {
+      deltaY: 10,
+    });
+
+    await act(async () => {
+      jest.advanceTimersByTime(1000000);
+      await Promise.resolve();
+    });
+
+    expect(container.querySelectorAll('[data-dev-offset-top]')[0]).toHaveAttribute(
+      'data-dev-offset-top',
+      '0',
+    );
+    expect(container.querySelectorAll('[data-dev-offset-top]')[1]).toHaveAttribute(
+      'data-dev-offset-top',
+      '10',
+    );
   });
 });
