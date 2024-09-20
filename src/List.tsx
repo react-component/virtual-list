@@ -425,8 +425,11 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
 
   useLayoutEffect(() => {
     // Firefox only
-    function onMozMousePixelScroll(e: Event) {
-      if (useVirtual) {
+    function onMozMousePixelScroll(e: WheelEvent) {
+      // scrolling at top/bottom limit
+      const scrollingUpAtTop = isScrollAtTop && e.detail < 0;
+      const scrollingDownAtBottom = isScrollAtBottom && e.detail > 0;
+      if (useVirtual && !scrollingUpAtTop && !scrollingDownAtBottom) {
         e.preventDefault();
       }
     }
@@ -441,7 +444,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
       componentEle.removeEventListener('DOMMouseScroll', onFireFoxScroll as any);
       componentEle.removeEventListener('MozMousePixelScroll', onMozMousePixelScroll as any);
     };
-  }, [useVirtual]);
+  }, [useVirtual, isScrollAtTop, isScrollAtBottom]);
 
   // Sync scroll left
   useLayoutEffect(() => {

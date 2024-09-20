@@ -84,4 +84,59 @@ describe('List.Firefox-Scroll', () => {
     expect(wheelPreventDefault).not.toHaveBeenCalled();
     expect(firefoxPreventDefault).toHaveBeenCalledTimes(1);
   });
+
+  it('should call preventDefault on MozMousePixelScroll', () => {
+    const preventDefault = jest.fn();
+    const wrapper = genList({ itemHeight: 20, height: 100, data: genData(100) });
+    const ulElement = wrapper.find('ul').instance();
+
+    act(() => {
+      const event = new Event('MozMousePixelScroll');
+      event.detail = 6;
+      event.preventDefault = preventDefault;
+      ulElement.dispatchEvent(event);
+
+      jest.runAllTimers();
+    });
+
+    expect(preventDefault).toHaveBeenCalled();
+  });
+
+  it('should not call preventDefault on MozMousePixelScroll when scrolling up at top boundary', () => {
+    const preventDefault = jest.fn();
+    const wrapper = genList({ itemHeight: 20, height: 100, data: genData(100) });
+    const ulElement = wrapper.find('ul').instance();
+
+    act(() => {
+      const event = new Event('MozMousePixelScroll');
+      event.detail = -6;
+      event.preventDefault = preventDefault;
+      ulElement.dispatchEvent(event);
+
+      jest.runAllTimers();
+    });
+
+    expect(preventDefault).not.toHaveBeenCalled();
+  });
+  it('should not call preventDefault on MozMousePixelScroll when scrolling down at bottom boundary', () => {
+    const preventDefault = jest.fn();
+    const listRef = React.createRef();
+    const wrapper = genList({ itemHeight: 20, height: 100, data: genData(100), ref: listRef });
+    const ulElement = wrapper.find('ul').instance();
+    // scroll to bottom
+    listRef.current.scrollTo(99999);
+    jest.runAllTimers();
+    expect(wrapper.find('ul').instance().scrollTop).toEqual(1900);
+
+    act(() => {
+      const event = new Event('MozMousePixelScroll');
+      event.detail = 6;
+      event.preventDefault = preventDefault;
+      ulElement.dispatchEvent(event);
+
+      jest.runAllTimers();
+    });
+
+    expect(preventDefault).not.toHaveBeenCalled();
+  });
 });
