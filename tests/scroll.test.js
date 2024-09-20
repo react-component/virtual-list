@@ -11,6 +11,21 @@ function genData(count) {
   return new Array(count).fill(null).map((_, index) => ({ id: String(index) }));
 }
 
+// Mock ScrollBar
+jest.mock('../src/ScrollBar', () => {
+  const OriScrollBar = jest.requireActual('../src/ScrollBar').default;
+  const React = jest.requireActual('react');
+  return React.forwardRef((props, ref) => {
+    const { scrollOffset } = props;
+
+    return (
+      <div data-dev-offset={scrollOffset}>
+        <OriScrollBar {...props} ref={ref} />
+      </div>
+    );
+  });
+});
+
 describe('List.Scroll', () => {
   let mockElement;
   let boundingRect = {
@@ -525,13 +540,16 @@ describe('List.Scroll', () => {
       await Promise.resolve();
     });
 
-    expect(container.querySelectorAll('[data-dev-offset-top]')[0]).toHaveAttribute(
-      'data-dev-offset-top',
-      '0',
-    );
-    expect(container.querySelectorAll('[data-dev-offset-top]')[1]).toHaveAttribute(
-      'data-dev-offset-top',
+    // inner
+    expect(container.querySelectorAll('[data-dev-offset]')[0]).toHaveAttribute(
+      'data-dev-offset',
       '10',
+    );
+
+    // outer
+    expect(container.querySelectorAll('[data-dev-offset]')[1]).toHaveAttribute(
+      'data-dev-offset',
+      '0',
     );
   });
 });

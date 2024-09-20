@@ -4,6 +4,21 @@ import React from 'react';
 import List from '../src';
 import { spyElementPrototypes } from './utils/domHook';
 
+// Mock ScrollBar
+jest.mock('../src/ScrollBar', () => {
+  const OriScrollBar = jest.requireActual('../src/ScrollBar').default;
+  const React = jest.requireActual('react');
+  return React.forwardRef((props, ref) => {
+    const { scrollOffset } = props;
+
+    return (
+      <div data-dev-offset={scrollOffset}>
+        <OriScrollBar {...props} ref={ref} />
+      </div>
+    );
+  });
+});
+
 function genData(count) {
   return new Array(count).fill(null).map((_, index) => ({ id: String(index) }));
 }
@@ -161,17 +176,16 @@ describe('List.Touch', () => {
       await Promise.resolve();
     });
 
-    expect(container.querySelectorAll('[data-dev-offset-top]')[0]).toHaveAttribute(
-      'data-dev-offset-top',
+    // inner not to be 0
+    expect(container.querySelectorAll('[data-dev-offset]')[0]).toHaveAttribute('data-dev-offset');
+    expect(container.querySelectorAll('[data-dev-offset]')[0]).not.toHaveAttribute(
+      'data-dev-offset',
       '0',
     );
 
-    // inner not to be 0
-    expect(container.querySelectorAll('[data-dev-offset-top]')[1]).toHaveAttribute(
-      'data-dev-offset-top',
-    );
-    expect(container.querySelectorAll('[data-dev-offset-top]')[1]).not.toHaveAttribute(
-      'data-dev-offset-top',
+    // outer
+    expect(container.querySelectorAll('[data-dev-offset]')[1]).toHaveAttribute(
+      'data-dev-offset',
       '0',
     );
   });
