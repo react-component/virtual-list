@@ -379,8 +379,6 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
 
   const onWheelDelta: Parameters<typeof useFrameWheel>[6] = useEvent((offsetXY, fromHorizontal) => {
     if (fromHorizontal) {
-      // Horizontal scroll no need sync virtual position
-
       flushSync(() => {
         setOffsetLeft((left) => {
           const nextOffsetLeft = left + (isRTL ? -offsetXY : offsetXY);
@@ -393,6 +391,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     } else {
       syncScrollTop((top) => {
         const newTop = top + offsetXY;
+
         return newTop;
       });
     }
@@ -410,17 +409,31 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   );
 
   // Mobile touch move
-  useMobileTouchMove(useVirtual, componentRef, (isHorizontal, delta, smoothOffset) => {
+  useMobileTouchMove(useVirtual, componentRef, (isHorizontal, delta, smoothOffset, e) => {
+    const event = e as TouchEvent & {
+      _virtualHandled?: boolean;
+    };
+
     if (originScroll(isHorizontal, delta, smoothOffset)) {
       return false;
     }
 
-    onRawWheel({
-      preventDefault() {},
-      deltaX: isHorizontal ? delta : 0,
-      deltaY: isHorizontal ? 0 : delta,
-    } as WheelEvent);
-    return true;
+    // Fix nest List trigger TouchMove event
+    if (!event || !event._virtualHandled) {
+      if (event) {
+        event._virtualHandled = true;
+      }
+
+      onRawWheel({
+        preventDefault() {},
+        deltaX: isHorizontal ? delta : 0,
+        deltaY: isHorizontal ? 0 : delta,
+      } as WheelEvent);
+
+      return true;
+    }
+
+    return false;
   });
 
   useLayoutEffect(() => {
@@ -546,6 +559,10 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   const containerProps: React.HTMLAttributes<HTMLDivElement> = {};
   if (isRTL) {
     containerProps.dir = 'rtl';
+  }
+
+  if (process.env.NODE_ENV !== 'production') {
+    containerProps['data-dev-offset-top'] = offsetTop;
   }
 
   return (
