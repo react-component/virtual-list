@@ -414,6 +414,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
       _virtualHandled?: boolean;
     };
 
+    // Fix nest List trigger Wheel event
     if (!event._virtualHandled) {
       event._virtualHandled = true;
       onRawWheel(event);
@@ -430,6 +431,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
       return false;
     }
 
+    // Fix nest List trigger TouchMove event
     if (!event || !event._virtualHandled) {
       if (event) {
         event._virtualHandled = true;
