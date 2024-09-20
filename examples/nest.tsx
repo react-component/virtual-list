@@ -25,7 +25,7 @@ const MyItem: React.ForwardRefRenderFunction<any, Item> = ({ id }, ref) => (
         boxSizing: 'border-box',
         background: 'white',
       }}
-      debug={`inner_${id}`}
+      // debug={`inner_${id}`}
     >
       {(item, index, props) => (
         <div {...(item as any)} {...props} style={{ height: 20, border: '1px solid cyan' }}>
@@ -56,7 +56,7 @@ const Demo = () => {
           boxSizing: 'border-box',
         }}
         onScroll={onScroll}
-        debug="outer"
+        // debug="outer"
       >
         {(item, _, props) => <ForwardMyItem {...item} {...props} />}
       </List>

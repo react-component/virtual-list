@@ -88,9 +88,6 @@ export interface ListProps<T> extends Omit<React.HTMLAttributes<any>, 'children'
 
   /** Render extra content into Filler */
   extraRender?: (info: ExtraRenderInfo) => React.ReactNode;
-
-  /** Not working in prod */
-  debug?: string;
 }
 
 export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
@@ -114,7 +111,6 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     innerProps,
     extraRender,
     styles,
-    debug,
     ...restProps
   } = props;
 
@@ -383,8 +379,6 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
 
   const onWheelDelta: Parameters<typeof useFrameWheel>[6] = useEvent((offsetXY, fromHorizontal) => {
     if (fromHorizontal) {
-      // Horizontal scroll no need sync virtual position
-
       flushSync(() => {
         setOffsetLeft((left) => {
           const nextOffsetLeft = left + (isRTL ? -offsetXY : offsetXY);
@@ -395,20 +389,12 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
 
       triggerScroll();
     } else {
-      // let isScrollOutOfBoundary = false;
       syncScrollTop((top) => {
         const newTop = top + offsetXY;
 
-        // const alignedTop = keepInRange(newTop);
-        // isScrollOutOfBoundary = alignedTop !== newTop;
-
         return newTop;
       });
-
-      // return !isScrollOutOfBoundary;
     }
-
-    // return true;
   });
 
   // Since this added in global,should use ref to keep update
@@ -420,20 +406,8 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     isScrollAtRight,
     !!scrollWidth,
     onWheelDelta,
-    debug,
   );
 
-  // const onDeduplicatedRawWheel: typeof onRawWheel = useEvent((e) => {
-  //   const event = e as WheelEvent & {
-  //     _virtualHandled?: boolean;
-  //   };
-
-  //   // Fix nest List trigger Wheel event
-  //   if (!event._virtualHandled) {
-  //     event._virtualHandled = true;
-  //     onRawWheel(event);
-  //   }
-  // });
   const onDeduplicatedRawWheel = onRawWheel;
 
   // Mobile touch move

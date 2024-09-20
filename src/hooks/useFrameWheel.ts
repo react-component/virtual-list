@@ -19,7 +19,6 @@ export default function useFrameWheel(
    * Return `true` when you need to prevent default event
    */
   onWheelDelta: (offset: number, horizontal: boolean) => void,
-  debugName?: string,
 ): [(e: WheelEvent) => void, (e: FireFoxDOMMouseScrollEvent) => void] {
   const offsetRef = useRef(0);
   const nextFrameRef = useRef<number>(null);
@@ -39,15 +38,10 @@ export default function useFrameWheel(
   function onWheelY(e: WheelEvent, deltaY: number) {
     raf.cancel(nextFrameRef.current);
 
-    offsetRef.current += deltaY;
-    wheelValueRef.current = deltaY;
-
     // Do nothing when scroll at the edge, Skip check when is in scroll
     if (originScroll(false, deltaY)) {
-      console.log(debugName, 'native scroll');
       return;
     }
-    console.log(debugName, 'virtual scroll', deltaY);
 
     // Skip if nest List has handled this event
     const event = e as WheelEvent & {
@@ -58,6 +52,9 @@ export default function useFrameWheel(
     } else {
       return;
     }
+
+    offsetRef.current += deltaY;
+    wheelValueRef.current = deltaY;
 
     // Proxy of scroll events
     if (!isFF) {
