@@ -409,18 +409,42 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     onWheelDelta,
   );
 
+  const onDeduplicatedRawWheel: typeof onRawWheel = useEvent((e) => {
+    const event = e as WheelEvent & {
+      _virtualHandled?: boolean;
+    };
+
+    if (!event._virtualHandled) {
+      event._virtualHandled = true;
+      onRawWheel(event);
+    }
+  });
+
   // Mobile touch move
-  useMobileTouchMove(useVirtual, componentRef, (isHorizontal, delta, smoothOffset) => {
+  useMobileTouchMove(useVirtual, componentRef, (isHorizontal, delta, smoothOffset, e) => {
+    const event = e as TouchEvent & {
+      _virtualHandled?: boolean;
+    };
+
     if (originScroll(isHorizontal, delta, smoothOffset)) {
       return false;
     }
 
-    onRawWheel({
-      preventDefault() {},
-      deltaX: isHorizontal ? delta : 0,
-      deltaY: isHorizontal ? 0 : delta,
-    } as WheelEvent);
-    return true;
+    if (!event || !event._virtualHandled) {
+      if (event) {
+        event._virtualHandled = true;
+      }
+
+      onDeduplicatedRawWheel({
+        preventDefault() {},
+        deltaX: isHorizontal ? delta : 0,
+        deltaY: isHorizontal ? 0 : delta,
+      } as WheelEvent);
+
+      return true;
+    }
+
+    return false;
   });
 
   useLayoutEffect(() => {
@@ -432,12 +456,12 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     }
 
     const componentEle = componentRef.current;
-    componentEle.addEventListener('wheel', onRawWheel, { passive: false });
+    componentEle.addEventListener('wheel', onDeduplicatedRawWheel, { passive: false });
     componentEle.addEventListener('DOMMouseScroll', onFireFoxScroll as any, { passive: true });
     componentEle.addEventListener('MozMousePixelScroll', onMozMousePixelScroll, { passive: false });
 
     return () => {
-      componentEle.removeEventListener('wheel', onRawWheel);
+      componentEle.removeEventListener('wheel', onDeduplicatedRawWheel);
       componentEle.removeEventListener('DOMMouseScroll', onFireFoxScroll as any);
       componentEle.removeEventListener('MozMousePixelScroll', onMozMousePixelScroll as any);
     };
