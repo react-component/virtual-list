@@ -39,9 +39,7 @@ export default function useFrameWheel(
     raf.cancel(nextFrameRef.current);
 
     // Do nothing when scroll at the edge, Skip check when is in scroll
-    if (originScroll(false, deltaY)) {
-      return;
-    }
+    if (originScroll(false, deltaY)) return;
 
     // Skip if nest List has handled this event
     const event = e as WheelEvent & {
