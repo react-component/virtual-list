@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { useRef, useEffect } from 'react';
-import findDOMNode from 'rc-util/lib/Dom/findDOMNode';
 import raf from 'rc-util/lib/raf';
 import type { GetKey } from '../interface';
 import CacheMap from '../utils/CacheMap';
@@ -30,10 +29,10 @@ export default function useHeights<T>(
     const doCollect = () => {
       instanceRef.current.forEach((element, key) => {
         if (element && element.offsetParent) {
-          const htmlElement = findDOMNode<HTMLElement>(element);
-          const { offsetHeight } = htmlElement;
+          const { offsetHeight } = element;
+
           if (heightsRef.current.get(key) !== offsetHeight) {
-            heightsRef.current.set(key, htmlElement.offsetHeight);
+            heightsRef.current.set(key, offsetHeight);
           }
         }
       });
