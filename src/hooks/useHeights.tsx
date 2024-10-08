@@ -4,6 +4,7 @@ import findDOMNode from 'rc-util/lib/Dom/findDOMNode';
 import raf from 'rc-util/lib/raf';
 import type { GetKey } from '../interface';
 import CacheMap from '../utils/CacheMap';
+import { getOuterHeight } from '../utils/outerHeight';
 
 export default function useHeights<T>(
   getKey: GetKey<T>,
@@ -31,9 +32,10 @@ export default function useHeights<T>(
       instanceRef.current.forEach((element, key) => {
         if (element && element.offsetParent) {
           const htmlElement = findDOMNode<HTMLElement>(element);
-          const { offsetHeight } = htmlElement;
-          if (heightsRef.current.get(key) !== offsetHeight) {
-            heightsRef.current.set(key, htmlElement.offsetHeight);
+          const outerHeight = getOuterHeight(htmlElement)
+
+          if (heightsRef.current.get(key) !== outerHeight) {
+            heightsRef.current.set(key, outerHeight);
           }
         }
       });
