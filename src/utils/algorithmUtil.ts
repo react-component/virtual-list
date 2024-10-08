@@ -84,3 +84,22 @@ export function findListDiffIndex<T>(
 
   return diffIndex === null ? null : { index: diffIndex, multiple };
 }
+
+export function generateIndexesWithSticky(
+  startIndex: number,
+  endIndex: number,
+  stickyIndexes: number[],
+) {
+  const indexArray: number[] = [];
+  for (let i = startIndex; i <= endIndex; i++) {
+    indexArray.push(i);
+  }
+
+  stickyIndexes.forEach((index) => {
+    if (index < startIndex || index > endIndex) {
+      indexArray.push(index);
+    }
+  });
+
+  return indexArray.sort((a, b) => a - b);
+}
