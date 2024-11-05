@@ -1,9 +1,14 @@
-import * as React from 'react';
-import { useRef, useEffect } from 'react';
 import findDOMNode from 'rc-util/lib/Dom/findDOMNode';
 import raf from 'rc-util/lib/raf';
+import * as React from 'react';
+import { useEffect, useRef } from 'react';
 import type { GetKey } from '../interface';
 import CacheMap from '../utils/CacheMap';
+
+function parseNumber(value: string) {
+  const num = parseFloat(value);
+  return isNaN(num) ? 0 : num;
+}
 
 export default function useHeights<T>(
   getKey: GetKey<T>,
@@ -32,8 +37,14 @@ export default function useHeights<T>(
         if (element && element.offsetParent) {
           const htmlElement = findDOMNode<HTMLElement>(element);
           const { offsetHeight } = htmlElement;
-          if (heightsRef.current.get(key) !== offsetHeight) {
-            heightsRef.current.set(key, htmlElement.offsetHeight);
+          const { marginTop, marginBottom } = getComputedStyle(htmlElement);
+
+          const marginTopNum = parseNumber(marginTop);
+          const marginBottomNum = parseNumber(marginBottom);
+          const totalHeight = offsetHeight + marginTopNum + marginBottomNum;
+
+          if (heightsRef.current.get(key) !== totalHeight) {
+            heightsRef.current.set(key, totalHeight);
           }
         }
       });
