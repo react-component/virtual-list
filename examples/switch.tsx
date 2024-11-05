@@ -16,6 +16,7 @@ const MyItem: React.FC<Item> = ({ id }, ref) => (
       lineHeight: '30px',
       boxSizing: 'border-box',
       display: 'inline-block',
+      // marginBottom: 8,
     }}
   >
     {id}
