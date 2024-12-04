@@ -1,6 +1,7 @@
 import classNames from 'classnames';
 import raf from 'rc-util/lib/raf';
 import * as React from 'react';
+import { getPageXY } from './hooks/useScrollDrag';
 
 export type ScrollBarDirectionType = 'ltr' | 'rtl';
 
@@ -21,14 +22,6 @@ export interface ScrollBarProps {
 
 export interface ScrollBarRef {
   delayHidden: () => void;
-}
-
-function getPageXY(
-  e: React.MouseEvent | React.TouchEvent | MouseEvent | TouchEvent,
-  horizontal: boolean,
-) {
-  const obj = 'touches' in e ? e.touches[0] : e;
-  return obj[horizontal ? 'pageX' : 'pageY'];
 }
 
 const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) => {

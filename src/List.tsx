@@ -15,6 +15,7 @@ import { useGetSize } from './hooks/useGetSize';
 import useHeights from './hooks/useHeights';
 import useMobileTouchMove from './hooks/useMobileTouchMove';
 import useOriginScroll from './hooks/useOriginScroll';
+import useScrollDrag from './hooks/useScrollDrag';
 import type { ScrollPos, ScrollTarget } from './hooks/useScrollTo';
 import useScrollTo from './hooks/useScrollTo';
 import type { ExtraRenderInfo, GetKey, RenderFunc, SharedConfig } from './interface';
@@ -434,6 +435,11 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     }
 
     return false;
+  });
+
+  // MouseDown drag for scroll
+  useScrollDrag(inVirtual, componentRef, (offset) => {
+    syncScrollTop((top) => top + offset);
   });
 
   useLayoutEffect(() => {
