@@ -29,6 +29,8 @@ jest.mock('../src/ScrollBar', () => {
 describe('List.Scroll', () => {
   let mockElement;
   let boundingRect = {
+    top: 0,
+    bottom: 0,
     width: 100,
     height: 100,
   };
@@ -54,6 +56,8 @@ describe('List.Scroll', () => {
 
   beforeEach(() => {
     boundingRect = {
+      top: 0,
+      bottom: 0,
       width: 100,
       height: 100,
     };
@@ -551,5 +555,49 @@ describe('List.Scroll', () => {
       'data-dev-offset',
       '0',
     );
+  });
+
+  it('mouse down drag', () => {
+    const onScroll = jest.fn();
+    const { container } = render(
+      <List
+        component="ul"
+        itemKey="id"
+        itemHeight={20}
+        height={100}
+        data={genData(100)}
+        onScroll={onScroll}
+      >
+        {({ id }) => <li>{id}</li>}
+      </List>,
+    );
+
+    function dragDown(mouseY) {
+      fireEvent.mouseDown(container.querySelector('li'));
+
+      let moveEvent = createEvent.mouseMove(container.querySelector('li'));
+      moveEvent.pageY = mouseY;
+      fireEvent(container.querySelector('li'), moveEvent);
+
+      act(() => {
+        jest.advanceTimersByTime(100);
+      });
+
+      fireEvent.mouseUp(container.querySelector('li'));
+    }
+
+    function getScrollTop() {
+      const innerEle = container.querySelector('.rc-virtual-list-holder-inner');
+      const { transform } = innerEle.style;
+      return Number(transform.match(/\d+/)[0]);
+    }
+
+    // Drag down
+    dragDown(100);
+    expect(getScrollTop()).toBeGreaterThan(0);
+
+    // Drag up
+    dragDown(-100);
+    expect(getScrollTop()).toBe(0);
   });
 });

@@ -38,8 +38,15 @@ export default function useScrollDrag(
         });
       };
 
-      const onMouseDown = () => {
-        mouseDownLock = true;
+      const onMouseDown = (e: MouseEvent) => {
+        // Skip if nest List has handled this event
+        const event = e as MouseEvent & {
+          _virtualHandled?: boolean;
+        };
+        if (!event._virtualHandled) {
+          event._virtualHandled = true;
+          mouseDownLock = true;
+        }
       };
       const onMouseUp = () => {
         mouseDownLock = false;
@@ -52,7 +59,7 @@ export default function useScrollDrag(
 
           if (mouseY <= top) {
             const diff = top - mouseY;
-            offset = smoothScrollOffset(diff);
+            offset = -smoothScrollOffset(diff);
             continueScroll();
           } else if (mouseY >= bottom) {
             const diff = mouseY - bottom;
