@@ -10,7 +10,7 @@ export function getPageXY(
   horizontal: boolean,
 ) {
   const obj = 'touches' in e ? e.touches[0] : e;
-  return obj[horizontal ? 'pageX' : 'pageY'];
+  return obj[horizontal ? 'pageX' : 'pageY'] - window[horizontal ? 'scrollX' : 'scrollY'];
 }
 
 export default function useScrollDrag(
