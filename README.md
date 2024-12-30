@@ -24,7 +24,7 @@ https://virtual-list-react-component.vercel.app/
 ```bash
 npm install
 npm start
-open http://localhost:9001/
+open http://localhost:8000/
 ```
 
 ## Feature
