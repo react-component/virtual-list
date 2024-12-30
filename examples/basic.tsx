@@ -74,7 +74,7 @@ const Demo = () => {
         <button
           type="button"
           onClick={() => {
-            listRef.current.scrollTo(null);
+            listRef.current?.scrollTo(null);
           }}
         >
           Show scroll bar
@@ -82,7 +82,7 @@ const Demo = () => {
         <button
           type="button"
           onClick={() => {
-            listRef.current.scrollTo(500);
+            listRef.current?.scrollTo(500);
           }}
         >
           Scroll To 100px
@@ -90,7 +90,7 @@ const Demo = () => {
         <button
           type="button"
           onClick={() => {
-            listRef.current.scrollTo({
+            listRef.current?.scrollTo({
               index: 99999999,
               align: 'top',
             });
@@ -101,7 +101,7 @@ const Demo = () => {
         <button
           type="button"
           onClick={() => {
-            listRef.current.scrollTo({
+            listRef.current?.scrollTo({
               index: 50,
               align: 'top',
             });
@@ -112,7 +112,7 @@ const Demo = () => {
         <button
           type="button"
           onClick={() => {
-            listRef.current.scrollTo({
+            listRef.current?.scrollTo({
               index: 50,
               align: 'bottom',
             });
@@ -123,7 +123,7 @@ const Demo = () => {
         <button
           type="button"
           onClick={() => {
-            listRef.current.scrollTo({
+            listRef.current?.scrollTo({
               index: 50,
               align: 'auto',
             });
@@ -134,7 +134,7 @@ const Demo = () => {
         <button
           type="button"
           onClick={() => {
-            listRef.current.scrollTo({
+            listRef.current?.scrollTo({
               index: 50,
               align: 'top',
               offset: 15,
@@ -146,7 +146,7 @@ const Demo = () => {
         <button
           type="button"
           onClick={() => {
-            listRef.current.scrollTo({
+            listRef.current?.scrollTo({
               index: 50,
               align: 'bottom',
               offset: 15,
@@ -158,7 +158,7 @@ const Demo = () => {
         <button
           type="button"
           onClick={() => {
-            listRef.current.scrollTo({
+            listRef.current?.scrollTo({
               key: 50,
               align: 'auto',
             });
@@ -179,7 +179,7 @@ const Demo = () => {
         <button
           type="button"
           onClick={() => {
-            listRef.current.scrollTo({
+            listRef.current?.scrollTo({
               index: data.length - 2,
               align: 'top',
             });
@@ -190,7 +190,7 @@ const Demo = () => {
         <button
           type="button"
           onClick={() => {
-            listRef.current.scrollTo({
+            listRef.current?.scrollTo({
               index: 0,
               align: 'bottom',
             });
@@ -202,7 +202,7 @@ const Demo = () => {
         <button
           type="button"
           onClick={() => {
-            listRef.current.scrollTo({
+            listRef.current?.scrollTo({
               index: 50,
               align: 'top',
             });
