@@ -10,7 +10,8 @@ const MyItem: React.ForwardRefRenderFunction<any, Item> = ({ id }, ref) => (
   <span
     ref={ref}
     style={{
-      height: 30 + (id % 2 ? 0 : 10),
+      // height: 30 + (id % 2 ? 0 : 10),
+      height: 100,
     }}
     className="fixed-item"
     onClick={() => {
@@ -44,7 +45,7 @@ const TYPES = [
 ];
 
 const onScroll: React.UIEventHandler<HTMLElement> = (e) => {
-  console.log('scroll:', e.currentTarget.scrollTop);
+  // console.log('scroll:', e.currentTarget.scrollTop);
 };
 
 const Demo = () => {
@@ -52,6 +53,12 @@ const Demo = () => {
   const [visible, setVisible] = React.useState(true);
   const [type, setType] = React.useState('dom');
   const listRef = React.useRef<ListRef>(null);
+
+  React.useEffect(() => {
+    listRef.current.scrollTo({
+      index: 99999999,
+    });
+  }, []);
 
   return (
     <React.StrictMode>
