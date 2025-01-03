@@ -271,6 +271,27 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   rangeRef.current.start = start;
   rangeRef.current.end = end;
 
+  React.useLayoutEffect(() => {
+    console.log('>>>> offsetTop', offsetTop);
+    console.log('>>>>', scrollHeight, start, end, heights.getRecord());
+
+    const changedRecord = heights.getRecord();
+    if (changedRecord.size === 1) {
+      const recordKey = Array.from(changedRecord)[0];
+      const startIndexKey = getKey(mergedData[start]);
+      if (startIndexKey === recordKey) {
+        const realStartHeight = heights.get(recordKey);
+        const diffHeight = realStartHeight - itemHeight;
+        syncScrollTop((ori) => {
+          console.log('-->', diffHeight, ori);
+          return ori + diffHeight;
+        });
+      }
+    }
+
+    heights.resetRecord();
+  }, [scrollHeight]);
+
   // ================================= Size =================================
   const [size, setSize] = React.useState({ width: 0, height });
 
