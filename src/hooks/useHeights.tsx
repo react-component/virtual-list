@@ -1,5 +1,4 @@
 import findDOMNode from 'rc-util/lib/Dom/findDOMNode';
-import raf from 'rc-util/lib/raf';
 import * as React from 'react';
 import { useEffect, useRef } from 'react';
 import type { GetKey } from '../interface';
@@ -23,10 +22,11 @@ export default function useHeights<T>(
   const [updatedMark, setUpdatedMark] = React.useState(0);
   const instanceRef = useRef(new Map<React.Key, HTMLElement>());
   const heightsRef = useRef(new CacheMap());
-  const collectRafRef = useRef<number>();
+
+  const promiseIdRef = useRef<number>(0);
 
   function cancelRaf() {
-    raf.cancel(collectRafRef.current);
+    promiseIdRef.current += 1;
   }
 
   function collectHeight(sync = false) {
@@ -56,7 +56,13 @@ export default function useHeights<T>(
     if (sync) {
       doCollect();
     } else {
-      collectRafRef.current = raf(doCollect);
+      promiseIdRef.current += 1;
+      const id = promiseIdRef.current;
+      Promise.resolve().then(() => {
+        if (id === promiseIdRef.current) {
+          doCollect();
+        }
+      });
     }
   }
 

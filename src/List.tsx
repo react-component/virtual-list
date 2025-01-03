@@ -271,10 +271,10 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   rangeRef.current.start = start;
   rangeRef.current.end = end;
 
+  // When scroll up, first visible item get real height may not same as `itemHeight`,
+  // Which will make scroll jump.
+  // Let's sync scroll top to avoid jump
   React.useLayoutEffect(() => {
-    console.log('>>>> offsetTop', offsetTop);
-    console.log('>>>>', scrollHeight, start, end, heights.getRecord());
-
     const changedRecord = heights.getRecord();
     if (changedRecord.size === 1) {
       const recordKey = Array.from(changedRecord)[0];
@@ -283,7 +283,6 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
         const realStartHeight = heights.get(recordKey);
         const diffHeight = realStartHeight - itemHeight;
         syncScrollTop((ori) => {
-          console.log('-->', diffHeight, ori);
           return ori + diffHeight;
         });
       }
