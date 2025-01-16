@@ -33,6 +33,8 @@ export default function useHeights<T>(
     cancelRaf();
 
     const doCollect = () => {
+      let changed = false;
+
       instanceRef.current.forEach((element, key) => {
         if (element && element.offsetParent) {
           const htmlElement = findDOMNode<HTMLElement>(element);
@@ -45,12 +47,15 @@ export default function useHeights<T>(
 
           if (heightsRef.current.get(key) !== totalHeight) {
             heightsRef.current.set(key, totalHeight);
+            changed = true;
           }
         }
       });
 
       // Always trigger update mark to tell parent that should re-calculate heights when resized
-      setUpdatedMark((c) => c + 1);
+      if (changed) {
+        setUpdatedMark((c) => c + 1);
+      }
     };
 
     if (sync) {
