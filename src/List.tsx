@@ -72,7 +72,7 @@ export interface ListProps<T> extends Omit<React.HTMLAttributes<any>, 'children'
     verticalScrollBar?: React.CSSProperties;
     verticalScrollBarThumb?: React.CSSProperties;
   };
-  showScrollBar?: boolean;
+  showScrollBar?: true | 'optional';
   onScroll?: React.UIEventHandler<HTMLElement>;
 
   /**
