@@ -18,7 +18,7 @@ export interface ScrollBarProps {
   thumbStyle?: React.CSSProperties;
   spinSize: number;
   containerSize: number;
-  showScrollBar?: true | 'optional';
+  showScrollBar?: boolean | 'optional';
 }
 
 export interface ScrollBarRef {
@@ -53,11 +53,11 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
   const thumbRef = React.useRef<HTMLDivElement>();
 
   // ======================= Visible ========================
-  const [visible, setVisible] = React.useState(showScrollBar === true);
+  const [visible, setVisible] = React.useState(showScrollBar);
   const visibleTimeoutRef = React.useRef<ReturnType<typeof setTimeout>>();
 
   const delayHidden = () => {
-    if (showScrollBar === true) return;
+    if (showScrollBar === true || showScrollBar === false) return;
     clearTimeout(visibleTimeoutRef.current);
     setVisible(true);
     visibleTimeoutRef.current = setTimeout(() => {
