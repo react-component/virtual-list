@@ -39,7 +39,7 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
     containerSize,
     style,
     thumbStyle: propsThumbStyle,
-    showScrollBar = 'optional',
+    showScrollBar,
   } = props;
 
   const [dragging, setDragging] = React.useState(false);
@@ -53,17 +53,16 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
   const thumbRef = React.useRef<HTMLDivElement>();
 
   // ======================= Visible ========================
-  const [visible, setVisible] = React.useState(false);
+  const [visible, setVisible] = React.useState(showScrollBar === true);
   const visibleTimeoutRef = React.useRef<ReturnType<typeof setTimeout>>();
 
   const delayHidden = () => {
+    if (showScrollBar === true) return;
     clearTimeout(visibleTimeoutRef.current);
     setVisible(true);
-    if (showScrollBar === 'optional') {
-      visibleTimeoutRef.current = setTimeout(() => {
-        setVisible(false);
-      }, 3000);
-    }
+    visibleTimeoutRef.current = setTimeout(() => {
+      setVisible(false);
+    }, 3000);
   };
 
   // ======================== Range =========================

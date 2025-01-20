@@ -112,6 +112,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     innerProps,
     extraRender,
     styles,
+    showScrollBar = 'optional',
     ...restProps
   } = props;
 
@@ -640,7 +641,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
           containerSize={size.height}
           style={styles?.verticalScrollBar}
           thumbStyle={styles?.verticalScrollBarThumb}
-          showScrollBar={restProps?.showScrollBar}
+          showScrollBar={showScrollBar}
         />
       )}
 
@@ -659,7 +660,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
           horizontal
           style={styles?.horizontalScrollBar}
           thumbStyle={styles?.horizontalScrollBarThumb}
-          showScrollBar={restProps?.showScrollBar}
+          showScrollBar={showScrollBar}
         />
       )}
     </div>
