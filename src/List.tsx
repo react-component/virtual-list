@@ -72,7 +72,7 @@ export interface ListProps<T> extends Omit<React.HTMLAttributes<any>, 'children'
     verticalScrollBar?: React.CSSProperties;
     verticalScrollBarThumb?: React.CSSProperties;
   };
-
+  showScrollBar?: boolean | 'optional';
   onScroll?: React.UIEventHandler<HTMLElement>;
 
   /**
@@ -112,6 +112,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     innerProps,
     extraRender,
     styles,
+    showScrollBar = 'optional',
     ...restProps
   } = props;
 
@@ -640,6 +641,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
           containerSize={size.height}
           style={styles?.verticalScrollBar}
           thumbStyle={styles?.verticalScrollBarThumb}
+          showScrollBar={showScrollBar}
         />
       )}
 
@@ -658,6 +660,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
           horizontal
           style={styles?.horizontalScrollBar}
           thumbStyle={styles?.horizontalScrollBarThumb}
+          showScrollBar={showScrollBar}
         />
       )}
     </div>
