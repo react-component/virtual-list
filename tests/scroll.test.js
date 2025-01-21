@@ -233,6 +233,25 @@ describe('List.Scroll', () => {
       expect(wrapper.find('ul').instance().scrollTop > 10).toBeTruthy();
     });
 
+    it('should show scrollbar when element has showScrollBar prop set to true', () => {
+      jest.useFakeTimers();
+      const listRef = React.createRef();
+      const { container } = genList(
+        {
+          itemHeight: 20,
+          height: 100,
+          data: genData(100),
+          ref: listRef,
+          showScrollBar: true,
+        },
+        render,
+      );
+      act(() => {
+        jest.runAllTimers();
+      });
+      const scrollbarElement = container.querySelector('.rc-virtual-list-scrollbar-visible');
+      expect(scrollbarElement).not.toBeNull();
+    });
     describe('not show scrollbar when disabled virtual', () => {
       [
         { name: '!virtual', props: { virtual: false } },
