@@ -7,7 +7,8 @@ lib/
 ~*
 yarn.lock
 package-lock.json
-!tests/__mocks__/rc-util/lib
+pnpm-lock.yaml
+!tests/__mocks__/@rc-component/util/lib
 bun.lockb
 
 # umi

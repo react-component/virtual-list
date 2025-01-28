@@ -1,4 +1,4 @@
-import useLayoutEffect from 'rc-util/lib/hooks/useLayoutEffect';
+import useLayoutEffect from '@rc-component/util/lib/hooks/useLayoutEffect';
 import type * as React from 'react';
 import { useRef } from 'react';
 

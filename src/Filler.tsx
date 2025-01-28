@@ -1,5 +1,5 @@
 import * as React from 'react';
-import ResizeObserver from 'rc-resize-observer';
+import ResizeObserver from '@rc-component/resize-observer';
 import classNames from 'classnames';
 
 export type InnerProps = Pick<React.HTMLAttributes<HTMLDivElement>, 'role' | 'id'>;
@@ -95,6 +95,8 @@ const Filler = React.forwardRef(
   },
 );
 
-Filler.displayName = 'Filler';
+if (process.env.NODE_ENV !== 'production') {
+  Filler.displayName = 'Filler';
+}
 
 export default Filler;

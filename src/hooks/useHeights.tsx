@@ -1,4 +1,4 @@
-import findDOMNode from 'rc-util/lib/Dom/findDOMNode';
+import findDOMNode from '@rc-component/util/lib/Dom/findDOMNode';
 import * as React from 'react';
 import { useEffect, useRef } from 'react';
 import type { GetKey } from '../interface';
