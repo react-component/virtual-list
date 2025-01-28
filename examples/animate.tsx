@@ -5,7 +5,7 @@ import * as React from 'react';
 import CSSMotion from 'rc-animate/lib/CSSMotion';
 import classNames from 'classnames';
 import List, { ListRef } from '../src/List';
-import useLayoutEffect from 'rc-util/lib/hooks/useLayoutEffect';
+import useLayoutEffect from '@rc-component/util/lib/hooks/useLayoutEffect';
 import './animate.less';
 
 let uuid = 0;
@@ -74,7 +74,7 @@ const MyItem: React.ForwardRefRenderFunction<any, MyItemProps> = (
       motionName="motion"
       motionAppear={motionAppear}
       onAppearStart={getCollapsedHeight}
-      onAppearActive={node => {
+      onAppearActive={(node) => {
         motionRef.current = true;
         return getMaxHeight(node);
       }}
@@ -135,7 +135,7 @@ const Demo = () => {
   const [animating, setAnimating] = React.useState(false);
   const [insertIndex, setInsertIndex] = React.useState<number>();
 
-  const listRef = React.useRef<ListRef>();
+  const listRef = React.useRef<ListRef>(null);
 
   const onClose = (id: string) => {
     setCloseMap({
@@ -145,7 +145,7 @@ const Demo = () => {
   };
 
   const onLeave = (id: string) => {
-    const newData = data.filter(item => item.id !== id);
+    const newData = data.filter((item) => item.id !== id);
     setData(newData);
   };
 
@@ -159,14 +159,14 @@ const Demo = () => {
   }
 
   const onInsertBefore = (id: string) => {
-    const index = data.findIndex(item => item.id === id);
+    const index = data.findIndex((item) => item.id === id);
     const newData = [...data.slice(0, index), genItem(), ...data.slice(index)];
     setInsertIndex(index);
     setData(newData);
     lockForAnimation();
   };
   const onInsertAfter = (id: string) => {
-    const index = data.findIndex(item => item.id === id) + 1;
+    const index = data.findIndex((item) => item.id === id) + 1;
     const newData = [...data.slice(0, index), genItem(), ...data.slice(index)];
     setInsertIndex(index);
     setData(newData);

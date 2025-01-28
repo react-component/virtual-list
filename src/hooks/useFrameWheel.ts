@@ -1,4 +1,4 @@
-import raf from 'rc-util/lib/raf';
+import raf from '@rc-component/util/lib/raf';
 import { useRef } from 'react';
 import isFF from '../utils/isFirefox';
 import useOriginScroll from './useOriginScroll';

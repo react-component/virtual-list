@@ -8,6 +8,8 @@ const List = React.forwardRef((props: ListProps<any>, ref: React.Ref<ListRef>) =
   props: React.PropsWithChildren<ListProps<Item>> & { ref?: React.Ref<ListRef> },
 ) => React.ReactElement;
 
-(List as any).displayName = 'List';
+if (process.env.NODE_ENV !== 'production') {
+  (List as any).displayName = 'List';
+}
 
 export default List;

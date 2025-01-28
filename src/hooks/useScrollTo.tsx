@@ -1,10 +1,10 @@
 /* eslint-disable no-param-reassign */
 import * as React from 'react';
-import raf from 'rc-util/lib/raf';
+import raf from '@rc-component/util/lib/raf';
 import type { GetKey } from '../interface';
 import type CacheMap from '../utils/CacheMap';
-import useLayoutEffect from 'rc-util/lib/hooks/useLayoutEffect';
-import { warning } from 'rc-util';
+import useLayoutEffect from '@rc-component/util/lib/hooks/useLayoutEffect';
+import { warning } from '@rc-component/util';
 
 const MAX_TIMES = 10;
 
@@ -37,7 +37,7 @@ export default function useScrollTo<T>(
   syncScrollTop: (newTop: number) => void,
   triggerFlash: () => void,
 ): (arg: number | ScrollTarget) => void {
-  const scrollRef = React.useRef<number>();
+  const scrollRef = React.useRef<number>(null);
 
   const [syncState, setSyncState] = React.useState<{
     times: number;
