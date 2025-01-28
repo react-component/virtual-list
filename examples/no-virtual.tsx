@@ -5,9 +5,11 @@ import List from '../src/List';
 interface Item {
   id: number;
   height: number;
+  ref?: React.Ref<HTMLSpanElement>;
 }
 
-const MyItem: React.FC<Item> = ({ id, height }, ref) => {
+const MyItem: React.FC<Item> = (props) => {
+  const { id, height, ref } = props;
   return (
     <span
       ref={ref}
@@ -50,7 +52,7 @@ const Demo = () => {
             boxSizing: 'border-box',
           }}
         >
-          {item => <ForwardMyItem {...(item as any)} />}
+          {(item) => <ForwardMyItem {...(item as any)} />}
         </List>
 
         <h2>Less Count</h2>
@@ -59,12 +61,9 @@ const Demo = () => {
           itemHeight={30}
           height={100}
           itemKey="id"
-          style={{
-            border: '1px solid red',
-            boxSizing: 'border-box',
-          }}
+          style={{ border: '1px solid red', boxSizing: 'border-box' }}
         >
-          {item => <ForwardMyItem {...(item as any)} />}
+          {(item) => <ForwardMyItem {...(item as any)} />}
         </List>
 
         <h2>Less Item Height</h2>
@@ -78,7 +77,7 @@ const Demo = () => {
             boxSizing: 'border-box',
           }}
         >
-          {item => <ForwardMyItem {...(item as any)} />}
+          {(item) => <ForwardMyItem {...(item as any)} />}
         </List>
 
         <h2>Without Height</h2>
@@ -91,7 +90,7 @@ const Demo = () => {
             boxSizing: 'border-box',
           }}
         >
-          {item => <ForwardMyItem {...(item as any)} />}
+          {(item) => <ForwardMyItem {...(item as any)} />}
         </List>
       </div>
     </React.StrictMode>

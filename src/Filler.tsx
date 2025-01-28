@@ -28,72 +28,60 @@ interface FillerProps {
 /**
  * Fill component to provided the scroll content real height.
  */
-const Filler = React.forwardRef(
-  (
-    {
-      height,
-      offsetY,
-      offsetX,
-      children,
-      prefixCls,
-      onInnerResize,
-      innerProps,
-      rtl,
-      extra,
-    }: FillerProps,
-    ref: React.Ref<HTMLDivElement>,
-  ) => {
-    let outerStyle: React.CSSProperties = {};
+const Filler = React.forwardRef<HTMLDivElement, FillerProps>((props, ref) => {
+  const { height, offsetY, offsetX, children, prefixCls, onInnerResize, innerProps, rtl, extra } =
+    props;
 
-    let innerStyle: React.CSSProperties = {
-      display: 'flex',
-      flexDirection: 'column',
+  let outerStyle: React.CSSProperties = {};
+
+  let innerStyle: React.CSSProperties = {
+    display: 'flex',
+    flexDirection: 'column',
+  };
+
+  if (offsetY !== undefined) {
+    // Not set `width` since this will break `sticky: right`
+    outerStyle = {
+      height,
+      position: 'relative',
+      overflow: 'hidden',
     };
 
-    if (offsetY !== undefined) {
-      // Not set `width` since this will break `sticky: right`
-      outerStyle = {
-        height,
-        position: 'relative',
-        overflow: 'hidden',
-      };
+    innerStyle = {
+      ...innerStyle,
+      transform: `translateY(${offsetY}px)`,
+      [rtl ? 'marginRight' : 'marginLeft']: -offsetX,
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      top: 0,
+    };
+  }
 
-      innerStyle = {
-        ...innerStyle,
-        transform: `translateY(${offsetY}px)`,
-        [rtl ? 'marginRight' : 'marginLeft']: -offsetX,
-        position: 'absolute',
-        left: 0,
-        right: 0,
-        top: 0,
-      };
-    }
-
-    return (
-      <div style={outerStyle}>
-        <ResizeObserver
-          onResize={({ offsetHeight }) => {
-            if (offsetHeight && onInnerResize) {
-              onInnerResize();
-            }
-          }}
+  return (
+    <div style={outerStyle}>
+      <ResizeObserver
+        onResize={({ offsetHeight }) => {
+          if (offsetHeight && onInnerResize) {
+            onInnerResize();
+          }
+        }}
+      >
+        <div
+          style={innerStyle}
+          className={classNames({
+            [`${prefixCls}-holder-inner`]: prefixCls,
+          })}
+          ref={ref}
+          {...innerProps}
         >
-          <div
-            style={innerStyle}
-            className={classNames({
-              [`${prefixCls}-holder-inner`]: prefixCls,
-            })}
-            ref={ref}
-            {...innerProps}
-          >
-            {children}
-            {extra}
-          </div>
-        </ResizeObserver>
-      </div>
-    );
-  },
-);
+          {children}
+          {extra}
+        </div>
+      </ResizeObserver>
+    </div>
+  );
+});
 
 if (process.env.NODE_ENV !== 'production') {
   Filler.displayName = 'Filler';
