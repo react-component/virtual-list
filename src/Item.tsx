@@ -6,11 +6,10 @@ export interface ItemProps {
 }
 
 export function Item({ children, setRef }: ItemProps) {
-  const refFunc = React.useCallback(node => {
+  const refFunc = React.useCallback((node: HTMLElement) => {
     setRef(node);
   }, []);
-
-  return React.cloneElement(children, {
+  return React.cloneElement<any>(children, {
     ref: refFunc,
   });
 }
