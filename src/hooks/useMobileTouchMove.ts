@@ -72,7 +72,7 @@ export default function useMobileTouchMove(
   const onTouchStart = (e: TouchEvent) => {
     cleanUpEvents();
 
-    if (e.touches.length === 1 && !touchedRef.current) {
+    if (e.touches.length === 1) {
       touchedRef.current = true;
       touchXRef.current = Math.ceil(e.touches[0].pageX);
       touchYRef.current = Math.ceil(e.touches[0].pageY);
