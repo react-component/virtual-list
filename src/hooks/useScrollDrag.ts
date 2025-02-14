@@ -39,7 +39,7 @@ export default function useScrollDrag(
       };
 
       const onMouseDown = (e: MouseEvent) => {
-        // 如果目标元素设置了 draggable，则跳过滚动逻辑
+        // Skip if element set draggable
         if ((e.target as HTMLElement).draggable) {
           return;
         }
