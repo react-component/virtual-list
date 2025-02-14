@@ -576,22 +576,8 @@ describe('List.Scroll', () => {
     );
   });
 
-  it('mouse down drag', () => {
-    const onScroll = jest.fn();
-    const { container } = render(
-      <List
-        component="ul"
-        itemKey="id"
-        itemHeight={20}
-        height={100}
-        data={genData(100)}
-        onScroll={onScroll}
-      >
-        {({ id }) => <li>{id}</li>}
-      </List>,
-    );
-
-    function dragDown(mouseY) {
+  describe('mouse down drag', () => {
+    function dragDown(container, mouseY) {
       fireEvent.mouseDown(container.querySelector('li'));
 
       let moveEvent = createEvent.mouseMove(container.querySelector('li'));
@@ -605,18 +591,57 @@ describe('List.Scroll', () => {
       fireEvent.mouseUp(container.querySelector('li'));
     }
 
-    function getScrollTop() {
+    function getScrollTop(container) {
       const innerEle = container.querySelector('.rc-virtual-list-holder-inner');
       const { transform } = innerEle.style;
       return Number(transform.match(/\d+/)[0]);
     }
 
-    // Drag down
-    dragDown(100);
-    expect(getScrollTop()).toBeGreaterThan(0);
+    it('can move', () => {
+      const onScroll = jest.fn();
+      const { container } = render(
+        <List
+          component="ul"
+          itemKey="id"
+          itemHeight={20}
+          height={100}
+          data={genData(100)}
+          onScroll={onScroll}
+        >
+          {({ id }) => <li>{id}</li>}
+        </List>,
+      );
 
-    // Drag up
-    dragDown(-100);
-    expect(getScrollTop()).toBe(0);
+      // Drag down
+      dragDown(container, 100);
+      expect(getScrollTop(container)).toBeGreaterThan(0);
+
+      // Drag up
+      dragDown(container, -100);
+      expect(getScrollTop(container)).toBe(0);
+    });
+
+    it('can not move when item add draggable', () => {
+      const onScroll = jest.fn();
+      const { container } = render(
+        <List
+          component="ul"
+          itemKey="id"
+          itemHeight={20}
+          height={100}
+          data={genData(100)}
+          onScroll={onScroll}
+        >
+          {({ id }) => <li draggable>{id}</li>}
+        </List>,
+      );
+
+      // Initial scroll should be 0
+      expect(getScrollTop(container)).toEqual(0);
+      // Simulate drag action
+      dragDown(container, 100);
+      // Assert that scroll did not change after drag
+      expect(getScrollTop(container)).toEqual(0);
+    });
   });
 });

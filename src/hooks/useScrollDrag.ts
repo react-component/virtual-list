@@ -39,6 +39,10 @@ export default function useScrollDrag(
       };
 
       const onMouseDown = (e: MouseEvent) => {
+        // Skip if element set draggable
+        if ((e.target as HTMLElement).draggable) {
+          return;
+        }
         // Skip if nest List has handled this event
         const event = e as MouseEvent & {
           _virtualHandled?: boolean;
