@@ -636,11 +636,11 @@ describe('List.Scroll', () => {
         </List>,
       );
 
-      // 初始滚动应为 0
+      // Initial scroll should be 0
       expect(getScrollTop(container)).toEqual(0);
-      // 模拟拖拽
+      // Simulate drag action
       dragDown(container, 100);
-      // 验证拖拽后滚动未改变
+      // Assert that scroll did not change after drag
       expect(getScrollTop(container)).toEqual(0);
     });
   });
