@@ -277,7 +277,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   // Let's sync scroll top to avoid jump
   React.useLayoutEffect(() => {
     const changedRecord = heights.getRecord();
-    if (changedRecord.size === 1) {
+    if (changedRecord.size === 1 && mergedData.length > 0) {
       const recordKey = Array.from(changedRecord)[0];
       const startIndexKey = getKey(mergedData[start]);
       if (startIndexKey === recordKey) {
