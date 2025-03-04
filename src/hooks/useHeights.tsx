@@ -1,4 +1,3 @@
-import findDOMNode from 'rc-util/lib/Dom/findDOMNode';
 import * as React from 'react';
 import { useEffect, useRef } from 'react';
 import type { GetKey } from '../interface';
@@ -37,9 +36,8 @@ export default function useHeights<T>(
 
       instanceRef.current.forEach((element, key) => {
         if (element && element.offsetParent) {
-          const htmlElement = findDOMNode<HTMLElement>(element);
-          const { offsetHeight } = htmlElement;
-          const { marginTop, marginBottom } = getComputedStyle(htmlElement);
+          const { offsetHeight } = element;
+          const { marginTop, marginBottom } = getComputedStyle(element);
 
           const marginTopNum = parseNumber(marginTop);
           const marginBottomNum = parseNumber(marginBottom);
