@@ -577,8 +577,10 @@ describe('List.Scroll', () => {
   });
 
   describe('mouse down drag', () => {
-    function dragDown(container, mouseY) {
-      fireEvent.mouseDown(container.querySelector('li'));
+    function dragDown(container, mouseY, button = 0) {
+      fireEvent.mouseDown(container.querySelector('li'), {
+        button,
+      });
 
       let moveEvent = createEvent.mouseMove(container.querySelector('li'));
       moveEvent.pageY = mouseY;
@@ -618,6 +620,26 @@ describe('List.Scroll', () => {
 
       // Drag up
       dragDown(container, -100);
+      expect(getScrollTop(container)).toBe(0);
+    });
+
+    it('right click should not move', () => {
+      const onScroll = jest.fn();
+      const { container } = render(
+        <List
+          component="ul"
+          itemKey="id"
+          itemHeight={20}
+          height={100}
+          data={genData(100)}
+          onScroll={onScroll}
+        >
+          {({ id }) => <li>{id}</li>}
+        </List>,
+      );
+
+      // Drag down
+      dragDown(container, 100, 2);
       expect(getScrollTop(container)).toBe(0);
     });
 
