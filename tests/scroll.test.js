@@ -38,10 +38,16 @@ describe('List.Scroll', () => {
   beforeAll(() => {
     mockElement = spyElementPrototypes(HTMLElement, {
       offsetHeight: {
-        get: () => 20,
+        get() {
+          const height = this.getAttribute('data-height');
+          return Number(height || 20);
+        },
       },
       clientHeight: {
-        get: () => 100,
+        get() {
+          const height = this.getAttribute('data-height');
+          return Number(height || 100);
+        },
       },
       getBoundingClientRect: () => boundingRect,
       offsetParent: {
@@ -665,5 +671,64 @@ describe('List.Scroll', () => {
       // Assert that scroll did not change after drag
       expect(getScrollTop(container)).toEqual(0);
     });
+  });
+
+  it('not scroll jump for item height change', async () => {
+    jest.useFakeTimers();
+
+    const onScroll = jest.fn();
+
+    const listRef = React.createRef();
+    const { container } = genList(
+      {
+        itemHeight: 10,
+        height: 100,
+        data: genData(100),
+        ref: listRef,
+        children: ({ id }) => <li data-id={id}>{id}</li>,
+        onScroll,
+      },
+      render,
+    );
+
+    // first render refresh
+    await act(async () => {
+      onLibResize([
+        {
+          target: container.querySelector('.rc-virtual-list-holder-inner'),
+        },
+      ]);
+
+      await Promise.resolve();
+    });
+
+    await act(async () => {
+      jest.advanceTimersByTime(1000);
+      await Promise.resolve();
+    });
+
+    container.querySelector('li[data-id="0"]').setAttribute('data-height', '30');
+
+    // Force change first row height
+    await act(async () => {
+      boundingRect.height = 110;
+
+      onLibResize([
+        {
+          target: container.querySelector('.rc-virtual-list-holder-inner'),
+        },
+      ]);
+
+      await Promise.resolve();
+    });
+
+    await act(async () => {
+      jest.advanceTimersByTime(1000);
+      await Promise.resolve();
+    });
+
+    expect(onScroll).not.toHaveBeenCalled();
+
+    jest.useRealTimers();
   });
 });

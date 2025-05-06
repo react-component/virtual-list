@@ -8,16 +8,18 @@ class CacheMap {
   // `useMemo` no need to update if `id` not change
   id: number = 0;
 
-  diffKeys = new Set<React.Key>();
+  diffRecords = new Map<React.Key, number>();
 
   constructor() {
     this.maps = Object.create(null);
   }
 
   set(key: React.Key, value: number) {
+    // Record prev value
+    this.diffRecords.set(key, this.maps[key as string]);
+
     this.maps[key as string] = value;
     this.id += 1;
-    this.diffKeys.add(key as string);
   }
 
   get(key: React.Key) {
@@ -29,11 +31,11 @@ class CacheMap {
    * To help to know what's update in the next render.
    */
   resetRecord() {
-    this.diffKeys.clear();
+    this.diffRecords.clear();
   }
 
   getRecord() {
-    return this.diffKeys;
+    return this.diffRecords;
   }
 }
 
