@@ -278,10 +278,12 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   React.useLayoutEffect(() => {
     const changedRecord = heights.getRecord();
     if (changedRecord.size === 1) {
-      const recordKey = Array.from(changedRecord)[0];
+      const recordKey = Array.from(changedRecord.keys())[0];
+      const prevCacheHeight = changedRecord.get(recordKey);
+
       // Quick switch data may cause `start` not in `mergedData` anymore
       const startItem = mergedData[start];
-      if (startItem) {
+      if (startItem && prevCacheHeight === undefined) {
         const startIndexKey = getKey(startItem);
         if (startIndexKey === recordKey) {
           const realStartHeight = heights.get(recordKey);
