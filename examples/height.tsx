@@ -6,7 +6,7 @@ interface Item {
   height: number;
 }
 
-const MyItem: React.ForwardRefRenderFunction<HTMLElement, Item> = ({ id, height }, ref) => {
+const MyItem: React.ForwardRefRenderFunction<HTMLSpanElement, Item> = ({ id, height }, ref) => {
   return (
     <span
       ref={ref}
@@ -50,7 +50,7 @@ const Demo = () => {
             boxSizing: 'border-box',
           }}
         >
-          {item => <ForwardMyItem {...item} />}
+          {(item) => <ForwardMyItem {...item} />}
         </List>
       </div>
     </React.StrictMode>

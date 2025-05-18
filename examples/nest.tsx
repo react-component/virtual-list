@@ -13,7 +13,7 @@ for (let i = 0; i < 100; i += 1) {
   });
 }
 
-const MyItem: React.ForwardRefRenderFunction<any, Item> = ({ id }, ref) => (
+const MyItem: React.ForwardRefRenderFunction<HTMLDivElement, Item> = ({ id }, ref) => (
   <div style={{ padding: 20, background: 'yellow' }} ref={ref}>
     <List
       data={data}

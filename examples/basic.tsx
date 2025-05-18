@@ -6,7 +6,7 @@ interface Item {
   id: number;
 }
 
-const MyItem: React.ForwardRefRenderFunction<any, Item> = ({ id }, ref) => (
+const MyItem: React.ForwardRefRenderFunction<HTMLSpanElement, Item> = ({ id }, ref) => (
   <span
     ref={ref}
     style={{

@@ -1,5 +1,5 @@
 import classNames from 'classnames';
-import raf from 'rc-util/lib/raf';
+import raf from '@rc-component/util/lib/raf';
 import * as React from 'react';
 import { getPageXY } from './hooks/useScrollDrag';
 
@@ -49,15 +49,17 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
   const isLTR = !rtl;
 
   // ========================= Refs =========================
-  const scrollbarRef = React.useRef<HTMLDivElement>();
-  const thumbRef = React.useRef<HTMLDivElement>();
+  const scrollbarRef = React.useRef<HTMLDivElement>(null);
+  const thumbRef = React.useRef<HTMLDivElement>(null);
 
   // ======================= Visible ========================
   const [visible, setVisible] = React.useState(showScrollBar);
-  const visibleTimeoutRef = React.useRef<ReturnType<typeof setTimeout>>();
+  const visibleTimeoutRef = React.useRef<ReturnType<typeof setTimeout>>(null);
 
   const delayHidden = () => {
-    if (showScrollBar === true || showScrollBar === false) return;
+    if (showScrollBar === true || showScrollBar === false) {
+      return;
+    }
     clearTimeout(visibleTimeoutRef.current);
     setVisible(true);
     visibleTimeoutRef.current = setTimeout(() => {
@@ -120,9 +122,9 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
   }, []);
 
   // Pass to effect
-  const enableScrollRangeRef = React.useRef<number>();
+  const enableScrollRangeRef = React.useRef<number>(null);
   enableScrollRangeRef.current = enableScrollRange;
-  const enableOffsetRangeRef = React.useRef<number>();
+  const enableOffsetRangeRef = React.useRef<number>(null);
   enableOffsetRangeRef.current = enableOffsetRange;
 
   React.useEffect(() => {

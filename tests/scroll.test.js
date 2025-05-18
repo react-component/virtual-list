@@ -1,8 +1,8 @@
 import '@testing-library/jest-dom';
 import { act, createEvent, fireEvent, render } from '@testing-library/react';
 import { mount } from 'enzyme';
-import { _rs as onLibResize } from 'rc-resize-observer/lib/utils/observerUtil';
-import { resetWarned } from 'rc-util/lib/warning';
+import { _rs as onLibResize } from '@rc-component/resize-observer/lib/utils/observerUtil';
+import { resetWarned } from '@rc-component/util/lib/warning';
 import React from 'react';
 import List from '../src';
 import { spyElementPrototypes } from './utils/domHook';

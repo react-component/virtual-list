@@ -7,7 +7,7 @@ interface Item {
   height: number;
 }
 
-const MyItem: React.FC<Item> = ({ id, height }, ref) => {
+const MyItem: React.ForwardRefRenderFunction<HTMLSpanElement, Item> = ({ id, height }, ref) => {
   return (
     <span
       ref={ref}
@@ -50,7 +50,7 @@ const Demo = () => {
             boxSizing: 'border-box',
           }}
         >
-          {item => <ForwardMyItem {...(item as any)} />}
+          {(item) => <ForwardMyItem {...(item as any)} />}
         </List>
 
         <h2>Less Count</h2>
@@ -64,7 +64,7 @@ const Demo = () => {
             boxSizing: 'border-box',
           }}
         >
-          {item => <ForwardMyItem {...(item as any)} />}
+          {(item) => <ForwardMyItem {...(item as any)} />}
         </List>
 
         <h2>Less Item Height</h2>
@@ -78,7 +78,7 @@ const Demo = () => {
             boxSizing: 'border-box',
           }}
         >
-          {item => <ForwardMyItem {...(item as any)} />}
+          {(item) => <ForwardMyItem {...(item as any)} />}
         </List>
 
         <h2>Without Height</h2>
@@ -91,7 +91,7 @@ const Demo = () => {
             boxSizing: 'border-box',
           }}
         >
-          {item => <ForwardMyItem {...(item as any)} />}
+          {(item) => <ForwardMyItem {...(item as any)} />}
         </List>
       </div>
     </React.StrictMode>

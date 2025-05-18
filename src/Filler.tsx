@@ -1,5 +1,5 @@
 import * as React from 'react';
-import ResizeObserver from 'rc-resize-observer';
+import ResizeObserver from '@rc-component/resize-observer';
 import classNames from 'classnames';
 
 export type InnerProps = Pick<React.HTMLAttributes<HTMLDivElement>, 'role' | 'id'>;
@@ -28,20 +28,10 @@ interface FillerProps {
 /**
  * Fill component to provided the scroll content real height.
  */
-const Filler = React.forwardRef(
+const Filler = React.forwardRef<HTMLDivElement, FillerProps>(
   (
-    {
-      height,
-      offsetY,
-      offsetX,
-      children,
-      prefixCls,
-      onInnerResize,
-      innerProps,
-      rtl,
-      extra,
-    }: FillerProps,
-    ref: React.Ref<HTMLDivElement>,
+    { height, offsetY, offsetX, children, prefixCls, onInnerResize, innerProps, rtl, extra },
+    ref,
   ) => {
     let outerStyle: React.CSSProperties = {};
 
@@ -80,9 +70,7 @@ const Filler = React.forwardRef(
         >
           <div
             style={innerStyle}
-            className={classNames({
-              [`${prefixCls}-holder-inner`]: prefixCls,
-            })}
+            className={classNames({ [`${prefixCls}-holder-inner`]: prefixCls })}
             ref={ref}
             {...innerProps}
           >
@@ -95,6 +83,8 @@ const Filler = React.forwardRef(
   },
 );
 
-Filler.displayName = 'Filler';
+if (process.env.NODE_ENV !== 'production') {
+  Filler.displayName = 'Filler';
+}
 
 export default Filler;
