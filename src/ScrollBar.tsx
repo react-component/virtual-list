@@ -213,7 +213,6 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
     background: 'var(--rc-virtual-list-scrollbar-bg, rgba(0, 0, 0, 0.5))',
     cursor: 'pointer',
     userSelect: 'none',
-    ...propsThumbStyle,
   };
 
   if (horizontal) {
@@ -247,7 +246,11 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
   return (
     <div
       ref={scrollbarRef}
-      className={scrollbarPrefixCls}
+      className={classNames(scrollbarPrefixCls, {
+        [`${scrollbarPrefixCls}-horizontal`]: horizontal,
+        [`${scrollbarPrefixCls}-vertical`]: !horizontal,
+        [`${scrollbarPrefixCls}-visible`]: visible,
+      })}
       style={{ ...containerStyle, ...style }}
       onMouseDown={onContainerMouseDown}
     >
@@ -256,7 +259,7 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
         className={classNames(`${scrollbarPrefixCls}-thumb`, {
           [`${scrollbarPrefixCls}-thumb-moving`]: dragging,
         })}
-        style={thumbStyle}
+        style={{ ...thumbStyle, ...propsThumbStyle }}
         onMouseDown={onThumbMouseDown}
       />
     </div>
