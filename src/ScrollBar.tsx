@@ -253,6 +253,7 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
       })}
       style={{ ...containerStyle, ...style }}
       onMouseDown={onContainerMouseDown}
+      onMouseMove={delayHidden}
     >
       <div
         ref={thumbRef}
