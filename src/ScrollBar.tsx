@@ -45,7 +45,6 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
   const [dragging, setDragging] = React.useState(false);
   const [pageXY, setPageXY] = React.useState<number | null>(null);
   const [startTop, setStartTop] = React.useState<number | null>(null);
-  const [dark, setDark] = React.useState(false);
 
   const isLTR = !rtl;
 
@@ -189,21 +188,6 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
   }, [dragging]);
 
   React.useEffect(() => {
-    const media = window.matchMedia?.('(prefers-color-scheme: dark)');
-    setDark(media.matches);
-
-    const listener = (e: MediaQueryListEvent) => {
-      setDark(e.matches);
-    };
-
-    media?.addEventListener('change', listener);
-
-    return () => {
-      media?.removeEventListener('change', listener);
-    };
-  }, []);
-
-  React.useEffect(() => {
     delayHidden();
     return () => {
       clearTimeout(visibleTimeoutRef.current);
@@ -225,11 +209,9 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
 
   const thumbStyle: React.CSSProperties = {
     position: 'absolute',
-    background: dark ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)',
     borderRadius: 99,
     cursor: 'pointer',
     userSelect: 'none',
-    ...propsThumbStyle,
   };
 
   if (horizontal) {
@@ -269,21 +251,16 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
   return (
     <div
       ref={scrollbarRef}
-      className={classNames(scrollbarPrefixCls, {
-        [`${scrollbarPrefixCls}-horizontal`]: horizontal,
-        [`${scrollbarPrefixCls}-vertical`]: !horizontal,
-        [`${scrollbarPrefixCls}-visible`]: visible,
-      })}
+      className={scrollbarPrefixCls}
       style={{ ...containerStyle, ...style }}
       onMouseDown={onContainerMouseDown}
-      onMouseMove={delayHidden}
     >
       <div
         ref={thumbRef}
         className={classNames(`${scrollbarPrefixCls}-thumb`, {
           [`${scrollbarPrefixCls}-thumb-moving`]: dragging,
         })}
-        style={{ ...thumbStyle }}
+        style={{ ...thumbStyle, ...propsThumbStyle }}
         onMouseDown={onThumbMouseDown}
       />
     </div>

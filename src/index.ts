@@ -1,3 +1,4 @@
+import './index.less';
 import List from './List';
 
 export type { ListRef, ListProps } from './List';
