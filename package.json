@@ -50,7 +50,7 @@
     "@types/react": "^18.0.8",
     "@types/react-dom": "^18.0.3",
     "@types/warning": "^3.0.0",
-    "cheerio": "1.0.0-rc.12",
+    "cheerio": "1.1.0",
     "cross-env": "^5.2.0",
     "dumi": "^2.2.17",
     "enzyme": "^3.1.0",
