@@ -1,233 +1,297 @@
-import * as React from 'react';
 import classNames from 'classnames';
 import raf from 'rc-util/lib/raf';
+import * as React from 'react';
+import { getPageXY } from './hooks/useScrollDrag';
 
-const MIN_SIZE = 20;
+export type ScrollBarDirectionType = 'ltr' | 'rtl';
 
 export interface ScrollBarProps {
   prefixCls: string;
-  scrollTop: number;
-  scrollHeight: number;
-  height: number;
-  count: number;
-  onScroll: (scrollTop: number) => void;
+  scrollOffset: number;
+  scrollRange: number;
+  rtl: boolean;
+  onScroll: (scrollOffset: number, horizontal?: boolean) => void;
   onStartMove: () => void;
   onStopMove: () => void;
+  horizontal?: boolean;
+  style?: React.CSSProperties;
+  thumbStyle?: React.CSSProperties;
+  spinSize: number;
+  containerSize: number;
+  showScrollBar?: boolean | 'optional';
 }
 
-interface ScrollBarState {
-  dragging: boolean;
-  pageY: number;
-  startTop: number;
-  visible: boolean;
+export interface ScrollBarRef {
+  delayHidden: () => void;
 }
 
-function getPageY(e: React.MouseEvent | MouseEvent | TouchEvent) {
-  return 'touches' in e ? e.touches[0].pageY : e.pageY;
-}
+const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) => {
+  const {
+    prefixCls,
+    rtl,
+    scrollOffset,
+    scrollRange,
+    onStartMove,
+    onStopMove,
+    onScroll,
+    horizontal,
+    spinSize,
+    containerSize,
+    style,
+    thumbStyle: propsThumbStyle,
+    showScrollBar,
+  } = props;
 
-export default class ScrollBar extends React.Component<ScrollBarProps, ScrollBarState> {
-  moveRaf: number = null;
+  const [dragging, setDragging] = React.useState(false);
+  const [pageXY, setPageXY] = React.useState<number | null>(null);
+  const [startTop, setStartTop] = React.useState<number | null>(null);
+  const [dark, setDark] = React.useState(false);
 
-  scrollbarRef = React.createRef<HTMLDivElement>();
+  const isLTR = !rtl;
 
-  thumbRef = React.createRef<HTMLDivElement>();
+  // ========================= Refs =========================
+  const scrollbarRef = React.useRef<HTMLDivElement>();
+  const thumbRef = React.useRef<HTMLDivElement>();
 
-  visibleTimeout: ReturnType<typeof setTimeout> = null;
+  // ======================= Visible ========================
+  const [visible, setVisible] = React.useState(showScrollBar);
+  const visibleTimeoutRef = React.useRef<ReturnType<typeof setTimeout>>();
 
-  state: ScrollBarState = {
-    dragging: false,
-    pageY: null,
-    startTop: null,
-    visible: false,
+  const delayHidden = () => {
+    if (showScrollBar === true || showScrollBar === false) return;
+    clearTimeout(visibleTimeoutRef.current);
+    setVisible(true);
+    visibleTimeoutRef.current = setTimeout(() => {
+      setVisible(false);
+    }, 3000);
   };
 
-  componentDidMount() {
-    this.scrollbarRef.current.addEventListener('touchstart', this.onScrollbarTouchStart);
-    this.thumbRef.current.addEventListener('touchstart', this.onMouseDown);
-  }
+  // ======================== Range =========================
+  const enableScrollRange = scrollRange - containerSize || 0;
+  const enableOffsetRange = containerSize - spinSize || 0;
 
-  componentDidUpdate(prevProps: ScrollBarProps) {
-    if (prevProps.scrollTop !== this.props.scrollTop) {
-      this.delayHidden();
-    }
-  }
-
-  componentWillUnmount() {
-    this.removeEvents();
-    clearTimeout(this.visibleTimeout);
-  }
-
-  delayHidden = () => {
-    clearTimeout(this.visibleTimeout);
-
-    this.setState({ visible: true });
-    this.visibleTimeout = setTimeout(() => {
-      this.setState({ visible: false });
-    }, 2000);
-  };
-
-  onScrollbarTouchStart = (e: TouchEvent) => {
-    e.preventDefault();
-  };
-
-  onContainerMouseDown: React.MouseEventHandler = (e) => {
-    e.stopPropagation();
-    e.preventDefault();
-  };
-
-  // ======================= Clean =======================
-  patchEvents = () => {
-    window.addEventListener('mousemove', this.onMouseMove);
-    window.addEventListener('mouseup', this.onMouseUp);
-
-    this.thumbRef.current.addEventListener('touchmove', this.onMouseMove);
-    this.thumbRef.current.addEventListener('touchend', this.onMouseUp);
-  };
-
-  removeEvents = () => {
-    window.removeEventListener('mousemove', this.onMouseMove);
-    window.removeEventListener('mouseup', this.onMouseUp);
-
-    this.scrollbarRef.current?.removeEventListener('touchstart', this.onScrollbarTouchStart);
-    
-    if (this.thumbRef.current) {
-      this.thumbRef.current.removeEventListener('touchstart', this.onMouseDown);
-      this.thumbRef.current.removeEventListener('touchmove', this.onMouseMove);
-      this.thumbRef.current.removeEventListener('touchend', this.onMouseUp);
-    }
-
-    raf.cancel(this.moveRaf);
-  };
-
-  // ======================= Thumb =======================
-  onMouseDown = (e: React.MouseEvent | TouchEvent) => {
-    const { onStartMove } = this.props;
-
-    this.setState({
-      dragging: true,
-      pageY: getPageY(e),
-      startTop: this.getTop(),
-    });
-
-    onStartMove();
-    this.patchEvents();
-    e.stopPropagation();
-    e.preventDefault();
-  };
-
-  onMouseMove = (e: MouseEvent | TouchEvent) => {
-    const { dragging, pageY, startTop } = this.state;
-    const { onScroll } = this.props;
-
-    raf.cancel(this.moveRaf);
-
-    if (dragging) {
-      const offsetY = getPageY(e) - pageY;
-      const newTop = startTop + offsetY;
-
-      const enableScrollRange = this.getEnableScrollRange();
-      const enableHeightRange = this.getEnableHeightRange();
-
-      const ptg = enableHeightRange ? newTop / enableHeightRange : 0;
-      const newScrollTop = Math.ceil(ptg * enableScrollRange);
-      this.moveRaf = raf(() => {
-        onScroll(newScrollTop);
-      });
-    }
-  };
-
-  onMouseUp = () => {
-    const { onStopMove } = this.props;
-    this.setState({ dragging: false });
-
-    onStopMove();
-    this.removeEvents();
-  };
-
-  // ===================== Calculate =====================
-  getSpinHeight = () => {
-    const { height, count } = this.props;
-    let baseHeight = (height / count) * 10;
-    baseHeight = Math.max(baseHeight, MIN_SIZE);
-    baseHeight = Math.min(baseHeight, height / 2);
-    return Math.floor(baseHeight);
-  };
-
-  getEnableScrollRange = () => {
-    const { scrollHeight, height } = this.props;
-    return scrollHeight - height || 0;
-  };
-
-  getEnableHeightRange = () => {
-    const { height } = this.props;
-    const spinHeight = this.getSpinHeight();
-    return height - spinHeight || 0;
-  };
-
-  getTop = () => {
-    const { scrollTop } = this.props;
-    const enableScrollRange = this.getEnableScrollRange();
-    const enableHeightRange = this.getEnableHeightRange();
-    if (scrollTop === 0 || enableScrollRange === 0) {
+  // ========================= Top ==========================
+  const top = React.useMemo(() => {
+    if (scrollOffset === 0 || enableScrollRange === 0) {
       return 0;
     }
-    const ptg = scrollTop / enableScrollRange;
-    return ptg * enableHeightRange;
+    const ptg = scrollOffset / enableScrollRange;
+    return ptg * enableOffsetRange;
+  }, [scrollOffset, enableScrollRange, enableOffsetRange]);
+
+  // ====================== Container =======================
+  const onContainerMouseDown: React.MouseEventHandler = (e) => {
+    e.stopPropagation();
+    e.preventDefault();
   };
 
-  // Not show scrollbar when height is large than scrollHeight
-  showScroll = (): boolean => {
-    const { height, scrollHeight } = this.props;
-    return scrollHeight > height;
+  // ======================== Thumb =========================
+  const stateRef = React.useRef({ top, dragging, pageY: pageXY, startTop });
+  stateRef.current = { top, dragging, pageY: pageXY, startTop };
+
+  const onThumbMouseDown = (e: React.MouseEvent | React.TouchEvent | TouchEvent) => {
+    setDragging(true);
+    setPageXY(getPageXY(e, horizontal));
+    setStartTop(stateRef.current.top);
+
+    onStartMove();
+    e.stopPropagation();
+    e.preventDefault();
   };
 
-  // ====================== Render =======================
-  render() {
-    const { dragging, visible } = this.state;
-    const { prefixCls } = this.props;
-    const spinHeight = this.getSpinHeight();
-    const top = this.getTop();
+  // ======================== Effect ========================
 
-    const canScroll = this.showScroll();
-    const mergedVisible = canScroll && visible;
+  // React make event as passive, but we need to preventDefault
+  // Add event on dom directly instead.
+  // ref: https://github.com/facebook/react/issues/9809
+  React.useEffect(() => {
+    const onScrollbarTouchStart = (e: TouchEvent) => {
+      e.preventDefault();
+    };
 
-    return (
-      <div
-        ref={this.scrollbarRef}
-        className={classNames(`${prefixCls}-scrollbar`, {
-          [`${prefixCls}-scrollbar-show`]: canScroll,
-        })}
-        style={{
-          width: 8,
-          top: 0,
-          bottom: 0,
-          right: 0,
-          position: 'absolute',
-          display: mergedVisible ? null : 'none',
-        }}
-        onMouseDown={this.onContainerMouseDown}
-        onMouseMove={this.delayHidden}
-      >
-        <div
-          ref={this.thumbRef}
-          className={classNames(`${prefixCls}-scrollbar-thumb`, {
-            [`${prefixCls}-scrollbar-thumb-moving`]: dragging,
-          })}
-          style={{
-            width: '100%',
-            height: spinHeight,
-            top,
-            left: 0,
-            position: 'absolute',
-            background: 'rgba(0, 0, 0, 0.5)',
-            borderRadius: 99,
-            cursor: 'pointer',
-            userSelect: 'none',
-          }}
-          onMouseDown={this.onMouseDown}
-        />
-      </div>
-    );
+    const scrollbarEle = scrollbarRef.current;
+    const thumbEle = thumbRef.current;
+    scrollbarEle.addEventListener('touchstart', onScrollbarTouchStart, { passive: false });
+    thumbEle.addEventListener('touchstart', onThumbMouseDown, { passive: false });
+
+    return () => {
+      scrollbarEle.removeEventListener('touchstart', onScrollbarTouchStart);
+      thumbEle.removeEventListener('touchstart', onThumbMouseDown);
+    };
+  }, []);
+
+  // Pass to effect
+  const enableScrollRangeRef = React.useRef<number>();
+  enableScrollRangeRef.current = enableScrollRange;
+  const enableOffsetRangeRef = React.useRef<number>();
+  enableOffsetRangeRef.current = enableOffsetRange;
+
+  React.useEffect(() => {
+    if (dragging) {
+      let moveRafId: number;
+
+      const onMouseMove = (e: MouseEvent | TouchEvent) => {
+        const {
+          dragging: stateDragging,
+          pageY: statePageY,
+          startTop: stateStartTop,
+        } = stateRef.current;
+        raf.cancel(moveRafId);
+
+        const rect = scrollbarRef.current.getBoundingClientRect();
+        const scale = containerSize / (horizontal ? rect.width : rect.height);
+
+        if (stateDragging) {
+          const offset = (getPageXY(e, horizontal) - statePageY) * scale;
+          let newTop = stateStartTop;
+
+          if (!isLTR && horizontal) {
+            newTop -= offset;
+          } else {
+            newTop += offset;
+          }
+
+          const tmpEnableScrollRange = enableScrollRangeRef.current;
+          const tmpEnableOffsetRange = enableOffsetRangeRef.current;
+
+          const ptg: number = tmpEnableOffsetRange ? newTop / tmpEnableOffsetRange : 0;
+
+          let newScrollTop = Math.ceil(ptg * tmpEnableScrollRange);
+          newScrollTop = Math.max(newScrollTop, 0);
+          newScrollTop = Math.min(newScrollTop, tmpEnableScrollRange);
+
+          moveRafId = raf(() => {
+            onScroll(newScrollTop, horizontal);
+          });
+        }
+      };
+
+      const onMouseUp = () => {
+        setDragging(false);
+
+        onStopMove();
+      };
+
+      window.addEventListener('mousemove', onMouseMove, { passive: true });
+      window.addEventListener('touchmove', onMouseMove, { passive: true });
+      window.addEventListener('mouseup', onMouseUp, { passive: true });
+      window.addEventListener('touchend', onMouseUp, { passive: true });
+
+      return () => {
+        window.removeEventListener('mousemove', onMouseMove);
+        window.removeEventListener('touchmove', onMouseMove);
+        window.removeEventListener('mouseup', onMouseUp);
+        window.removeEventListener('touchend', onMouseUp);
+
+        raf.cancel(moveRafId);
+      };
+    }
+  }, [dragging]);
+
+  React.useEffect(() => {
+    const media = window.matchMedia?.('(prefers-color-scheme: dark)');
+    setDark(media.matches);
+
+    const listener = (e: MediaQueryListEvent) => {
+      setDark(e.matches);
+    };
+
+    media?.addEventListener('change', listener);
+
+    return () => {
+      media?.removeEventListener('change', listener);
+    };
+  }, []);
+
+  React.useEffect(() => {
+    delayHidden();
+    return () => {
+      clearTimeout(visibleTimeoutRef.current);
+    };
+  }, [scrollOffset]);
+
+  // ====================== Imperative ======================
+  React.useImperativeHandle(ref, () => ({
+    delayHidden,
+  }));
+
+  // ======================== Render ========================
+  const scrollbarPrefixCls = `${prefixCls}-scrollbar`;
+
+  const containerStyle: React.CSSProperties = {
+    position: 'absolute',
+    visibility: visible ? null : 'hidden',
+  };
+
+  const thumbStyle: React.CSSProperties = {
+    position: 'absolute',
+    background: dark ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)',
+    borderRadius: 99,
+    cursor: 'pointer',
+    userSelect: 'none',
+    ...propsThumbStyle,
+  };
+
+  if (horizontal) {
+    // Container
+    containerStyle.height = 8;
+    containerStyle.left = 0;
+    containerStyle.right = 0;
+    containerStyle.bottom = 0;
+
+    // Thumb
+    thumbStyle.height = '100%';
+    thumbStyle.width = spinSize;
+
+    if (isLTR) {
+      thumbStyle.left = top;
+    } else {
+      thumbStyle.right = top;
+    }
+  } else {
+    // Container
+    containerStyle.width = 8;
+    containerStyle.top = 0;
+    containerStyle.bottom = 0;
+
+    if (isLTR) {
+      containerStyle.right = 0;
+    } else {
+      containerStyle.left = 0;
+    }
+
+    // Thumb
+    thumbStyle.width = '100%';
+    thumbStyle.height = spinSize;
+    thumbStyle.top = top;
   }
+
+  return (
+    <div
+      ref={scrollbarRef}
+      className={classNames(scrollbarPrefixCls, {
+        [`${scrollbarPrefixCls}-horizontal`]: horizontal,
+        [`${scrollbarPrefixCls}-vertical`]: !horizontal,
+        [`${scrollbarPrefixCls}-visible`]: visible,
+      })}
+      style={{ ...containerStyle, ...style }}
+      onMouseDown={onContainerMouseDown}
+      onMouseMove={delayHidden}
+    >
+      <div
+        ref={thumbRef}
+        className={classNames(`${scrollbarPrefixCls}-thumb`, {
+          [`${scrollbarPrefixCls}-thumb-moving`]: dragging,
+        })}
+        style={{ ...thumbStyle }}
+        onMouseDown={onThumbMouseDown}
+      />
+    </div>
+  );
+});
+
+if (process.env.NODE_ENV !== 'production') {
+  ScrollBar.displayName = 'ScrollBar';
 }
+
+export default ScrollBar;

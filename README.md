@@ -24,7 +24,7 @@ https://virtual-list-react-component.vercel.app/
 ```bash
 npm install
 npm start
-open http://localhost:9001/
+open http://localhost:8000/
 ```
 
 ## Feature
@@ -51,15 +51,16 @@ import List from 'rc-virtual-list';
 
 ## List
 
-| Prop       | Description                                             | Type                                 | Default |
-| ---------- | ------------------------------------------------------- | ------------------------------------ | ------- |
-| children   | Render props of item                                    | (item, index, props) => ReactElement | -       |
-| component  | Customize List dom element                              | string \| Component                  | div     |
-| data       | Data list                                               | Array                                | -       |
-| disabled   | Disable scroll check. Usually used on animation control | boolean                              | false   |
-| height     | List height                                             | number                               | -       |
-| itemHeight | Item minium height                                      | number                               | -       |
-| itemKey    | Match key with item                                     | string                               | -       |
+| Prop       | Description                                             | Type                                                                                                                                                                                  | Default |
+| ---------- | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| children   | Render props of item                                    | (item, index, props) => ReactElement                                                                                                                                                  | -       |
+| component  | Customize List dom element                              | string \| Component                                                                                                                                                                   | div     |
+| data       | Data list                                               | Array                                                                                                                                                                                 | -       |
+| disabled   | Disable scroll check. Usually used on animation control | boolean                                                                                                                                                                               | false   |
+| height     | List height                                             | number                                                                                                                                                                                | -       |
+| itemHeight | Item minimum height                                     | number                                                                                                                                                                                | -       |
+| itemKey    | Match key with item                                     | string                                                                                                                                                                                | -       |
+| styles     | style                                                   | { horizontalScrollBar?: React.CSSProperties; horizontalScrollBarThumb?: React.CSSProperties; verticalScrollBar?: React.CSSProperties; verticalScrollBarThumb?: React.CSSProperties; } | -       |
 
 `children` provides additional `props` argument to support IE 11 scroll shaking.
 It will set `style` to `visibility: hidden` when measuring. You can ignore this if no requirement on IE.

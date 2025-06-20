@@ -8,9 +8,12 @@ lib/
 yarn.lock
 package-lock.json
 !tests/__mocks__/rc-util/lib
+bun.lockb
 
 # umi
 .umi
 .umi-production
 .umi-test
 .env.local
+
+.dumi

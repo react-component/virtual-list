@@ -1,7 +1,23 @@
-import React from 'react';
+import { act, fireEvent, render } from '@testing-library/react';
 import { mount } from 'enzyme';
-import { spyElementPrototypes } from './utils/domHook';
+import React from 'react';
 import List from '../src';
+import { spyElementPrototypes } from './utils/domHook';
+
+// Mock ScrollBar
+jest.mock('../src/ScrollBar', () => {
+  const OriScrollBar = jest.requireActual('../src/ScrollBar').default;
+  const React = jest.requireActual('react');
+  return React.forwardRef((props, ref) => {
+    const { scrollOffset } = props;
+
+    return (
+      <div data-dev-offset={scrollOffset}>
+        <OriScrollBar {...props} ref={ref} />
+      </div>
+    );
+  });
+});
 
 function genData(count) {
   return new Array(count).fill(null).map((_, index) => ({ id: String(index) }));
@@ -123,11 +139,54 @@ describe('List.Touch', () => {
 
     const touchEvent = new Event('touchstart');
     touchEvent.preventDefault = preventDefault;
-    wrapper
-      .find('.rc-virtual-list-scrollbar')
-      .instance()
-      .dispatchEvent(touchEvent);
+    wrapper.find('.rc-virtual-list-scrollbar').instance().dispatchEvent(touchEvent);
 
     expect(preventDefault).toHaveBeenCalled();
+  });
+
+  it('nest touch', async () => {
+    const { container } = render(
+      <List component="ul" itemHeight={20} height={100} data={genData(100)}>
+        {({ id }) =>
+          id === '0' ? (
+            <li>
+              <List component="ul" itemKey="id" itemHeight={20} height={100} data={genData(100)}>
+                {({ id }) => <li>{id}</li>}
+              </List>
+            </li>
+          ) : (
+            <li />
+          )
+        }
+      </List>,
+    );
+
+    const targetLi = container.querySelector('ul ul li');
+
+    fireEvent.touchStart(targetLi, {
+      touches: [{ pageY: 0 }],
+    });
+
+    fireEvent.touchMove(targetLi, {
+      touches: [{ pageY: -1 }],
+    });
+
+    await act(async () => {
+      jest.advanceTimersByTime(1000000);
+      await Promise.resolve();
+    });
+
+    // inner not to be 0
+    expect(container.querySelectorAll('[data-dev-offset]')[0]).toHaveAttribute('data-dev-offset');
+    expect(container.querySelectorAll('[data-dev-offset]')[0]).not.toHaveAttribute(
+      'data-dev-offset',
+      '0',
+    );
+
+    // outer
+    expect(container.querySelectorAll('[data-dev-offset]')[1]).toHaveAttribute(
+      'data-dev-offset',
+      '0',
+    );
   });
 });

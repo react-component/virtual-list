@@ -17,10 +17,6 @@ describe('List.Basic', () => {
       </List>
     );
 
-    if (props.ref) {
-      node = <div>{node}</div>;
-    }
-
     return mount(node);
   }
 
@@ -87,7 +83,7 @@ describe('List.Basic', () => {
       scrollTop = 0;
       const wrapper = genList({ itemHeight: 20, height: 100, data: genData(100), onVisibleChange });
       expect(wrapper.find(Filler).props().height).toEqual(2000);
-      expect(wrapper.find(Filler).props().offset).toEqual(0);
+      expect(wrapper.find(Filler).props().offsetY).toEqual(0);
       onVisibleChange.mockReset();
 
       // scrollTop to end
@@ -96,7 +92,7 @@ describe('List.Basic', () => {
         scrollTop,
       });
       expect(wrapper.find(Filler).props().height).toEqual(2000);
-      expect(wrapper.find(Filler).props().offset + wrapper.find('li').length * 20).toEqual(2000);
+      expect(wrapper.find(Filler).props().offsetY + wrapper.find('li').length * 20).toEqual(2000);
 
       expect(onVisibleChange.mock.calls[0][0]).toHaveLength(6);
       expect(onVisibleChange.mock.calls[0][1]).toHaveLength(100);
@@ -210,5 +206,26 @@ describe('List.Basic', () => {
       wrapper.find('Filler').find('ResizeObserver').props().onResize({ offsetHeight: 100 });
       expect(collected).toBeTruthy();
     });
+  });
+
+  it('innerProps', () => {
+    const wrapper = genList({
+      itemHeight: 20,
+      height: 100,
+      data: genData(100),
+      virtual: false,
+      innerProps: {
+        role: 'listbox',
+        id: `my_list`,
+      },
+    });
+
+    expect(wrapper.find('div#my_list').prop('role')).toEqual('listbox');
+  });
+
+  it('nativeElement', () => {
+    const ref = React.createRef();
+    const wrapper = genList({ data: genData(1), ref });
+    expect(ref.current.nativeElement).toBe(wrapper.getDOMNode());
   });
 });

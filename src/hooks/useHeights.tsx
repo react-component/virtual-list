@@ -1,41 +1,72 @@
 import * as React from 'react';
-import { useRef, useEffect } from 'react';
-import findDOMNode from 'rc-util/lib/Dom/findDOMNode';
-import raf from 'rc-util/lib/raf';
+import { useEffect, useRef } from 'react';
 import type { GetKey } from '../interface';
 import CacheMap from '../utils/CacheMap';
+
+function parseNumber(value: string) {
+  const num = parseFloat(value);
+  return isNaN(num) ? 0 : num;
+}
 
 export default function useHeights<T>(
   getKey: GetKey<T>,
   onItemAdd?: (item: T) => void,
   onItemRemove?: (item: T) => void,
-): [(item: T, instance: HTMLElement) => void, () => void, CacheMap, number] {
+): [
+  setInstanceRef: (item: T, instance: HTMLElement) => void,
+  collectHeight: (sync?: boolean) => void,
+  cacheMap: CacheMap,
+  updatedMark: number,
+] {
   const [updatedMark, setUpdatedMark] = React.useState(0);
   const instanceRef = useRef(new Map<React.Key, HTMLElement>());
   const heightsRef = useRef(new CacheMap());
-  const collectRafRef = useRef<number>();
+
+  const promiseIdRef = useRef<number>(0);
 
   function cancelRaf() {
-    raf.cancel(collectRafRef.current);
+    promiseIdRef.current += 1;
   }
 
-  function collectHeight() {
+  function collectHeight(sync = false) {
     cancelRaf();
 
-    collectRafRef.current = raf(() => {
+    const doCollect = () => {
+      let changed = false;
+
       instanceRef.current.forEach((element, key) => {
         if (element && element.offsetParent) {
-          const htmlElement = findDOMNode<HTMLElement>(element);
-          const { offsetHeight } = htmlElement;
-          if (heightsRef.current.get(key) !== offsetHeight) {
-            heightsRef.current.set(key, htmlElement.offsetHeight);
+          const { offsetHeight } = element;
+          const { marginTop, marginBottom } = getComputedStyle(element);
+
+          const marginTopNum = parseNumber(marginTop);
+          const marginBottomNum = parseNumber(marginBottom);
+          const totalHeight = offsetHeight + marginTopNum + marginBottomNum;
+
+          if (heightsRef.current.get(key) !== totalHeight) {
+            heightsRef.current.set(key, totalHeight);
+            changed = true;
           }
         }
       });
 
       // Always trigger update mark to tell parent that should re-calculate heights when resized
-      setUpdatedMark((c) => c + 1);
-    });
+      if (changed) {
+        setUpdatedMark((c) => c + 1);
+      }
+    };
+
+    if (sync) {
+      doCollect();
+    } else {
+      promiseIdRef.current += 1;
+      const id = promiseIdRef.current;
+      Promise.resolve().then(() => {
+        if (id === promiseIdRef.current) {
+          doCollect();
+        }
+      });
+    }
   }
 
   function setInstanceRef(item: T, instance: HTMLElement) {
