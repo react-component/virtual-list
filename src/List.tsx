@@ -37,7 +37,7 @@ export interface ScrollInfo {
 
 export type ScrollConfig = ScrollTarget | ScrollPos;
 
-export type ScrollTo = (arg: number | ScrollConfig) => void;
+export type ScrollTo = (arg?: number | ScrollConfig | null) => void;
 
 export type ListRef = {
   nativeElement: HTMLDivElement;
