@@ -1,8 +1,8 @@
 import classNames from 'classnames';
-import type { ResizeObserverProps } from 'rc-resize-observer';
-import ResizeObserver from 'rc-resize-observer';
-import { useEvent } from 'rc-util';
-import useLayoutEffect from 'rc-util/lib/hooks/useLayoutEffect';
+import type { ResizeObserverProps } from '@rc-component/resize-observer';
+import ResizeObserver from '@rc-component/resize-observer';
+import { useEvent } from '@rc-component/util';
+import useLayoutEffect from '@rc-component/util/lib/hooks/useLayoutEffect';
 import * as React from 'react';
 import { useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
@@ -148,9 +148,9 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
 
   const mergedClassName = classNames(prefixCls, { [`${prefixCls}-rtl`]: isRTL }, className);
   const mergedData = data || EMPTY_DATA;
-  const componentRef = useRef<HTMLDivElement>();
-  const fillerInnerRef = useRef<HTMLDivElement>();
-  const containerRef = useRef<HTMLDivElement>();
+  const componentRef = useRef<HTMLDivElement>(null);
+  const fillerInnerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // =============================== Item Key ===============================
 
@@ -190,7 +190,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   // Put ref here since the range is generate by follow
   const rangeRef = useRef({ start: 0, end: mergedData.length });
 
-  const diffItemRef = useRef<T>();
+  const diffItemRef = useRef<T>(null);
   const [diffItem] = useDiffItem(mergedData, getKey);
   diffItemRef.current = diffItem;
 
@@ -309,8 +309,8 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   };
 
   // Hack on scrollbar to enable flash call
-  const verticalScrollBarRef = useRef<ScrollBarRef>();
-  const horizontalScrollBarRef = useRef<ScrollBarRef>();
+  const verticalScrollBarRef = useRef<ScrollBarRef>(null);
+  const horizontalScrollBarRef = useRef<ScrollBarRef>(null);
 
   const horizontalScrollBarSpinSize = React.useMemo(
     () => getSpinSize(size.width, scrollWidth),
@@ -675,7 +675,9 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
 
 const List = React.forwardRef<ListRef, ListProps<any>>(RawList);
 
-List.displayName = 'List';
+if (process.env.NODE_ENV !== 'production') {
+  List.displayName = 'List';
+}
 
 export default List as <Item = any>(
   props: ListProps<Item> & { ref?: React.Ref<ListRef> },
