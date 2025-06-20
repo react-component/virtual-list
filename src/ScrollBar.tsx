@@ -210,44 +210,38 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
   const thumbStyle: React.CSSProperties = {
     position: 'absolute',
     borderRadius: 99,
-    background: 'var(--rc-virtual-list-scrollbar-bg)',
+    background: 'var(--rc-virtual-list-scrollbar-bg, rgba(0, 0, 0, 0.5))',
     cursor: 'pointer',
     userSelect: 'none',
     ...propsThumbStyle,
   };
 
   if (horizontal) {
-    // Container
-    containerStyle.height = 8;
-    containerStyle.left = 0;
-    containerStyle.right = 0;
-    containerStyle.bottom = 0;
-
-    // Thumb
-    thumbStyle.height = '100%';
-    thumbStyle.width = spinSize;
-
-    if (isLTR) {
-      thumbStyle.left = top;
-    } else {
-      thumbStyle.right = top;
-    }
+    Object.assign(containerStyle, {
+      height: 8,
+      left: 0,
+      right: 0,
+      bottom: 0,
+    });
+  
+    Object.assign(thumbStyle, {
+      height: '100%',
+      width: spinSize,
+      [isLTR ? 'left' : 'right']: top,
+    });
   } else {
-    // Container
-    containerStyle.width = 8;
-    containerStyle.top = 0;
-    containerStyle.bottom = 0;
-
-    if (isLTR) {
-      containerStyle.right = 0;
-    } else {
-      containerStyle.left = 0;
-    }
-
-    // Thumb
-    thumbStyle.width = '100%';
-    thumbStyle.height = spinSize;
-    thumbStyle.top = top;
+    Object.assign(containerStyle, {
+      width: 8,
+      top: 0,
+      bottom: 0,
+      [isLTR ? 'right' : 'left']: 0,
+    });
+  
+    Object.assign(thumbStyle, {
+      width: '100%',
+      height: spinSize,
+      top,
+    });
   }
 
   return (
