@@ -38,6 +38,12 @@ export default function useScrollDrag(
         });
       };
 
+      // 清理拖拽状态的统一函数
+      const clearDragState = () => {
+        mouseDownLock = false;
+        stopScroll();
+      };
+
       const onMouseDown = (e: MouseEvent) => {
         // Skip if element set draggable
         if ((e.target as HTMLElement).draggable || e.button !== 0) {
@@ -52,10 +58,28 @@ export default function useScrollDrag(
           mouseDownLock = true;
         }
       };
+
       const onMouseUp = () => {
-        mouseDownLock = false;
-        stopScroll();
+        clearDragState();
       };
+
+      // 当开始原生拖拽时清理状态
+      const onDragStart = () => {
+        clearDragState();
+      };
+
+      // 当失去焦点时清理状态
+      const onBlur = () => {
+        clearDragState();
+      };
+
+      // 当页面不可见时清理状态
+      const onVisibilityChange = () => {
+        if (document.hidden) {
+          clearDragState();
+        }
+      };
+
       const onMouseMove = (e: MouseEvent) => {
         if (mouseDownLock) {
           const mouseY = getPageXY(e, false);
@@ -78,11 +102,21 @@ export default function useScrollDrag(
       ele.addEventListener('mousedown', onMouseDown);
       ele.ownerDocument.addEventListener('mouseup', onMouseUp);
       ele.ownerDocument.addEventListener('mousemove', onMouseMove);
+      
+      // 添加额外的状态清理事件监听器
+      ele.ownerDocument.addEventListener('dragstart', onDragStart);
+      ele.ownerDocument.addEventListener('dragend', clearDragState);
+      window.addEventListener('blur', onBlur);
+      document.addEventListener('visibilitychange', onVisibilityChange);
 
       return () => {
         ele.removeEventListener('mousedown', onMouseDown);
         ele.ownerDocument.removeEventListener('mouseup', onMouseUp);
         ele.ownerDocument.removeEventListener('mousemove', onMouseMove);
+        ele.ownerDocument.removeEventListener('dragstart', onDragStart);
+        ele.ownerDocument.removeEventListener('dragend', clearDragState);
+        window.removeEventListener('blur', onBlur);
+        document.removeEventListener('visibilitychange', onVisibilityChange);
         stopScroll();
       };
     }
