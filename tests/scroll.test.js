@@ -747,7 +747,7 @@ describe('List.Scroll', () => {
         {({ id }) => <li draggable>{id}</li>}
       </List>,
     );
-    // 选中第99个 fixed-item 的文本内容
+    // Select the text content of the 99th fixed-item
     const fixedItems = container.querySelectorAll('.fixed-item');
     const targetItem = fixedItems[99];
     if (targetItem) {
@@ -757,14 +757,14 @@ describe('List.Scroll', () => {
       selection.removeAllRanges();
       selection.addRange(range);
     }
-    // 模拟将选中的文本拖拽到列表最底部
+    // Simulate dragging the selected text to the bottom of the list
     const listHolder = container.querySelector('.rc-virtual-list-holder');
     if (targetItem && listHolder) {
-      // 创建拖拽事件
+      // Create drag event
       const dragStartEvent = new DragEvent('dragstart', { bubbles: true });
       targetItem.dispatchEvent(dragStartEvent);
 
-      // 拖拽到最底部
+      // Drag to the bottom
       const rect = listHolder.getBoundingClientRect();
       const dragOverEvent = new DragEvent('dragover', {
         bubbles: true,
@@ -772,7 +772,7 @@ describe('List.Scroll', () => {
       });
       listHolder.dispatchEvent(dragOverEvent);
 
-      // 松开鼠标
+      // Release mouse
       const dropEvent = new DragEvent('drop', {
         bubbles: true,
         clientY: rect.bottom + 10,
@@ -782,10 +782,10 @@ describe('List.Scroll', () => {
       const dragEndEvent = new DragEvent('dragend', { bubbles: true });
       targetItem.dispatchEvent(dragEndEvent);
     }
-    // 检查 onScroll 没有被触发
+    // Check that onScroll was not triggered
     expect(onScroll).not.toHaveBeenCalled();
 
-    // 模拟将鼠标移动到列表最顶部
+    // Simulate moving the mouse to the top of the list
     if (listHolder) {
       const rect = listHolder.getBoundingClientRect();
       const mouseMoveEvent = new MouseEvent('mousemove', {
@@ -794,7 +794,7 @@ describe('List.Scroll', () => {
       });
       listHolder.dispatchEvent(mouseMoveEvent);
     }
-    // 检查 onScroll 没有被触发
+    // Check that onScroll was not triggered
     expect(onScroll).not.toHaveBeenCalled();
   });
 });
