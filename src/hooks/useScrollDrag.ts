@@ -90,7 +90,6 @@ export default function useScrollDrag(
       ele.ownerDocument.addEventListener('mouseup', onMouseUp);
       ele.ownerDocument.addEventListener('mousemove', onMouseMove);
       
-      // 添加额外的状态清理事件监听器
       ele.ownerDocument.addEventListener('dragstart', onDragStart);
       ele.ownerDocument.addEventListener('dragend', clearDragState);
 
