@@ -731,4 +731,70 @@ describe('List.Scroll', () => {
 
     jest.useRealTimers();
   });
+
+  it('should not scroll after drop table text', () => {
+    
+    const onScroll = jest.fn();
+    const { container } = render(
+      <List
+        component="ul"
+        itemKey="id"
+        itemHeight={20}
+        height={100}
+        data={genData(200)}
+        onScroll={onScroll}
+      >
+        {({ id }) => <li draggable>{id}</li>}
+      </List>,
+    );
+    // 选中第99个 fixed-item 的文本内容
+    const fixedItems = container.querySelectorAll('.fixed-item');
+    const targetItem = fixedItems[99];
+    if (targetItem) {
+      const range = document.createRange();
+      range.selectNodeContents(targetItem);
+      const selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(range);
+    }
+    // 模拟将选中的文本拖拽到列表最底部
+    const listHolder = container.querySelector('.rc-virtual-list-holder');
+    if (targetItem && listHolder) {
+      // 创建拖拽事件
+      const dragStartEvent = new DragEvent('dragstart', { bubbles: true });
+      targetItem.dispatchEvent(dragStartEvent);
+
+      // 拖拽到最底部
+      const rect = listHolder.getBoundingClientRect();
+      const dragOverEvent = new DragEvent('dragover', {
+        bubbles: true,
+        clientY: rect.bottom + 10,
+      });
+      listHolder.dispatchEvent(dragOverEvent);
+
+      // 松开鼠标
+      const dropEvent = new DragEvent('drop', {
+        bubbles: true,
+        clientY: rect.bottom + 10,
+      });
+      listHolder.dispatchEvent(dropEvent);
+
+      const dragEndEvent = new DragEvent('dragend', { bubbles: true });
+      targetItem.dispatchEvent(dragEndEvent);
+    }
+    // 检查 onScroll 没有被触发
+    expect(onScroll).not.toHaveBeenCalled();
+
+    // 模拟将鼠标移动到列表最顶部
+    if (listHolder) {
+      const rect = listHolder.getBoundingClientRect();
+      const mouseMoveEvent = new MouseEvent('mousemove', {
+        bubbles: true,
+        clientY: rect.top - 10,
+      });
+      listHolder.dispatchEvent(mouseMoveEvent);
+    }
+    // 检查 onScroll 没有被触发
+    expect(onScroll).not.toHaveBeenCalled();
+  });
 });
