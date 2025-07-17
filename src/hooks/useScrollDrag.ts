@@ -62,22 +62,9 @@ export default function useScrollDrag(
       const onMouseUp = () => {
         clearDragState();
       };
-
-      // 当开始原生拖拽时清理状态
+      
       const onDragStart = () => {
         clearDragState();
-      };
-
-      // 当失去焦点时清理状态
-      const onBlur = () => {
-        clearDragState();
-      };
-
-      // 当页面不可见时清理状态
-      const onVisibilityChange = () => {
-        if (document.hidden) {
-          clearDragState();
-        }
       };
 
       const onMouseMove = (e: MouseEvent) => {
@@ -106,8 +93,6 @@ export default function useScrollDrag(
       // 添加额外的状态清理事件监听器
       ele.ownerDocument.addEventListener('dragstart', onDragStart);
       ele.ownerDocument.addEventListener('dragend', clearDragState);
-      window.addEventListener('blur', onBlur);
-      document.addEventListener('visibilitychange', onVisibilityChange);
 
       return () => {
         ele.removeEventListener('mousedown', onMouseDown);
@@ -115,8 +100,6 @@ export default function useScrollDrag(
         ele.ownerDocument.removeEventListener('mousemove', onMouseMove);
         ele.ownerDocument.removeEventListener('dragstart', onDragStart);
         ele.ownerDocument.removeEventListener('dragend', clearDragState);
-        window.removeEventListener('blur', onBlur);
-        document.removeEventListener('visibilitychange', onVisibilityChange);
         stopScroll();
       };
     }

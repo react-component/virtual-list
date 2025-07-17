@@ -735,6 +735,12 @@ describe('List.Scroll', () => {
   it('should not scroll after drop table text', () => {
     
     const onScroll = jest.fn();
+    // 这两个事件绑定在 document
+    const onDragStart = jest.fn();
+    const onDragEnd = jest.fn();
+    document.addEventListener('dragstart', onDragStart);
+    document.addEventListener('dragend', onDragEnd);
+
     const { container } = render(
       <List
         component="ul"
@@ -744,12 +750,12 @@ describe('List.Scroll', () => {
         data={genData(200)}
         onScroll={onScroll}
       >
-        {({ id }) => <li draggable>{id}</li>}
+        {({ id }) => <li className="fixed-item">{id}</li>}
       </List>,
     );
-    // Select the text content of the 99th fixed-item
+    // 选择第一个可见的 fixed-item 的文本内容
     const fixedItems = container.querySelectorAll('.fixed-item');
-    const targetItem = fixedItems[99];
+    const targetItem = fixedItems[0]; // 使用第一个可见元素
     if (targetItem) {
       const range = document.createRange();
       range.selectNodeContents(targetItem);
@@ -757,35 +763,40 @@ describe('List.Scroll', () => {
       selection.removeAllRanges();
       selection.addRange(range);
     }
-    // Simulate dragging the selected text to the bottom of the list
+    // 选中 fixed-item 里的文本并拖拽文本到列表底部
     const listHolder = container.querySelector('.rc-virtual-list-holder');
     if (targetItem && listHolder) {
-      // Create drag event
-      const dragStartEvent = new DragEvent('dragstart', { bubbles: true });
-      targetItem.dispatchEvent(dragStartEvent);
+      // 创建选区，选中 fixed-item 的文本
+      const range = document.createRange();
+      range.selectNodeContents(targetItem);
+      const selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(range);
 
-      // Drag to the bottom
+      // 模拟拖拽文本
+      fireEvent.dragStart(targetItem, { bubbles: true });
+
+      // 拖拽到列表底部
       const rect = listHolder.getBoundingClientRect();
-      const dragOverEvent = new DragEvent('dragover', {
-        bubbles: true,
+      fireEvent.dragOver(listHolder, {
         clientY: rect.bottom + 10,
-      });
-      listHolder.dispatchEvent(dragOverEvent);
-
-      // Release mouse
-      const dropEvent = new DragEvent('drop', {
         bubbles: true,
-        clientY: rect.bottom + 10,
       });
-      listHolder.dispatchEvent(dropEvent);
 
-      const dragEndEvent = new DragEvent('dragend', { bubbles: true });
-      targetItem.dispatchEvent(dragEndEvent);
+      // 松开鼠标
+      fireEvent.drop(listHolder, {
+        clientY: rect.bottom + 10,
+        bubbles: true,
+      });
+
+      fireEvent.dragEnd(targetItem, { bubbles: true });
     }
-    // Check that onScroll was not triggered
+    // 检查 onScroll 没有被触发
     expect(onScroll).not.toHaveBeenCalled();
+    expect(onDragStart).toHaveBeenCalled();
+    expect(onDragEnd).toHaveBeenCalled();
 
-    // Simulate moving the mouse to the top of the list
+    // 模拟鼠标移动到列表顶部
     if (listHolder) {
       const rect = listHolder.getBoundingClientRect();
       const mouseMoveEvent = new MouseEvent('mousemove', {
@@ -794,7 +805,11 @@ describe('List.Scroll', () => {
       });
       listHolder.dispatchEvent(mouseMoveEvent);
     }
-    // Check that onScroll was not triggered
+    // 检查 onScroll 没有被触发
     expect(onScroll).not.toHaveBeenCalled();
+    
+    // 清理事件监听器
+    document.removeEventListener('dragstart', onDragStart);
+    document.removeEventListener('dragend', onDragEnd);
   });
 });
