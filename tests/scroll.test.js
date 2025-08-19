@@ -734,6 +734,15 @@ describe('List.Scroll', () => {
 
   it('should not scroll after drop table text', () => {
     
+    // Helper function to select text content of an element
+    const selectElementText = (element) => {
+      const range = document.createRange();
+      range.selectNodeContents(element);
+      const selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(range);
+    };
+
     const onScroll = jest.fn();
     const onDragStart = jest.fn();
     const onDragEnd = jest.fn();
@@ -755,19 +764,11 @@ describe('List.Scroll', () => {
     const fixedItems = container.querySelectorAll('.fixed-item');
     const targetItem = fixedItems[0];
     if (targetItem) {
-      const range = document.createRange();
-      range.selectNodeContents(targetItem);
-      const selection = window.getSelection();
-      selection.removeAllRanges();
-      selection.addRange(range);
+      selectElementText(targetItem);
     }
     const listHolder = container.querySelector('.rc-virtual-list-holder');
     if (targetItem && listHolder) {
-      const range = document.createRange();
-      range.selectNodeContents(targetItem);
-      const selection = window.getSelection();
-      selection.removeAllRanges();
-      selection.addRange(range);
+      selectElementText(targetItem);
 
       fireEvent.dragStart(targetItem, { bubbles: true });
 

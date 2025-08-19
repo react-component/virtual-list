@@ -58,14 +58,6 @@ export default function useScrollDrag(
         }
       };
 
-      const onMouseUp = () => {
-        clearDragState();
-      };
-      
-      const onDragStart = () => {
-        clearDragState();
-      };
-
       const onMouseMove = (e: MouseEvent) => {
         if (mouseDownLock) {
           const mouseY = getPageXY(e, false);
@@ -86,18 +78,13 @@ export default function useScrollDrag(
       };
 
       ele.addEventListener('mousedown', onMouseDown);
-      ele.ownerDocument.addEventListener('mouseup', onMouseUp);
+      ele.ownerDocument.addEventListener('mouseup', clearDragState);
       ele.ownerDocument.addEventListener('mousemove', onMouseMove);
-      
-      ele.ownerDocument.addEventListener('dragstart', onDragStart);
-      ele.ownerDocument.addEventListener('dragend', clearDragState);
 
       return () => {
         ele.removeEventListener('mousedown', onMouseDown);
-        ele.ownerDocument.removeEventListener('mouseup', onMouseUp);
+        ele.ownerDocument.removeEventListener('mouseup', clearDragState);
         ele.ownerDocument.removeEventListener('mousemove', onMouseMove);
-        ele.ownerDocument.removeEventListener('dragstart', onDragStart);
-        ele.ownerDocument.removeEventListener('dragend', clearDragState);
         stopScroll();
       };
     }
