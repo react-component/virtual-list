@@ -24,11 +24,11 @@ export default function useHeights<T>(
 
   const promiseIdRef = useRef<number>(0);
 
-  function cancelRaf() {
+  const cancelRaf = React.useCallback(function cancelRaf() {
     promiseIdRef.current += 1;
-  }
+  }, []);
 
-  function collectHeight(sync = false) {
+  const collectHeight = React.useCallback(function (sync = false) {
     cancelRaf();
 
     const doCollect = () => {
@@ -67,9 +67,9 @@ export default function useHeights<T>(
         }
       });
     }
-  }
+  }, [cancelRaf]);
 
-  function setInstanceRef(item: T, instance: HTMLElement) {
+  const setInstanceRef = React.useCallback(function setInstanceRef(item: T, instance: HTMLElement) {
     const key = getKey(item);
     const origin = instanceRef.current.get(key);
 
@@ -88,11 +88,12 @@ export default function useHeights<T>(
         onItemRemove?.(item);
       }
     }
-  }
+  }, [collectHeight, getKey, onItemAdd, onItemRemove]);
 
   useEffect(() => {
     return cancelRaf;
   }, []);
 
+  // 这里稍显迷惑性，当 heightsRef.current.set 被调用时，updatedMark 会变化，进而导致 heightsRef.current 也出现变化
   return [setInstanceRef, collectHeight, heightsRef.current, updatedMark];
 }

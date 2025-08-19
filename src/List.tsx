@@ -165,9 +165,11 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     setScrollMoving(false);
   };
 
-  const sharedConfig: SharedConfig<T> = {
-    getKey,
-  };
+  const sharedConfig: SharedConfig<T> = React.useMemo(() => {
+    return {
+      getKey,
+    };
+  }, [getKey]);
 
   // ================================ Scroll ================================
   function syncScrollTop(newTop: number | ((prev: number) => number)) {
