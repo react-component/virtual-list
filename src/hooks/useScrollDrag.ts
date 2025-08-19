@@ -38,7 +38,6 @@ export default function useScrollDrag(
         });
       };
 
-      // 清理拖拽状态的统一函数
       const clearDragState = () => {
         mouseDownLock = false;
         stopScroll();

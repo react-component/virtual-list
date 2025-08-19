@@ -735,7 +735,6 @@ describe('List.Scroll', () => {
   it('should not scroll after drop table text', () => {
     
     const onScroll = jest.fn();
-    // 这两个事件绑定在 document
     const onDragStart = jest.fn();
     const onDragEnd = jest.fn();
     document.addEventListener('dragstart', onDragStart);
@@ -753,9 +752,8 @@ describe('List.Scroll', () => {
         {({ id }) => <li className="fixed-item">{id}</li>}
       </List>,
     );
-    // 选择第一个可见的 fixed-item 的文本内容
     const fixedItems = container.querySelectorAll('.fixed-item');
-    const targetItem = fixedItems[0]; // 使用第一个可见元素
+    const targetItem = fixedItems[0];
     if (targetItem) {
       const range = document.createRange();
       range.selectNodeContents(targetItem);
@@ -763,27 +761,22 @@ describe('List.Scroll', () => {
       selection.removeAllRanges();
       selection.addRange(range);
     }
-    // 选中 fixed-item 里的文本并拖拽文本到列表底部
     const listHolder = container.querySelector('.rc-virtual-list-holder');
     if (targetItem && listHolder) {
-      // 创建选区，选中 fixed-item 的文本
       const range = document.createRange();
       range.selectNodeContents(targetItem);
       const selection = window.getSelection();
       selection.removeAllRanges();
       selection.addRange(range);
 
-      // 模拟拖拽文本
       fireEvent.dragStart(targetItem, { bubbles: true });
 
-      // 拖拽到列表底部
       const rect = listHolder.getBoundingClientRect();
       fireEvent.dragOver(listHolder, {
         clientY: rect.bottom + 10,
         bubbles: true,
       });
 
-      // 松开鼠标
       fireEvent.drop(listHolder, {
         clientY: rect.bottom + 10,
         bubbles: true,
@@ -791,12 +784,10 @@ describe('List.Scroll', () => {
 
       fireEvent.dragEnd(targetItem, { bubbles: true });
     }
-    // 检查 onScroll 没有被触发
     expect(onScroll).not.toHaveBeenCalled();
     expect(onDragStart).toHaveBeenCalled();
     expect(onDragEnd).toHaveBeenCalled();
 
-    // 模拟鼠标移动到列表顶部
     if (listHolder) {
       const rect = listHolder.getBoundingClientRect();
       const mouseMoveEvent = new MouseEvent('mousemove', {
@@ -805,10 +796,8 @@ describe('List.Scroll', () => {
       });
       listHolder.dispatchEvent(mouseMoveEvent);
     }
-    // 检查 onScroll 没有被触发
     expect(onScroll).not.toHaveBeenCalled();
     
-    // 清理事件监听器
     document.removeEventListener('dragstart', onDragStart);
     document.removeEventListener('dragend', onDragEnd);
   });
