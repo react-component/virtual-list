@@ -94,9 +94,13 @@ describe('List.Scroll', () => {
     jest.useFakeTimers();
     const listRef = React.createRef();
     const wrapper = genList({ itemHeight: 20, height: 100, data: genData(100), ref: listRef });
-    jest.runAllTimers();
 
-    listRef.current.scrollTo(null);
+    act(() => {
+      jest.runAllTimers();
+
+      listRef.current.scrollTo(null);
+    });
+
     expect(wrapper.find('.rc-virtual-list-scrollbar-thumb').props().style.display).not.toEqual(
       'none',
     );
@@ -107,8 +111,10 @@ describe('List.Scroll', () => {
     it('value scroll', () => {
       const listRef = React.createRef();
       const wrapper = genList({ itemHeight: 20, height: 100, data: genData(100), ref: listRef });
-      listRef.current.scrollTo(903);
-      jest.runAllTimers();
+      act(() => {
+        listRef.current.scrollTo(903);
+        jest.runAllTimers();
+      });
       expect(wrapper.find('ul').instance().scrollTop).toEqual(903);
 
       wrapper.unmount();
@@ -125,9 +131,8 @@ describe('List.Scroll', () => {
         ...result,
         ref,
         scrollTo: (...args) => {
-          ref.current.scrollTo(...args);
-
           act(() => {
+            ref.current.scrollTo(...args);
             jest.runAllTimers();
           });
         },
@@ -153,8 +158,10 @@ describe('List.Scroll', () => {
 
     it('scroll top should not out of range', () => {
       const { scrollTo, container } = presetList();
-      scrollTo({ index: 0, align: 'bottom' });
-      jest.runAllTimers();
+      act(() => {
+        scrollTo({ index: 0, align: 'bottom' });
+        jest.runAllTimers();
+      });
       expect(container.querySelector('ul').scrollTop).toEqual(0);
     });
 
@@ -389,9 +396,13 @@ describe('List.Scroll', () => {
       ref: listRef,
       direction: 'rtl',
     });
-    jest.runAllTimers();
 
-    listRef.current.scrollTo(null);
+    act(() => {
+      jest.runAllTimers();
+
+      listRef.current.scrollTo(null);
+    });
+
     expect(wrapper.find('.rc-virtual-list-scrollbar-thumb').props().style.display).not.toEqual(
       'none',
     );
