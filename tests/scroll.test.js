@@ -732,9 +732,7 @@ describe('List.Scroll', () => {
     jest.useRealTimers();
   });
 
-  it('should not scroll after drop table text', () => {
-    
-    // Helper function to select text content of an element
+  it('should not scroll after dropping selected list text', () => {
     const selectElementText = (element) => {
       const range = document.createRange();
       range.selectNodeContents(element);
@@ -769,8 +767,13 @@ describe('List.Scroll', () => {
     const listHolder = container.querySelector('.rc-virtual-list-holder');
     if (targetItem && listHolder) {
       selectElementText(targetItem);
+      
+      fireEvent.scroll(listHolder, { target: { scrollTop: 100 } });
+      expect(onScroll).toHaveBeenCalled();
+      const scrollCallCountBeforeDrop = onScroll.mock.calls.length;
 
-      fireEvent.dragStart(targetItem, { bubbles: true });
+      const dragStartEvent = new Event('dragstart', { bubbles: true, cancelable: true });
+      targetItem.ownerDocument.dispatchEvent(dragStartEvent);
 
       const rect = listHolder.getBoundingClientRect();
       fireEvent.dragOver(listHolder, {
@@ -783,21 +786,25 @@ describe('List.Scroll', () => {
         bubbles: true,
       });
 
-      fireEvent.dragEnd(targetItem, { bubbles: true });
+      const dragEndEvent = new Event('dragend', { bubbles: true, cancelable: true });
+      targetItem.ownerDocument.dispatchEvent(dragEndEvent);
+
+      const afterRect = listHolder.getBoundingClientRect();
+      const mouseMoveEvent = new MouseEvent('mousemove', {
+        bubbles: true,
+        clientY: afterRect.top - 10,
+      });
+      listHolder.dispatchEvent(mouseMoveEvent);
+      act(() => {
+        jest.advanceTimersByTime(100);
+      });
+      expect(onScroll.mock.calls.length).toBe(scrollCallCountBeforeDrop);
     }
-    expect(onScroll).not.toHaveBeenCalled();
     expect(onDragStart).toHaveBeenCalled();
     expect(onDragEnd).toHaveBeenCalled();
 
-    if (listHolder) {
-      const rect = listHolder.getBoundingClientRect();
-      const mouseMoveEvent = new MouseEvent('mousemove', {
-        bubbles: true,
-        clientY: rect.top - 10,
-      });
-      listHolder.dispatchEvent(mouseMoveEvent);
-    }
-    expect(onScroll).not.toHaveBeenCalled();
+    const sel = window.getSelection();
+    sel && sel.removeAllRanges();
     
     document.removeEventListener('dragstart', onDragStart);
     document.removeEventListener('dragend', onDragEnd);
