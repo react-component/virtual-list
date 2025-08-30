@@ -1,5 +1,5 @@
-import React from 'react';
 import { mount } from 'enzyme';
+import React from 'react';
 import List from '../src';
 
 describe('Props', () => {
@@ -11,30 +11,20 @@ describe('Props', () => {
     }
 
     const wrapper = mount(
-      <List data={[{ id: 903 }, { id: 1128 }]} itemKey={item => item.id}>
+      <List data={[{ id: 903 }, { id: 1128 }]} itemKey={(item) => item.id}>
         {({ id }) => <ItemComponent>{id}</ItemComponent>}
       </List>,
     );
 
-    expect(
-      wrapper
-        .find('Item')
-        .at(0)
-        .key(),
-    ).toBe('903');
+    expect(wrapper.find('Item').at(0).key()).toBe('903');
 
-    expect(
-      wrapper
-        .find('Item')
-        .at(1)
-        .key(),
-    ).toBe('1128');
+    expect(wrapper.find('Item').at(1).key()).toBe('1128');
   });
 
   it('prefixCls', () => {
     const wrapper = mount(
-      <List data={[0]} itemKey={id => id} prefixCls="prefix">
-        {id => <div>{id}</div>}
+      <List data={[0]} itemKey={(id) => id} prefixCls="prefix">
+        {(id) => <div>{id}</div>}
       </List>,
     );
 
@@ -44,10 +34,11 @@ describe('Props', () => {
   it('offsetX in renderFn', () => {
     let scrollLeft;
     mount(
-      <List data={[0]} itemKey={id => id} prefixCls="prefix">
-        {(id, _, { offsetX }) => { 
+      <List data={[0]} itemKey={(id) => id} prefixCls="prefix">
+        {(id, _, { offsetX }) => {
           scrollLeft = offsetX;
-          return <div>{id}</div>}}
+          return <div>{id}</div>;
+        }}
       </List>,
     );
 
