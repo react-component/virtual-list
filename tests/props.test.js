@@ -53,4 +53,28 @@ describe('Props', () => {
 
     expect(scrollLeft).toEqual(0);
   });
+
+  it('no unnecessary re-render', () => {
+    const renderItem = sinon.fake(({ id, key }) => <div key={key}>{id}</div>);
+    const data = [{ id: 1, key: 1 }];
+    function Wrapper() {
+      const [state, setState] = React.useState(0);
+
+      React.useEffect(() => {
+        setState(1);
+      }, []);
+
+      return (
+        <div>
+          <h1>{state}</h1>
+          <List data={data} itemKey="key" prefixCls="prefix">
+            {renderItem}
+          </List>
+        </div>
+      );
+    }
+    const wrapper = mount(<Wrapper />);
+    expect(wrapper.find('h1').text()).toBe('1');
+    expect(renderItem.callCount).toBe(1);
+  });
 });
