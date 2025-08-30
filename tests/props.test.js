@@ -46,7 +46,9 @@ describe('Props', () => {
   });
 
   it('no unnecessary re-render', () => {
-    const renderItem = sinon.fake(({ id, key }) => <div key={key}>{id}</div>);
+    const renderItem = jest.fn();
+    renderItem.mockImplementation(({ id, key }) => <div key={key}>{id}</div>);
+
     const data = [{ id: 1, key: 1 }];
     function Wrapper() {
       const [state, setState] = React.useState(0);
@@ -66,6 +68,6 @@ describe('Props', () => {
     }
     const wrapper = mount(<Wrapper />);
     expect(wrapper.find('h1').text()).toBe('1');
-    expect(renderItem.callCount).toBe(1);
+    expect(renderItem).toHaveBeenCalledTimes(1);
   });
 });
