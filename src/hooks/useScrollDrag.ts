@@ -80,15 +80,14 @@ export default function useScrollDrag(
       ele.addEventListener('mousedown', onMouseDown);
       ele.ownerDocument.addEventListener('mouseup', clearDragState);
       ele.ownerDocument.addEventListener('mousemove', onMouseMove);
-      
-      ele.ownerDocument.addEventListener('dragstart', clearDragState);
+
       ele.ownerDocument.addEventListener('dragend', clearDragState);
 
       return () => {
         ele.removeEventListener('mousedown', onMouseDown);
         ele.ownerDocument.removeEventListener('mouseup', clearDragState);
         ele.ownerDocument.removeEventListener('mousemove', onMouseMove);
-        ele.ownerDocument.removeEventListener('dragstart', clearDragState);
+
         ele.ownerDocument.removeEventListener('dragend', clearDragState);
         stopScroll();
       };
