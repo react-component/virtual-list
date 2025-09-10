@@ -731,4 +731,82 @@ describe('List.Scroll', () => {
 
     jest.useRealTimers();
   });
+
+  it('should not scroll after dropping selected list text', () => {
+    const selectElementText = (element) => {
+      const range = document.createRange();
+      range.selectNodeContents(element);
+      const selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(range);
+    };
+
+    const onScroll = jest.fn();
+    const onDragStart = jest.fn();
+    const onDragEnd = jest.fn();
+    document.addEventListener('dragstart', onDragStart);
+    document.addEventListener('dragend', onDragEnd);
+
+    const { container } = render(
+      <List
+        component="ul"
+        itemKey="id"
+        itemHeight={20}
+        height={100}
+        data={genData(200)}
+        onScroll={onScroll}
+      >
+        {({ id }) => <li className="fixed-item">{id}</li>}
+      </List>,
+    );
+    const fixedItems = container.querySelectorAll('.fixed-item');
+    const targetItem = fixedItems[0];
+    if (targetItem) {
+      selectElementText(targetItem);
+    }
+    const listHolder = container.querySelector('.rc-virtual-list-holder');
+    if (targetItem && listHolder) {
+      selectElementText(targetItem);
+      
+      fireEvent.scroll(listHolder, { target: { scrollTop: 100 } });
+      expect(onScroll).toHaveBeenCalled();
+      const scrollCallCountBeforeDrop = onScroll.mock.calls.length;
+
+      const dragStartEvent = new Event('dragstart', { bubbles: true, cancelable: true });
+      targetItem.ownerDocument.dispatchEvent(dragStartEvent);
+
+      const rect = listHolder.getBoundingClientRect();
+      fireEvent.dragOver(listHolder, {
+        clientY: rect.bottom + 10,
+        bubbles: true,
+      });
+
+      fireEvent.drop(listHolder, {
+        clientY: rect.bottom + 10,
+        bubbles: true,
+      });
+
+      const dragEndEvent = new Event('dragend', { bubbles: true, cancelable: true });
+      targetItem.ownerDocument.dispatchEvent(dragEndEvent);
+
+      const afterRect = listHolder.getBoundingClientRect();
+      const mouseMoveEvent = new MouseEvent('mousemove', {
+        bubbles: true,
+        clientY: afterRect.top - 10,
+      });
+      listHolder.dispatchEvent(mouseMoveEvent);
+      act(() => {
+        jest.advanceTimersByTime(100);
+      });
+      expect(onScroll.mock.calls.length).toBe(scrollCallCountBeforeDrop);
+    }
+    expect(onDragStart).toHaveBeenCalled();
+    expect(onDragEnd).toHaveBeenCalled();
+
+    const sel = window.getSelection();
+    sel && sel.removeAllRanges();
+    
+    document.removeEventListener('dragstart', onDragStart);
+    document.removeEventListener('dragend', onDragEnd);
+  });
 });
