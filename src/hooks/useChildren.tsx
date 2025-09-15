@@ -1,5 +1,5 @@
 import * as React from 'react';
-import type { RenderFunc, SharedConfig } from '../interface';
+import type { RenderFunc, GetKey } from '../interface';
 import { Item } from '../Item';
 
 export default function useChildren<T>(
@@ -10,7 +10,7 @@ export default function useChildren<T>(
   offsetX: number,
   setNodeRef: (item: T, element: HTMLElement) => void,
   renderFunc: RenderFunc<T>,
-  { getKey }: SharedConfig<T>,
+  getKey: GetKey<T>,
 ) {
   // 可能存在 list 不变但是里面的数据存在变化的情况，会与之前写法存在不同的行为
   return React.useMemo(() => {
