@@ -94,6 +94,6 @@ export default function useHeights<T>(
     return cancelRaf;
   }, []);
 
-  // 这里稍显迷惑性，当 heightsRef.current.set 被调用时，updatedMark 会变化，进而导致 heightsRef.current 也出现变化
+  // This is somewhat confusing: when heightsRef.current.set is called, updatedMark changes, which in turn causes heightsRef.current to also change.
   return [setInstanceRef, collectHeight, heightsRef.current, updatedMark];
 }

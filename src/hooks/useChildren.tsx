@@ -12,7 +12,7 @@ export default function useChildren<T>(
   renderFunc: RenderFunc<T>,
   getKey: GetKey<T>,
 ) {
-  // 可能存在 list 不变但是里面的数据存在变化的情况，会与之前写法存在不同的行为
+  // The list reference may remain unchanged, but its internal data may change, which can result in different behavior compared to the previous implementation.  
   return React.useMemo(() => {
     return list.slice(startIndex, endIndex + 1).map((item, index) => {
       const eleIndex = startIndex + index;
