@@ -128,6 +128,49 @@ describe('List.Touch', () => {
       wrapper.unmount();
     });
 
+    it('origin scroll', () => {
+      const wrapper = genList({ itemHeight: 20, height: 100, data: genData(100) });
+
+      function getElement() {
+        return wrapper.find('.rc-virtual-list-holder').instance();
+      }
+
+      // start
+      const touchEvent = new Event('touchstart');
+      touchEvent.touches = [{ pageY: 100 }];
+      getElement().dispatchEvent(touchEvent);
+
+      // move
+      const moveEvent1 = new Event('touchmove');
+      moveEvent1.touches = [{ pageY: 110 }];
+      getElement().dispatchEvent(moveEvent1);
+
+      // move
+      const moveEvent2 = new Event('touchmove');
+      moveEvent2.touches = [{ pageY: 150 }];
+      getElement().dispatchEvent(moveEvent2);
+
+      // move
+      const moveEvent3 = new Event('touchmove');
+      moveEvent3.touches = [{ pageY: 20 }];
+      getElement().dispatchEvent(moveEvent3);
+
+      // move
+      const moveEvent4 = new Event('touchmove');
+      moveEvent4.touches = [{ pageY: 100 }];
+      getElement().dispatchEvent(moveEvent4);
+
+      // end
+      const endEvent = new Event('touchend');
+      getElement().dispatchEvent(endEvent);
+
+      // smooth
+      jest.runAllTimers();
+
+      expect(wrapper.find('ul').instance().scrollTop).toBe(0);
+      wrapper.unmount();
+    });
+
     it('not call when not scroll-able', () => {
       const wrapper = genList({ itemHeight: 20, height: 100, data: genData(100) });
 
