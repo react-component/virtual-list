@@ -22,6 +22,7 @@ import type { ExtraRenderInfo, GetKey, RenderFunc, SharedConfig } from './interf
 import type { ScrollBarDirectionType, ScrollBarRef } from './ScrollBar';
 import ScrollBar from './ScrollBar';
 import { getSpinSize } from './utils/scrollbarUtil';
+import { debounce } from './utils/debounce';
 
 const EMPTY_DATA = [];
 
@@ -272,10 +273,15 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   rangeRef.current.start = start;
   rangeRef.current.end = end;
 
+  const isScrollingRef = useRef(false);
   // When scroll up, first visible item get real height may not same as `itemHeight`,
   // Which will make scroll jump.
   // Let's sync scroll top to avoid jump
   React.useLayoutEffect(() => {
+    // When the `scrollHeight` change is not caused by scrolling,
+    // end the function execution avoiding table jitter caused by changes in the first row
+    if (!isScrollingRef.current) return;
+
     const changedRecord = heights.getRecord();
     if (changedRecord.size === 1) {
       const recordKey = Array.from(changedRecord.keys())[0];
@@ -384,6 +390,9 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     }
   }
 
+  const toggleScrollStatus = React.useCallback(debounce(() => {
+    isScrollingRef.current = false;
+  }, 100), []);
   // When data size reduce. It may trigger native scroll event back to fit scroll position
   function onFallbackScroll(e: React.UIEvent<HTMLDivElement>) {
     const { scrollTop: newScrollTop } = e.currentTarget;
@@ -394,6 +403,10 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     // Trigger origin onScroll
     onScroll?.(e);
     triggerScroll();
+    // Set the scroll status to `true`
+    isScrollingRef.current = true;
+    // Set the scroll status to `false` after scrolling ends
+    toggleScrollStatus();
   }
 
   const keepInHorizontalRange = (nextOffsetLeft: number) => {
