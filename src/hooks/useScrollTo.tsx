@@ -71,7 +71,6 @@ export default function useScrollTo<T>(
         const mergedAlign = targetAlign || originAlign;
 
         // Get top & bottom
-        let stackTop = 0;
         let itemTop = 0;
         let itemBottom = 0;
 
@@ -79,11 +78,9 @@ export default function useScrollTo<T>(
 
         for (let i = 0; i <= maxLen; i += 1) {
           const key = getKey(data[i]);
-          itemTop = stackTop;
+          itemTop = itemBottom;
           const cacheHeight = heights.get(key);
           itemBottom = itemTop + (cacheHeight === undefined ? itemHeight : cacheHeight);
-
-          stackTop = itemBottom;
         }
 
         // Check if need sync height (visible range has item not record height)
