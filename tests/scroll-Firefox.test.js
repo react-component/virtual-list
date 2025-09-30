@@ -1,9 +1,9 @@
-import React from 'react';
-import { act } from 'react-dom/test-utils';
+import { act } from '@testing-library/react';
 import { mount } from 'enzyme';
-import { spyElementPrototypes } from './utils/domHook';
+import React from 'react';
 import List from '../src';
 import isFF from '../src/utils/isFirefox';
+import { spyElementPrototypes } from './utils/domHook';
 
 function genData(count) {
   return new Array(count).fill(null).map((_, index) => ({ id: String(index) }));
@@ -124,8 +124,10 @@ describe('List.Firefox-Scroll', () => {
     const wrapper = genList({ itemHeight: 20, height: 100, data: genData(100), ref: listRef });
     const ulElement = wrapper.find('ul').instance();
     // scroll to bottom
-    listRef.current.scrollTo(99999);
-    jest.runAllTimers();
+    act(() => {
+      listRef.current.scrollTo(99999);
+      jest.runAllTimers();
+    });
     expect(wrapper.find('ul').instance().scrollTop).toEqual(1900);
 
     act(() => {

@@ -18,7 +18,7 @@ import useOriginScroll from './hooks/useOriginScroll';
 import useScrollDrag from './hooks/useScrollDrag';
 import type { ScrollPos, ScrollTarget } from './hooks/useScrollTo';
 import useScrollTo from './hooks/useScrollTo';
-import type { ExtraRenderInfo, GetKey, RenderFunc, SharedConfig } from './interface';
+import type { ExtraRenderInfo, GetKey, RenderFunc } from './interface';
 import type { ScrollBarDirectionType, ScrollBarRef } from './ScrollBar';
 import ScrollBar from './ScrollBar';
 import { getSpinSize } from './utils/scrollbarUtil';
@@ -163,10 +163,6 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   };
   const onScrollbarStopMove = () => {
     setScrollMoving(false);
-  };
-
-  const sharedConfig: SharedConfig<T> = {
-    getKey,
   };
 
   // ================================ Scroll ================================
@@ -572,7 +568,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     offsetLeft,
     setInstanceRef,
     children,
-    sharedConfig,
+    getKey,
   );
 
   let componentStyle: React.CSSProperties = null;

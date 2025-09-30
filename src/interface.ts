@@ -4,10 +4,6 @@ export type RenderFunc<T> = (
   props: { style: React.CSSProperties; offsetX: number },
 ) => React.ReactNode;
 
-export interface SharedConfig<T> {
-  getKey: (item: T) => React.Key;
-}
-
 export type GetKey<T> = (item: T) => React.Key;
 
 export type GetSize = (startKey: React.Key, endKey?: React.Key) => { top: number; bottom: number };
