@@ -128,7 +128,7 @@ describe('List.Touch', () => {
       wrapper.unmount();
     });
 
-    it('origin scroll', () => {
+    it('should handle complex touch gestures', () => {
       const wrapper = genList({ itemHeight: 20, height: 100, data: genData(100) });
 
       function getElement() {
