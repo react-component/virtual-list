@@ -55,7 +55,7 @@
     "enzyme": "^3.1.0",
     "enzyme-adapter-react-16": "^1.15.6",
     "eslint": "^8.56.0",
-    "eslint-plugin-unicorn": "^55.0.0",
+    "eslint-plugin-unicorn": "^62.0.0",
     "father": "^4.4.0",
     "glob": "^7.1.6",
     "np": "^10.2.0",
