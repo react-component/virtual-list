@@ -69,7 +69,7 @@ export default function useHeights<T>(
     }
   }
 
-  function setInstanceRef(item: T, instance: HTMLElement) {
+  const setInstanceRef = React.useCallback(function setInstanceRef(item: T, instance: HTMLElement) {
     const key = getKey(item);
     const origin = instanceRef.current.get(key);
 
@@ -88,11 +88,12 @@ export default function useHeights<T>(
         onItemRemove?.(item);
       }
     }
-  }
+  }, [getKey, onItemAdd, onItemRemove]);
 
   useEffect(() => {
     return cancelRaf;
   }, []);
 
+  // This is somewhat confusing: when heightsRef.current.set is called, updatedMark changes, which in turn causes heightsRef.current to also change.
   return [setInstanceRef, collectHeight, heightsRef.current, updatedMark];
 }

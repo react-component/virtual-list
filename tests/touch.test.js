@@ -71,15 +71,94 @@ describe('List.Touch', () => {
         return wrapper.find('.rc-virtual-list-holder').instance();
       }
 
+      act(() => {
+        // start
+        const touchEvent = new Event('touchstart');
+        touchEvent.touches = [{ pageY: 100 }];
+        getElement().dispatchEvent(touchEvent);
+
+        // move
+        const moveEvent = new Event('touchmove');
+        moveEvent.touches = [{ pageY: 90 }];
+        getElement().dispatchEvent(moveEvent);
+
+        // end
+        const endEvent = new Event('touchend');
+        getElement().dispatchEvent(endEvent);
+
+        // smooth
+        jest.runAllTimers();
+      });
+      expect(wrapper.find('ul').instance().scrollTop > 10).toBeTruthy();
+
+      wrapper.unmount();
+    });
+
+    it('origin scroll', () => {
+      const wrapper = genList({ itemHeight: 20, height: 100, data: genData(100) });
+
+      function getElement() {
+        return wrapper.find('.rc-virtual-list-holder').instance();
+      }
+
+      act(() => {
+        // start
+        const touchEvent = new Event('touchstart');
+        touchEvent.touches = [{ pageY: 100 }];
+        getElement().dispatchEvent(touchEvent);
+
+        // move
+        const moveEvent1 = new Event('touchmove');
+        moveEvent1.touches = [{ pageY: 110 }];
+        getElement().dispatchEvent(moveEvent1);
+
+        // move
+        const moveEvent2 = new Event('touchmove');
+        moveEvent2.touches = [{ pageY: 150 }];
+        getElement().dispatchEvent(moveEvent2);
+
+        // end
+        const endEvent = new Event('touchend');
+        getElement().dispatchEvent(endEvent);
+
+        // smooth
+        jest.runAllTimers();
+      });
+      expect(wrapper.find('ul').instance().scrollTop).toBe(0);
+      wrapper.unmount();
+    });
+
+    it('should handle complex touch gestures', () => {
+      const wrapper = genList({ itemHeight: 20, height: 100, data: genData(100) });
+
+      function getElement() {
+        return wrapper.find('.rc-virtual-list-holder').instance();
+      }
+
       // start
       const touchEvent = new Event('touchstart');
       touchEvent.touches = [{ pageY: 100 }];
       getElement().dispatchEvent(touchEvent);
 
       // move
-      const moveEvent = new Event('touchmove');
-      moveEvent.touches = [{ pageY: 90 }];
-      getElement().dispatchEvent(moveEvent);
+      const moveEvent1 = new Event('touchmove');
+      moveEvent1.touches = [{ pageY: 110 }];
+      getElement().dispatchEvent(moveEvent1);
+
+      // move
+      const moveEvent2 = new Event('touchmove');
+      moveEvent2.touches = [{ pageY: 150 }];
+      getElement().dispatchEvent(moveEvent2);
+
+      // move
+      const moveEvent3 = new Event('touchmove');
+      moveEvent3.touches = [{ pageY: 20 }];
+      getElement().dispatchEvent(moveEvent3);
+
+      // move
+      const moveEvent4 = new Event('touchmove');
+      moveEvent4.touches = [{ pageY: 100 }];
+      getElement().dispatchEvent(moveEvent4);
 
       // end
       const endEvent = new Event('touchend');
@@ -87,8 +166,8 @@ describe('List.Touch', () => {
 
       // smooth
       jest.runAllTimers();
-      expect(wrapper.find('ul').instance().scrollTop > 10).toBeTruthy();
 
+      expect(wrapper.find('ul').instance().scrollTop).toBe(0);
       wrapper.unmount();
     });
 
@@ -99,35 +178,39 @@ describe('List.Touch', () => {
         return wrapper.find('.rc-virtual-list-holder').instance();
       }
 
-      // start
-      const touchEvent = new Event('touchstart');
-      touchEvent.touches = [{ pageY: 500 }];
-      getElement().dispatchEvent(touchEvent);
-
-      // move
       const preventDefault = jest.fn();
-      const moveEvent = new Event('touchmove');
-      moveEvent.touches = [{ pageY: 0 }];
-      moveEvent.preventDefault = preventDefault;
-      getElement().dispatchEvent(moveEvent);
 
+      act(() => {
+        // start
+        const touchEvent = new Event('touchstart');
+        touchEvent.touches = [{ pageY: 500 }];
+        getElement().dispatchEvent(touchEvent);
+
+        // move
+        const moveEvent = new Event('touchmove');
+        moveEvent.touches = [{ pageY: 0 }];
+        moveEvent.preventDefault = preventDefault;
+        getElement().dispatchEvent(moveEvent);
+      });
       // Call preventDefault
       expect(preventDefault).toHaveBeenCalled();
 
-      // ======= Not call since scroll to the bottom =======
-      jest.runAllTimers();
-      preventDefault.mockReset();
+      act(() => {
+        // ======= Not call since scroll to the bottom =======
+        jest.runAllTimers();
+        preventDefault.mockReset();
 
-      // start
-      const touchEvent2 = new Event('touchstart');
-      touchEvent2.touches = [{ pageY: 500 }];
-      getElement().dispatchEvent(touchEvent2);
+        // start
+        const touchEvent2 = new Event('touchstart');
+        touchEvent2.touches = [{ pageY: 500 }];
+        getElement().dispatchEvent(touchEvent2);
 
-      // move
-      const moveEvent2 = new Event('touchmove');
-      moveEvent2.touches = [{ pageY: 0 }];
-      moveEvent2.preventDefault = preventDefault;
-      getElement().dispatchEvent(moveEvent2);
+        // move
+        const moveEvent2 = new Event('touchmove');
+        moveEvent2.touches = [{ pageY: 0 }];
+        moveEvent2.preventDefault = preventDefault;
+        getElement().dispatchEvent(moveEvent2);
+      });
 
       expect(preventDefault).not.toHaveBeenCalled();
     });
@@ -137,16 +220,18 @@ describe('List.Touch', () => {
     const preventDefault = jest.fn();
     const wrapper = genList({ itemHeight: 20, height: 100, data: genData(100) });
 
-    const touchEvent = new Event('touchstart');
-    touchEvent.preventDefault = preventDefault;
-    wrapper.find('.rc-virtual-list-scrollbar').instance().dispatchEvent(touchEvent);
+    act(() => {
+      const touchEvent = new Event('touchstart');
+      touchEvent.preventDefault = preventDefault;
+      wrapper.find('.rc-virtual-list-scrollbar').instance().dispatchEvent(touchEvent);
+    });
 
     expect(preventDefault).toHaveBeenCalled();
   });
 
   it('nest touch', async () => {
     const { container } = render(
-      <List component="ul" itemHeight={20} height={100} data={genData(100)}>
+      <List component="ul" itemHeight={20} height={100} data={genData(100)} itemKey="id">
         {({ id }) =>
           id === '0' ? (
             <li>

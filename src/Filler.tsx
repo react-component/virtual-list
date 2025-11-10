@@ -1,6 +1,6 @@
-import * as React from 'react';
-import ResizeObserver from 'rc-resize-observer';
 import classNames from 'classnames';
+import ResizeObserver from 'rc-resize-observer';
+import * as React from 'react';
 
 export type InnerProps = Pick<React.HTMLAttributes<HTMLDivElement>, 'role' | 'id'>;
 
@@ -69,15 +69,15 @@ const Filler = React.forwardRef(
       };
     }
 
+    const handleResize = ({ offsetHeight }) => {
+      if (offsetHeight && onInnerResize) {
+        onInnerResize();
+      }
+    };
+
     return (
       <div style={outerStyle}>
-        <ResizeObserver
-          onResize={({ offsetHeight }) => {
-            if (offsetHeight && onInnerResize) {
-              onInnerResize();
-            }
-          }}
-        >
+        <ResizeObserver onResize={handleResize}>
           <div
             style={innerStyle}
             className={classNames({
