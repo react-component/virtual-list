@@ -69,20 +69,15 @@ const Filler = React.forwardRef(
       };
     }
 
-    const handleResize = React.useCallback(
-      ({ offsetHeight }) => {
-        if (offsetHeight && onInnerResize) {
-          onInnerResize();
-        }
-      },
-      [onInnerResize],
-    );
+    const handleResize = ({ offsetHeight }) => {
+      if (offsetHeight && onInnerResize) {
+        onInnerResize();
+      }
+    };
 
     return (
       <div style={outerStyle}>
-        <ResizeObserver
-          onResize={handleResize}
-        >
+        <ResizeObserver onResize={handleResize}>
           <div
             style={innerStyle}
             className={classNames({

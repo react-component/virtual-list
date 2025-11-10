@@ -24,11 +24,11 @@ export default function useHeights<T>(
 
   const promiseIdRef = useRef<number>(0);
 
-  const cancelRaf = React.useCallback(function cancelRaf() {
+  function cancelRaf() {
     promiseIdRef.current += 1;
-  }, []);
+  }
 
-  const collectHeight = React.useCallback(function (sync = false) {
+  function collectHeight(sync = false) {
     cancelRaf();
 
     const doCollect = () => {
@@ -67,7 +67,7 @@ export default function useHeights<T>(
         }
       });
     }
-  }, [cancelRaf]);
+  }
 
   const setInstanceRef = React.useCallback(function setInstanceRef(item: T, instance: HTMLElement) {
     const key = getKey(item);
@@ -88,7 +88,7 @@ export default function useHeights<T>(
         onItemRemove?.(item);
       }
     }
-  }, [collectHeight, getKey, onItemAdd, onItemRemove]);
+  }, [getKey, onItemAdd, onItemRemove]);
 
   useEffect(() => {
     return cancelRaf;
