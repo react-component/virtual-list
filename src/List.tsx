@@ -1,6 +1,6 @@
 import { clsx } from 'clsx';
-import type { ResizeObserverProps } from 'rc-resize-observer';
-import ResizeObserver from 'rc-resize-observer';
+import type { ResizeObserverProps } from '@rc-component/resize-observer';
+import ResizeObserver from '@rc-component/resize-observer';
 import { useEvent } from '@rc-component/util';
 import useLayoutEffect from '@rc-component/util/lib/hooks/useLayoutEffect';
 import * as React from 'react';

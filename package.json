@@ -1,5 +1,5 @@
 {
-  "name": "rc-virtual-list",
+  "name": "@rc-component/virtual-list",
   "version": "3.19.2",
   "description": "React Virtual List Component",
   "engines": {
@@ -67,8 +67,8 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.20.0",
+    "@rc-component/resize-observer": "^1.0.1",
     "@rc-component/util": "^1.4.0",
-    "clsx": "^2.1.1",
-    "rc-resize-observer": "^1.0.0"
+    "clsx": "^2.1.1"
   }
 }
