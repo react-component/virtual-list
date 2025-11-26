@@ -1,5 +1,5 @@
-import classNames from 'classnames';
-import raf from 'rc-util/lib/raf';
+import { clsx } from 'clsx';
+import raf from '@rc-component/util/lib/raf';
 import * as React from 'react';
 import { getPageXY } from './hooks/useScrollDrag';
 
@@ -222,7 +222,7 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
       right: 0,
       bottom: 0,
     });
-  
+
     Object.assign(thumbStyle, {
       height: '100%',
       width: spinSize,
@@ -235,7 +235,7 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
       bottom: 0,
       [isLTR ? 'right' : 'left']: 0,
     });
-  
+
     Object.assign(thumbStyle, {
       width: '100%',
       height: spinSize,
@@ -246,7 +246,7 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
   return (
     <div
       ref={scrollbarRef}
-      className={classNames(scrollbarPrefixCls, {
+      className={clsx(scrollbarPrefixCls, {
         [`${scrollbarPrefixCls}-horizontal`]: horizontal,
         [`${scrollbarPrefixCls}-vertical`]: !horizontal,
         [`${scrollbarPrefixCls}-visible`]: visible,
@@ -257,7 +257,7 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
     >
       <div
         ref={thumbRef}
-        className={classNames(`${scrollbarPrefixCls}-thumb`, {
+        className={clsx(`${scrollbarPrefixCls}-thumb`, {
           [`${scrollbarPrefixCls}-thumb-moving`]: dragging,
         })}
         style={{ ...thumbStyle, ...propsThumbStyle }}

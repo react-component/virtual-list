@@ -1,6 +1,6 @@
 import * as React from 'react';
 import ResizeObserver from 'rc-resize-observer';
-import classNames from 'classnames';
+import { clsx } from 'clsx';
 
 export type InnerProps = Pick<React.HTMLAttributes<HTMLDivElement>, 'role' | 'id'>;
 
@@ -80,9 +80,7 @@ const Filler = React.forwardRef(
         >
           <div
             style={innerStyle}
-            className={classNames({
-              [`${prefixCls}-holder-inner`]: prefixCls,
-            })}
+            className={clsx({ [`${prefixCls}-holder-inner`]: prefixCls })}
             ref={ref}
             {...innerProps}
           >

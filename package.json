@@ -44,9 +44,9 @@
     "@rc-component/father-plugin": "^1.0.2",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^12.1.5",
-    "@types/classnames": "^2.2.10",
     "@types/enzyme": "^3.10.5",
     "@types/jest": "^30.0.0",
+    "@types/node": "^24.10.1",
     "@types/react": "^18.0.8",
     "@types/react-dom": "^18.0.3",
     "@types/warning": "^3.0.0",
@@ -67,8 +67,8 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.20.0",
-    "classnames": "^2.2.6",
-    "rc-resize-observer": "^1.0.0",
-    "rc-util": "^5.36.0"
+    "@rc-component/util": "^1.4.0",
+    "clsx": "^2.1.1",
+    "rc-resize-observer": "^1.0.0"
   }
 }
