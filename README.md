@@ -1,6 +1,6 @@
 # @rc-component/virtual-list
 
-React Virtual List Component which worked with animation.
+React Virtual List Component which works with animation.
 
 [![NPM version][npm-image]][npm-url]
 [![npm download][download-image]][download-url]
