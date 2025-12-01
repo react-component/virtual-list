@@ -6,7 +6,7 @@ React Virtual List Component which worked with animation.
 
 [npm-image]: http://img.shields.io/npm/v/@rc-component/virtual-list.svg?style=flat-square
 [npm-url]: http://npmjs.org/package/@rc-component/virtual-list
-[github-actions-image]: https://github.com/react-component/virtual-list/workflows/CI/badge.svg
+[github-actions-image]: https://github.com/react-component/virtual-list/actions/workflows/main.yml/badge.svg
 [github-actions-url]: https://github.com/react-component/virtual-list/actions
 [coveralls-image]: https://img.shields.io/codecov/c/github/react-component/virtual-list/master.svg?style=flat-square
 [coveralls-url]: https://codecov.io/gh/react-component/virtual-list
