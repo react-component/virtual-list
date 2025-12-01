@@ -1,14 +1,14 @@
 import '@testing-library/jest-dom';
 import { act, fireEvent, render } from '@testing-library/react';
-import { _rs as onLibResize } from 'rc-resize-observer/lib/utils/observerUtil';
-import { spyElementPrototypes } from 'rc-util/lib/test/domHook';
+import { _rs as onLibResize } from '@rc-component/resize-observer/lib/utils/observerUtil';
+import { spyElementPrototypes } from '@rc-component/util/lib/test/domHook';
 import React from 'react';
 import type { ListRef } from '../src';
 import List, { type ListProps } from '../src';
 
 const ITEM_HEIGHT = 20;
 
-function genData(count) {
+function genData(count: number) {
   return new Array(count).fill(null).map((_, index) => ({ id: String(index) }));
 }
 

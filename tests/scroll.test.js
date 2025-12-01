@@ -1,8 +1,8 @@
 import '@testing-library/jest-dom';
 import { act, createEvent, fireEvent, render } from '@testing-library/react';
 import { mount } from 'enzyme';
-import { _rs as onLibResize } from 'rc-resize-observer/lib/utils/observerUtil';
-import { resetWarned } from 'rc-util/lib/warning';
+import { _rs as onLibResize } from '@rc-component/resize-observer/lib/utils/observerUtil';
+import { resetWarned } from '@rc-component/util/lib/warning';
 import React from 'react';
 import List from '../src';
 import { spyElementPrototypes } from './utils/domHook';
@@ -767,7 +767,7 @@ describe('List.Scroll', () => {
     const listHolder = container.querySelector('.rc-virtual-list-holder');
     if (targetItem && listHolder) {
       selectElementText(targetItem);
-      
+
       fireEvent.scroll(listHolder, { target: { scrollTop: 100 } });
       expect(onScroll).toHaveBeenCalled();
       const scrollCallCountBeforeDrop = onScroll.mock.calls.length;
@@ -805,7 +805,7 @@ describe('List.Scroll', () => {
 
     const sel = window.getSelection();
     sel && sel.removeAllRanges();
-    
+
     document.removeEventListener('dragstart', onDragStart);
     document.removeEventListener('dragend', onDragEnd);
   });
