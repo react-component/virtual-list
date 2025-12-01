@@ -1,8 +1,8 @@
-import classNames from 'classnames';
-import type { ResizeObserverProps } from 'rc-resize-observer';
-import ResizeObserver from 'rc-resize-observer';
-import { useEvent } from 'rc-util';
-import useLayoutEffect from 'rc-util/lib/hooks/useLayoutEffect';
+import { clsx } from 'clsx';
+import type { ResizeObserverProps } from '@rc-component/resize-observer';
+import ResizeObserver from '@rc-component/resize-observer';
+import { useEvent } from '@rc-component/util';
+import useLayoutEffect from '@rc-component/util/lib/hooks/useLayoutEffect';
 import * as React from 'react';
 import { useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
@@ -37,7 +37,7 @@ export interface ScrollInfo {
 
 export type ScrollConfig = ScrollTarget | ScrollPos;
 
-export type ScrollTo = (arg: number | ScrollConfig) => void;
+export type ScrollTo = (arg?: number | ScrollConfig | null) => void;
 
 export type ListRef = {
   nativeElement: HTMLDivElement;
@@ -146,7 +146,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     (Math.max(itemHeight * data.length, containerHeight) > height || !!scrollWidth);
   const isRTL = direction === 'rtl';
 
-  const mergedClassName = classNames(prefixCls, { [`${prefixCls}-rtl`]: isRTL }, className);
+  const mergedClassName = clsx(prefixCls, { [`${prefixCls}-rtl`]: isRTL }, className);
   const mergedData = data || EMPTY_DATA;
   const componentRef = useRef<HTMLDivElement>();
   const fillerInnerRef = useRef<HTMLDivElement>();

@@ -1,19 +1,32 @@
-# rc-virtual-list
+# @rc-component/virtual-list
 
 React Virtual List Component which worked with animation.
 
-[![NPM version][npm-image]][npm-url] [![dumi](https://img.shields.io/badge/docs%20by-dumi-blue?style=flat-square)](https://github.com/umijs/dumi) [![build status][github-actions-image]][github-actions-url] [![Test coverage][coveralls-image]][coveralls-url] [![node version][node-image]][node-url] [![npm download][download-image]][download-url]
+[![NPM version][npm-image]][npm-url]
+[![npm download][download-image]][download-url]
+[![build status][github-actions-image]][github-actions-url]
+[![Codecov][codecov-image]][codecov-url]
+[![bundle size][bundlephobia-image]][bundlephobia-url]
+[![dumi][dumi-image]][dumi-url]
 
-[npm-image]: http://img.shields.io/npm/v/rc-virtual-list.svg?style=flat-square
-[npm-url]: http://npmjs.org/package/rc-virtual-list
-[github-actions-image]: https://github.com/react-component/virtual-list/workflows/CI/badge.svg
-[github-actions-url]: https://github.com/react-component/virtual-list/actions
-[coveralls-image]: https://img.shields.io/codecov/c/github/react-component/virtual-list/master.svg?style=flat-square
-[coveralls-url]: https://codecov.io/gh/react-component/virtual-list
-[node-image]: https://img.shields.io/badge/node.js-%3E=_6.0-green.svg?style=flat-square
-[node-url]: http://nodejs.org/download/
-[download-image]: https://img.shields.io/npm/dm/rc-virtual-list.svg?style=flat-square
-[download-url]: https://npmjs.org/package/rc-virtual-list
+[npm-image]: https://img.shields.io/npm/v/@rc-component/virtual-list.svg?style=flat-square
+[npm-url]: https://npmjs.org/package/@rc-component/virtual-list
+[travis-image]: https://img.shields.io/travis/react-component/virtual-list/master?style=flat-square
+[travis-url]: https://travis-ci.com/react-component/virtual-list
+[github-actions-image]: https://github.com/react-component/virtual-list/actions/workflows/main.yml/badge.svg
+[github-actions-url]: https://github.com/react-component/virtual-list/actions/workflows/main.yml
+[codecov-image]: https://img.shields.io/codecov/c/github/react-component/virtual-list/master.svg?style=flat-square
+[codecov-url]: https://app.codecov.io/gh/react-component/virtual-list
+[david-url]: https://david-dm.org/react-component/virtual-list
+[david-image]: https://david-dm.org/react-component/virtual-list/status.svg?style=flat-square
+[david-dev-url]: https://david-dm.org/react-component/virtual-list?type=dev
+[david-dev-image]: https://david-dm.org/react-component/virtual-list/dev-status.svg?style=flat-square
+[download-image]: https://img.shields.io/npm/dm/@rc-component/virtual-list.svg?style=flat-square
+[download-url]: https://npmjs.org/package/@rc-component/virtual-list
+[bundlephobia-url]: https://bundlephobia.com/package/@rc-component/virtual-list
+[bundlephobia-image]: https://badgen.net/bundlephobia/minzip/@rc-component/virtual-list
+[dumi-url]: https://github.com/umijs/dumi
+[dumi-image]: https://img.shields.io/badge/docs%20by-dumi-blue?style=flat-square
 
 ## Online Preview
 
@@ -35,15 +48,15 @@ open http://localhost:8000/
 
 ## Install
 
-[![rc-virtual-list](https://nodei.co/npm/rc-virtual-list.png)](https://npmjs.org/package/rc-virtual-list)
+[![@rc-component/virtual-list](https://nodei.co/npm/@rc-component/virtual-list.png)](https://npmjs.org/package/@rc-component/virtual-list)
 
 ## Usage
 
-```js
-import List from 'rc-virtual-list';
+```tsx
+import List from '@rc-component/virtual-list';
 
 <List data={[0, 1, 2]} height={200} itemHeight={30} itemKey="id">
-  {index => <div>{index}</div>}
+  {(index) => <div>{index}</div>}
 </List>;
 ```
 

@@ -1,4 +1,4 @@
-import raf from 'rc-util/lib/raf';
+import raf from '@rc-component/util/lib/raf';
 import * as React from 'react';
 
 function smoothScrollOffset(offset: number) {
@@ -38,6 +38,11 @@ export default function useScrollDrag(
         });
       };
 
+      const clearDragState = () => {
+        mouseDownLock = false;
+        stopScroll();
+      };
+
       const onMouseDown = (e: MouseEvent) => {
         // Skip if element set draggable
         if ((e.target as HTMLElement).draggable || e.button !== 0) {
@@ -52,10 +57,7 @@ export default function useScrollDrag(
           mouseDownLock = true;
         }
       };
-      const onMouseUp = () => {
-        mouseDownLock = false;
-        stopScroll();
-      };
+
       const onMouseMove = (e: MouseEvent) => {
         if (mouseDownLock) {
           const mouseY = getPageXY(e, false);
@@ -76,13 +78,17 @@ export default function useScrollDrag(
       };
 
       ele.addEventListener('mousedown', onMouseDown);
-      ele.ownerDocument.addEventListener('mouseup', onMouseUp);
+      ele.ownerDocument.addEventListener('mouseup', clearDragState);
       ele.ownerDocument.addEventListener('mousemove', onMouseMove);
+
+      ele.ownerDocument.addEventListener('dragend', clearDragState);
 
       return () => {
         ele.removeEventListener('mousedown', onMouseDown);
-        ele.ownerDocument.removeEventListener('mouseup', onMouseUp);
+        ele.ownerDocument.removeEventListener('mouseup', clearDragState);
         ele.ownerDocument.removeEventListener('mousemove', onMouseMove);
+
+        ele.ownerDocument.removeEventListener('dragend', clearDragState);
         stopScroll();
       };
     }
