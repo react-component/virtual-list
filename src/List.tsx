@@ -558,6 +558,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     end,
     virtual: inVirtual,
     offsetX: offsetLeft,
+    scrollTop: offsetTop,
     offsetY: fillerOffset,
     rtl: isRTL,
     getSize,
