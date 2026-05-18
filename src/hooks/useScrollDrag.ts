@@ -1,4 +1,4 @@
-import raf from '@rc-component/util/lib/raf';
+import { raf } from '@rc-component/util';
 import * as React from 'react';
 
 function smoothScrollOffset(offset: number) {
