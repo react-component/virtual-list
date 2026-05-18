@@ -19,10 +19,11 @@ export interface ExtraRenderInfo {
   end: number;
   /** Is current in virtual render */
   virtual: boolean;
-  /** Used for `scrollWidth` tell the horizontal offset */
+  /** Horizontal scroll offset applied to rendered items when `scrollWidth` is set */
   offsetX: number;
-  /** Current vertical scroll offset */
+  /** Current vertical scrollTop of the holder element */
   scrollTop: number;
+  /** Vertical translate offset of the rendered filler content */
   offsetY: number;
 
   rtl: boolean;
