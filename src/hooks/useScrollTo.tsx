@@ -1,10 +1,8 @@
 /* eslint-disable no-param-reassign */
 import * as React from 'react';
-import raf from '@rc-component/util/lib/raf';
+import { raf, useLayoutEffect, warning } from '@rc-component/util';
 import type { GetKey } from '../interface';
 import type CacheMap from '../utils/CacheMap';
-import useLayoutEffect from '@rc-component/util/lib/hooks/useLayoutEffect';
-import { warning } from '@rc-component/util';
 
 const MAX_TIMES = 10;
 

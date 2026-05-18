@@ -19,8 +19,20 @@ export interface ExtraRenderInfo {
   end: number;
   /** Is current in virtual render */
   virtual: boolean;
-  /** Used for `scrollWidth` tell the horizontal offset */
+  /**
+   * Horizontal scroll offset applied to rendered items when `scrollWidth` is set.
+   * 当设置 `scrollWidth` 时，应用到已渲染元素上的横向滚动偏移量。
+   */
   offsetX: number;
+  /**
+   * Current vertical scrollTop of the holder element.
+   * holder 元素当前真实的纵向 `scrollTop`，表示视口滚动到了哪里。
+   */
+  scrollTop: number;
+  /**
+   * Vertical translate offset of the rendered filler content.
+   * 已渲染 filler 内容的纵向 `translateY` 偏移量，表示这一段内容被平移到虚拟列表中的哪个位置。
+   */
   offsetY: number;
 
   rtl: boolean;

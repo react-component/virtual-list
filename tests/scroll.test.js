@@ -113,6 +113,30 @@ describe('List.Scroll', () => {
 
       wrapper.unmount();
     });
+
+    it('passes current scrollTop to extraRender', () => {
+      const listRef = React.createRef();
+      const extraRender = jest.fn(() => null);
+      const wrapper = genList({
+        itemHeight: 20,
+        height: 100,
+        data: genData(100),
+        ref: listRef,
+        extraRender,
+      });
+
+      listRef.current.scrollTo(80);
+      jest.runAllTimers();
+      wrapper.update();
+
+      expect(extraRender).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          scrollTop: 80,
+        }),
+      );
+
+      wrapper.unmount();
+    });
   });
 
   describe('scroll to object', () => {

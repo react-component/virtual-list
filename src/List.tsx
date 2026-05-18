@@ -1,8 +1,7 @@
 import { clsx } from 'clsx';
 import type { ResizeObserverProps } from '@rc-component/resize-observer';
 import ResizeObserver from '@rc-component/resize-observer';
-import { useEvent } from '@rc-component/util';
-import useLayoutEffect from '@rc-component/util/lib/hooks/useLayoutEffect';
+import { useEvent, useLayoutEffect } from '@rc-component/util';
 import * as React from 'react';
 import { useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
@@ -558,6 +557,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     end,
     virtual: inVirtual,
     offsetX: offsetLeft,
+    scrollTop: offsetTop,
     offsetY: fillerOffset,
     rtl: isRTL,
     getSize,
