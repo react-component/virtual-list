@@ -1,5 +1,4 @@
 import { act, fireEvent, render } from '@testing-library/react';
-import { mount } from 'enzyme';
 import React from 'react';
 import List from '../src';
 import { spyElementPrototypes } from './utils/domHook';
@@ -50,53 +49,51 @@ describe('List.Touch', () => {
   });
 
   function genList(props) {
-    let node = (
+    const node = (
       <List component="ul" itemKey="id" {...props}>
         {({ id }) => <li>{id}</li>}
       </List>
     );
 
-    if (props.ref) {
-      node = <div>{node}</div>;
-    }
-
-    return mount(node);
+    return render(node);
   }
 
   describe('touch content', () => {
     it('touch scroll should work', () => {
-      const wrapper = genList({ itemHeight: 20, height: 100, data: genData(100) });
+      const { container, unmount } = genList({ itemHeight: 20, height: 100, data: genData(100) });
 
       function getElement() {
-        return wrapper.find('.rc-virtual-list-holder').instance();
+        return container.querySelector('.rc-virtual-list-holder');
       }
 
-      // start
-      const touchEvent = new Event('touchstart');
-      touchEvent.touches = [{ pageY: 100 }];
-      getElement().dispatchEvent(touchEvent);
+      act(() => {
+        // start
+        const touchEvent = new Event('touchstart');
+        touchEvent.touches = [{ pageY: 100 }];
+        getElement().dispatchEvent(touchEvent);
 
-      // move
-      const moveEvent = new Event('touchmove');
-      moveEvent.touches = [{ pageY: 90 }];
-      getElement().dispatchEvent(moveEvent);
+        // move
+        const moveEvent = new Event('touchmove');
+        moveEvent.touches = [{ pageY: 90 }];
+        getElement().dispatchEvent(moveEvent);
 
-      // end
-      const endEvent = new Event('touchend');
-      getElement().dispatchEvent(endEvent);
+        // end
+        const endEvent = new Event('touchend');
+        getElement().dispatchEvent(endEvent);
 
-      // smooth
-      jest.runAllTimers();
-      expect(wrapper.find('ul').instance().scrollTop > 10).toBeTruthy();
+        // smooth
+        jest.runAllTimers();
+      });
+      expect(container.querySelector('ul').scrollTop > 10).toBeTruthy();
 
-      wrapper.unmount();
+      unmount();
     });
 
     it('not call when not scroll-able', () => {
-      const wrapper = genList({ itemHeight: 20, height: 100, data: genData(100) });
+      const { container } = genList({ itemHeight: 20, height: 100, data: genData(100) });
 
       function getElement() {
-        return wrapper.find('.rc-virtual-list-holder').instance();
+        return container.querySelector('.rc-virtual-list-holder');
       }
 
       // start
@@ -115,7 +112,9 @@ describe('List.Touch', () => {
       expect(preventDefault).toHaveBeenCalled();
 
       // ======= Not call since scroll to the bottom =======
-      jest.runAllTimers();
+      act(() => {
+        jest.runAllTimers();
+      });
       preventDefault.mockReset();
 
       // start
@@ -135,11 +134,11 @@ describe('List.Touch', () => {
 
   it('should container preventDefault', () => {
     const preventDefault = jest.fn();
-    const wrapper = genList({ itemHeight: 20, height: 100, data: genData(100) });
+    const { container } = genList({ itemHeight: 20, height: 100, data: genData(100) });
 
     const touchEvent = new Event('touchstart');
     touchEvent.preventDefault = preventDefault;
-    wrapper.find('.rc-virtual-list-scrollbar').instance().dispatchEvent(touchEvent);
+    container.querySelector('.rc-virtual-list-scrollbar').dispatchEvent(touchEvent);
 
     expect(preventDefault).toHaveBeenCalled();
   });

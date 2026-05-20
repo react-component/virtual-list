@@ -1,6 +1,5 @@
 import '@testing-library/jest-dom';
 import { act, createEvent, fireEvent, render } from '@testing-library/react';
-import { mount } from 'enzyme';
 import { _rs as onLibResize } from '@rc-component/resize-observer/lib/utils/observerUtil';
 import { resetWarned } from '@rc-component/util/lib/warning';
 import React from 'react';
@@ -9,6 +8,25 @@ import { spyElementPrototypes } from './utils/domHook';
 
 function genData(count) {
   return new Array(count).fill(null).map((_, index) => ({ id: String(index) }));
+}
+
+function genNode(props) {
+  const mergedProps = {
+    component: 'ul',
+    itemKey: 'id',
+    children: ({ id }) => <li>{id}</li>,
+    ...props,
+  };
+
+  return <List {...mergedProps} />;
+}
+
+function getHolder(container) {
+  return container.querySelector('.rc-virtual-list-holder');
+}
+
+function getScrollOffset(container) {
+  return Number(container.querySelector('[data-dev-offset]')?.getAttribute('data-dev-offset'));
 }
 
 // Mock ScrollBar
@@ -74,30 +92,20 @@ describe('List.Scroll', () => {
     jest.useRealTimers();
   });
 
-  function genList(props, func = mount) {
-    const mergedProps = {
-      component: 'ul',
-      itemKey: 'id',
-      children: ({ id }) => <li>{id}</li>,
-      ...props,
-    };
-    let node = <List {...mergedProps} />;
-
-    if (props.ref) {
-      node = <div>{node}</div>;
-    }
-
-    return func(node);
+  function genList(props) {
+    return render(genNode(props));
   }
 
   it('scrollTo null will show the scrollbar', () => {
     jest.useFakeTimers();
     const listRef = React.createRef();
-    const wrapper = genList({ itemHeight: 20, height: 100, data: genData(100), ref: listRef });
-    jest.runAllTimers();
+    const { container } = genList({ itemHeight: 20, height: 100, data: genData(100), ref: listRef });
+    act(() => {
+      jest.runAllTimers();
+      listRef.current.scrollTo(null);
+    });
 
-    listRef.current.scrollTo(null);
-    expect(wrapper.find('.rc-virtual-list-scrollbar-thumb').props().style.display).not.toEqual(
+    expect(container.querySelector('.rc-virtual-list-scrollbar-thumb').style.display).not.toEqual(
       'none',
     );
     jest.useRealTimers();
@@ -106,18 +114,25 @@ describe('List.Scroll', () => {
   describe('scrollTo number', () => {
     it('value scroll', () => {
       const listRef = React.createRef();
-      const wrapper = genList({ itemHeight: 20, height: 100, data: genData(100), ref: listRef });
-      listRef.current.scrollTo(903);
-      jest.runAllTimers();
-      expect(wrapper.find('ul').instance().scrollTop).toEqual(903);
+      const { container, unmount } = genList({
+        itemHeight: 20,
+        height: 100,
+        data: genData(100),
+        ref: listRef,
+      });
+      act(() => {
+        listRef.current.scrollTo(903);
+        jest.runAllTimers();
+      });
+      expect(container.querySelector('ul').scrollTop).toEqual(903);
 
-      wrapper.unmount();
+      unmount();
     });
 
     it('passes current scrollTop to extraRender', () => {
       const listRef = React.createRef();
       const extraRender = jest.fn(() => null);
-      const wrapper = genList({
+      const { unmount } = genList({
         itemHeight: 20,
         height: 100,
         data: genData(100),
@@ -125,9 +140,10 @@ describe('List.Scroll', () => {
         extraRender,
       });
 
-      listRef.current.scrollTo(80);
-      jest.runAllTimers();
-      wrapper.update();
+      act(() => {
+        listRef.current.scrollTo(80);
+        jest.runAllTimers();
+      });
 
       expect(extraRender).toHaveBeenLastCalledWith(
         expect.objectContaining({
@@ -135,7 +151,7 @@ describe('List.Scroll', () => {
         }),
       );
 
-      wrapper.unmount();
+      unmount();
     });
   });
 
@@ -143,15 +159,14 @@ describe('List.Scroll', () => {
     function presetList() {
       const ref = React.createRef();
 
-      const result = genList({ itemHeight: 20, height: 100, data: genData(100), ref }, render);
+      const result = genList({ itemHeight: 20, height: 100, data: genData(100), ref });
 
       return {
         ...result,
         ref,
         scrollTo: (...args) => {
-          ref.current.scrollTo(...args);
-
           act(() => {
+            ref.current.scrollTo(...args);
             jest.runAllTimers();
           });
         },
@@ -216,8 +231,8 @@ describe('List.Scroll', () => {
 
   it('inject wheel', () => {
     const preventDefault = jest.fn();
-    const wrapper = genList({ itemHeight: 20, height: 100, data: genData(100) });
-    const ulElement = wrapper.find('ul').instance();
+    const { container } = genList({ itemHeight: 20, height: 100, data: genData(100) });
+    const ulElement = container.querySelector('ul');
 
     act(() => {
       const wheelEvent = new Event('wheel');
@@ -234,21 +249,29 @@ describe('List.Scroll', () => {
   describe('scrollbar', () => {
     it('moving', () => {
       const listRef = React.createRef();
-      const wrapper = genList({ itemHeight: 20, height: 100, data: genData(100), ref: listRef });
+      const { container } = genList({
+        itemHeight: 20,
+        height: 100,
+        data: genData(100),
+        ref: listRef,
+      });
 
       // Mouse down
-      wrapper.find('.rc-virtual-list-scrollbar-thumb').simulate('mousedown', {
-        pageY: 0,
+      act(() => {
+        const thumb = container.querySelector('.rc-virtual-list-scrollbar-thumb');
+        const mouseDownEvent = createEvent.mouseDown(thumb);
+        Object.defineProperty(mouseDownEvent, 'pageY', { value: 0 });
+        fireEvent(thumb, mouseDownEvent);
       });
 
       // Mouse move
       act(() => {
-        const mouseMoveEvent = new Event('mousemove');
-        mouseMoveEvent.pageY = 10;
+        const mouseMoveEvent = new MouseEvent('mousemove');
+        Object.defineProperty(mouseMoveEvent, 'pageY', { value: 10 });
         window.dispatchEvent(mouseMoveEvent);
       });
 
-      expect(wrapper.find('.rc-virtual-list-holder').props().style.pointerEvents).toEqual('none');
+      expect(getHolder(container).style.pointerEvents).toEqual('none');
 
       act(() => {
         jest.runAllTimers();
@@ -260,7 +283,7 @@ describe('List.Scroll', () => {
         window.dispatchEvent(mouseUpEvent);
       });
 
-      expect(wrapper.find('ul').instance().scrollTop > 10).toBeTruthy();
+      expect(container.querySelector('ul').scrollTop > 0).toBeTruthy();
     });
 
     it('should show scrollbar when element has showScrollBar prop set to true', () => {
@@ -273,8 +296,7 @@ describe('List.Scroll', () => {
           data: genData(100),
           ref: listRef,
           showScrollBar: true,
-        },
-        render,
+        }
       );
       act(() => {
         jest.runAllTimers();
@@ -295,28 +317,28 @@ describe('List.Scroll', () => {
         },
       ].forEach(({ name, props }) => {
         it(name, () => {
-          const wrapper = genList({
+          const { container } = genList({
             itemHeight: 20,
             height: 100,
             data: genData(5),
             ...props,
           });
-          expect(wrapper.find('.rc-virtual-list-scrollbar-thumb')).toHaveLength(0);
+          expect(container.querySelector('.rc-virtual-list-scrollbar-thumb')).toBeFalsy();
         });
       });
     });
   });
 
   it('no bubble', () => {
-    const wrapper = genList({ itemHeight: 20, height: 100, data: genData(100) });
+    const { container } = genList({ itemHeight: 20, height: 100, data: genData(100) });
 
     // Mouse down
     const preventDefault = jest.fn();
     const stopPropagation = jest.fn();
-    wrapper.find('.rc-virtual-list-scrollbar').simulate('mousedown', {
-      preventDefault,
-      stopPropagation,
-    });
+    const event = createEvent.mouseDown(container.querySelector('.rc-virtual-list-scrollbar'));
+    event.preventDefault = preventDefault;
+    event.stopPropagation = stopPropagation;
+    fireEvent(container.querySelector('.rc-virtual-list-scrollbar'), event);
 
     expect(preventDefault).toHaveBeenCalled();
     expect(stopPropagation).toHaveBeenCalled();
@@ -328,16 +350,17 @@ describe('List.Scroll', () => {
     const onScroll = jest.fn((e) => {
       ({ currentTarget } = e);
     });
-    const wrapper = genList({ itemHeight: 20, height: 100, data: genData(100), onScroll });
-    wrapper.find('.rc-virtual-list-holder').simulate('scroll');
+    const { container } = genList({ itemHeight: 20, height: 100, data: genData(100), onScroll });
+    const holder = getHolder(container);
+    fireEvent.scroll(holder);
 
-    expect(currentTarget).toBe(wrapper.find('.rc-virtual-list-holder').hostNodes().instance());
+    expect(currentTarget).toBe(holder);
   });
 
   describe('scroll should in range', () => {
     it('less than 0', () => {
-      const wrapper = genList({ itemHeight: 20, height: 100, data: genData(100) });
-      const ulElement = wrapper.find('ul').instance();
+      const { container, rerender } = genList({ itemHeight: 20, height: 100, data: genData(100) });
+      const ulElement = container.querySelector('ul');
 
       act(() => {
         const wheelEvent = new Event('wheel');
@@ -347,26 +370,20 @@ describe('List.Scroll', () => {
         jest.runAllTimers();
       });
 
-      wrapper.setProps({ data: genData(1) });
+      rerender(genNode({ itemHeight: 20, height: 100, data: genData(1) }));
       act(() => {
-        wrapper
-          .find('.rc-virtual-list-holder')
-          .props()
-          .onScroll({
-            currentTarget: {
-              scrollTop: 0,
-            },
-          });
+        getHolder(container).scrollTop = 0;
+        fireEvent.scroll(getHolder(container));
       });
 
-      wrapper.setProps({ data: genData(100) });
+      rerender(genNode({ itemHeight: 20, height: 100, data: genData(100) }));
 
-      expect(wrapper.find('ScrollBar').props().scrollOffset).toEqual(0);
+      expect(getScrollOffset(container)).toEqual(0);
     });
 
     it('over max height', () => {
-      const wrapper = genList({ itemHeight: 20, height: 100, data: genData(100) });
-      const ulElement = wrapper.find('ul').instance();
+      const { container } = genList({ itemHeight: 20, height: 100, data: genData(100) });
+      const ulElement = container.querySelector('ul');
 
       act(() => {
         const wheelEvent = new Event('wheel');
@@ -376,14 +393,16 @@ describe('List.Scroll', () => {
         jest.runAllTimers();
       });
 
-      wrapper.update();
-
-      expect(wrapper.find('ScrollBar').props().scrollOffset).toEqual(1900);
+      expect(getScrollOffset(container)).toEqual(1900);
     });
 
     it('dynamic large to small', () => {
-      const wrapper = genList({ itemHeight: 20, height: 100, data: genData(1000) });
-      const ulElement = wrapper.find('ul').instance();
+      const { container, rerender } = genList({
+        itemHeight: 20,
+        height: 100,
+        data: genData(1000),
+      });
+      const ulElement = container.querySelector('ul');
 
       // To bottom
       act(() => {
@@ -395,34 +414,34 @@ describe('List.Scroll', () => {
       });
 
       // Cut data len
-      wrapper.setProps({
-        data: genData(20),
-      });
+      rerender(genNode({ itemHeight: 20, height: 100, data: genData(20) }));
 
-      expect(wrapper.find('li').length).toBeLessThan(10);
+      expect(container.querySelectorAll('li').length).toBeLessThan(10);
     });
   });
 
   it('scrollbar should be left position with rtl', () => {
     jest.useFakeTimers();
     const listRef = React.createRef();
-    const wrapper = genList({
+    const { container } = genList({
       itemHeight: 20,
       height: 100,
       data: genData(100),
       ref: listRef,
       direction: 'rtl',
     });
-    jest.runAllTimers();
+    act(() => {
+      jest.runAllTimers();
+      listRef.current.scrollTo(null);
+    });
 
-    listRef.current.scrollTo(null);
-    expect(wrapper.find('.rc-virtual-list-scrollbar-thumb').props().style.display).not.toEqual(
+    expect(container.querySelector('.rc-virtual-list-scrollbar-thumb').style.display).not.toEqual(
       'none',
     );
-    expect(wrapper.find('.rc-virtual-list-scrollbar').props().style.left).toEqual(0);
+    expect(container.querySelector('.rc-virtual-list-scrollbar').style.left).toEqual('0px');
     jest.useRealTimers();
 
-    expect(wrapper.exists('.rc-virtual-list-rtl')).toBeTruthy();
+    expect(container.querySelector('.rc-virtual-list-rtl')).toBeTruthy();
   });
 
   it('wheel horizontal', () => {

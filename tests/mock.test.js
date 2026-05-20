@@ -1,27 +1,21 @@
+import { render } from '@testing-library/react';
 import React from 'react';
-import { mount } from 'enzyme';
 import MockList from '../src/mock';
-import Filler from '../src/Filler';
 
 describe('MockList', () => {
   it('correct render', () => {
-    const wrapper = mount(
+    const { container } = render(
       <MockList data={[0, 1, 2]} itemKey={id => id}>
         {id => <span>{id}</span>}
       </MockList>,
     );
 
-    expect(wrapper.find(Filler).length).toBeTruthy();
-
-    for (let i = 0; i < 3; i += 1) {
-      expect(
-        wrapper
-          .find('Item')
-          .at(i)
-          .key(),
-      ).toBe(String(i));
-    }
-
-    expect(wrapper.find('List')).toHaveLength(1);
+    expect(container.querySelector('.rc-virtual-list-holder-inner')).toBeTruthy();
+    expect(Array.from(container.querySelectorAll('span')).map(node => node.textContent)).toEqual([
+      '0',
+      '1',
+      '2',
+    ]);
+    expect(container.querySelector('.rc-virtual-list')).toBeTruthy();
   });
 });

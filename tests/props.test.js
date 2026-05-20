@@ -1,5 +1,5 @@
+import { render } from '@testing-library/react';
 import React from 'react';
-import { mount } from 'enzyme';
 import List from '../src';
 
 describe('Props', () => {
@@ -10,44 +10,33 @@ describe('Props', () => {
       }
     }
 
-    const wrapper = mount(
+    const { container } = render(
       <List data={[{ id: 903 }, { id: 1128 }]} itemKey={item => item.id}>
         {({ id }) => <ItemComponent>{id}</ItemComponent>}
       </List>,
     );
 
-    expect(
-      wrapper
-        .find('Item')
-        .at(0)
-        .key(),
-    ).toBe('903');
-
-    expect(
-      wrapper
-        .find('Item')
-        .at(1)
-        .key(),
-    ).toBe('1128');
+    expect(container.textContent).toEqual('9031128');
   });
 
   it('prefixCls', () => {
-    const wrapper = mount(
+    const { container } = render(
       <List data={[0]} itemKey={id => id} prefixCls="prefix">
         {id => <div>{id}</div>}
       </List>,
     );
 
-    expect(wrapper.find('.prefix-holder-inner').length).toBeTruthy();
+    expect(container.querySelector('.prefix-holder-inner')).toBeTruthy();
   });
 
   it('offsetX in renderFn', () => {
     let scrollLeft;
-    mount(
+    render(
       <List data={[0]} itemKey={id => id} prefixCls="prefix">
-        {(id, _, { offsetX }) => { 
+        {(id, _, { offsetX }) => {
           scrollLeft = offsetX;
-          return <div>{id}</div>}}
+          return <div>{id}</div>;
+        }}
       </List>,
     );
 
