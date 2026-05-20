@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
 import * as React from 'react';
 import { raf, useLayoutEffect, warning } from '@rc-component/util';
-import type { GetKey } from '../interface';
+import type { GetKey, GetSize } from '../interface';
 import type CacheMap from '../utils/CacheMap';
 
 const MAX_TIMES = 10;
@@ -13,17 +13,33 @@ export type ScrollPos = {
   top?: number;
 };
 
+export interface ScrollOffsetInfo {
+  /**
+   * Get item size range by key.
+   * 通过 key 获取元素在虚拟列表中的尺寸范围。
+   */
+  getSize: GetSize;
+}
+
+export type ScrollOffset = number | ((info: ScrollOffsetInfo) => number);
+
 export type ScrollTarget =
   | {
       index: number;
       align?: ScrollAlign;
-      offset?: number;
+      offset?: ScrollOffset;
     }
   | {
       key: React.Key;
       align?: ScrollAlign;
-      offset?: number;
+      offset?: ScrollOffset;
     };
+
+function getOffset(rawOffset: ScrollOffset, info: ScrollOffsetInfo) {
+  const resolvedOffset = typeof rawOffset === 'function' ? rawOffset(info) : rawOffset;
+
+  return Number.isFinite(resolvedOffset) ? resolvedOffset : 0;
+}
 
 export default function useScrollTo<T>(
   containerRef: React.RefObject<HTMLDivElement>,
@@ -31,6 +47,7 @@ export default function useScrollTo<T>(
   heights: CacheMap,
   itemHeight: number,
   getKey: GetKey<T>,
+  getSize: GetSize,
   collectHeight: () => void,
   syncScrollTop: (newTop: number) => void,
   triggerFlash: () => void,
@@ -40,7 +57,7 @@ export default function useScrollTo<T>(
   const [syncState, setSyncState] = React.useState<{
     times: number;
     index: number;
-    offset: number;
+    offset: ScrollOffset;
     originAlign: ScrollAlign;
     targetAlign?: 'top' | 'bottom';
     lastTop?: number;
@@ -57,7 +74,8 @@ export default function useScrollTo<T>(
 
       collectHeight();
 
-      const { targetAlign, originAlign, index, offset } = syncState;
+      const { targetAlign, originAlign, index, offset: rawOffset } = syncState;
+      const offset = getOffset(rawOffset, { getSize });
 
       const height = containerRef.current.clientHeight;
       let needCollectHeight = false;
@@ -171,12 +189,12 @@ export default function useScrollTo<T>(
         index = data.findIndex((item) => getKey(item) === arg.key);
       }
 
-      const { offset = 0 } = arg;
+      const { offset: rawOffset = 0 } = arg;
 
       setSyncState({
         times: 0,
         index,
-        offset,
+        offset: rawOffset,
         originAlign: align,
       });
     }
