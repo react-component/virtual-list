@@ -15,7 +15,12 @@ import useHeights from './hooks/useHeights';
 import useMobileTouchMove from './hooks/useMobileTouchMove';
 import useOriginScroll from './hooks/useOriginScroll';
 import useScrollDrag from './hooks/useScrollDrag';
-import type { ScrollPos, ScrollTarget } from './hooks/useScrollTo';
+import type {
+  ScrollOffset,
+  ScrollOffsetInfo,
+  ScrollPos,
+  ScrollTarget,
+} from './hooks/useScrollTo';
 import useScrollTo from './hooks/useScrollTo';
 import type { ExtraRenderInfo, GetKey, RenderFunc, SharedConfig } from './interface';
 import type { ScrollBarDirectionType, ScrollBarRef } from './ScrollBar';
@@ -37,6 +42,8 @@ export interface ScrollInfo {
 export type ScrollConfig = ScrollTarget | ScrollPos;
 
 export type ScrollTo = (arg?: number | ScrollConfig | null) => void;
+
+export type { ScrollOffset, ScrollOffsetInfo };
 
 export type ListRef = {
   nativeElement: HTMLDivElement;
@@ -506,12 +513,15 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     horizontalScrollBarRef.current?.delayHidden();
   };
 
+  const getSize = useGetSize(mergedData, getKey, heights, itemHeight);
+
   const scrollTo = useScrollTo<T>(
     componentRef,
     mergedData,
     heights,
     itemHeight,
     getKey,
+    getSize,
     () => collectHeight(true),
     syncScrollTop,
     delayHideScrollBar,
@@ -550,8 +560,6 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   }, [start, end, mergedData]);
 
   // ================================ Extra =================================
-  const getSize = useGetSize(mergedData, getKey, heights, itemHeight);
-
   const extraContent = extraRender?.({
     start,
     end,

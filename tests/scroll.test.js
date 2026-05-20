@@ -203,6 +203,28 @@ describe('List.Scroll', () => {
       expect(container.querySelector('ul').scrollTop).toEqual(520);
     });
 
+    it('supports function offset with getSize info', () => {
+      const { scrollTo, container } = presetList();
+      const offset = jest.fn(({ getSize }) => getSize('2').bottom);
+
+      scrollTo({ key: '30', align: 'top', offset });
+
+      expect(offset).toHaveBeenCalledWith({
+        getSize: expect.any(Function),
+      });
+      expect(offset).toHaveBeenCalledTimes(2);
+      expect(container.querySelector('ul').scrollTop).toEqual(540);
+    });
+
+    it('fallbacks invalid function offset to zero', () => {
+      const { scrollTo, container } = presetList();
+      const offset = jest.fn(() => NaN);
+
+      scrollTo({ key: '30', align: 'top', offset });
+
+      expect(container.querySelector('ul').scrollTop).toEqual(600);
+    });
+
     it('smart', () => {
       const { scrollTo, container } = presetList();
       scrollTo(0);
