@@ -1,49 +1,67 @@
+import '@testing-library/jest-dom';
+import { _rs as onLibResize } from '@rc-component/resize-observer/lib/utils/observerUtil';
+import { act, fireEvent, render } from '@testing-library/react';
 import React from 'react';
-import { mount } from 'enzyme';
-import { act } from 'react-dom/test-utils';
 import List from '../src';
-import Filler from '../src/Filler';
 import { spyElementPrototypes } from './utils/domHook';
 
 function genData(count) {
   return new Array(count).fill(null).map((_, id) => ({ id }));
 }
 
+function genNode(props) {
+  return (
+    <List component="ul" itemKey="id" {...props}>
+      {({ id }) => <li>{id}</li>}
+    </List>
+  );
+}
+
+function genList(props) {
+  return render(genNode(props));
+}
+
+function getHolder(container) {
+  return container.querySelector('.rc-virtual-list-holder');
+}
+
+function getInner(container) {
+  return container.querySelector('.rc-virtual-list-holder-inner');
+}
+
+function getFiller(container) {
+  return getInner(container).parentElement;
+}
+
+function getOffsetY(container) {
+  const { transform } = getInner(container).style;
+  return Number(transform.match(/translateY\((\d+)px\)/)?.[1] || 0);
+}
+
 describe('List.Basic', () => {
-  function genList(props) {
-    let node = (
-      <List component="ul" itemKey="id" {...props}>
-        {({ id }) => <li>{id}</li>}
-      </List>
-    );
-
-    return mount(node);
-  }
-
   describe('raw', () => {
     it('without height', () => {
-      const wrapper = genList({ data: genData(1) });
-      expect(wrapper.find(Filler).props().offset).toBeFalsy();
+      const { container } = genList({ data: genData(1) });
+      expect(getFiller(container)).not.toHaveStyle({ height: '1px' });
+      expect(getInner(container).style.transform).toEqual('');
     });
 
     describe('height over itemHeight', () => {
       it('full height', () => {
-        const wrapper = genList({ data: genData(1), itemHeight: 1, height: 999 });
-        expect(wrapper.find(Filler).props().offset).toBeFalsy();
-        expect(wrapper.find('ul').props().style).toEqual(expect.objectContaining({ height: 999 }));
+        const { container } = genList({ data: genData(1), itemHeight: 1, height: 999 });
+        expect(getFiller(container).style.height).toEqual('');
+        expect(getHolder(container)).toHaveStyle({ height: '999px' });
       });
 
       it('without full height', () => {
-        const wrapper = genList({
+        const { container } = genList({
           data: genData(1),
           itemHeight: 1,
           height: 999,
           fullHeight: false,
         });
-        expect(wrapper.find(Filler).props().offset).toBeFalsy();
-        expect(wrapper.find('ul').props().style).toEqual(
-          expect.objectContaining({ maxHeight: 999 }),
-        );
+        expect(getFiller(container).style.height).toEqual('');
+        expect(getHolder(container)).toHaveStyle({ maxHeight: '999px' });
       });
     });
   });
@@ -81,18 +99,21 @@ describe('List.Basic', () => {
 
       // scroll to top
       scrollTop = 0;
-      const wrapper = genList({ itemHeight: 20, height: 100, data: genData(100), onVisibleChange });
-      expect(wrapper.find(Filler).props().height).toEqual(2000);
-      expect(wrapper.find(Filler).props().offsetY).toEqual(0);
+      const { container } = genList({
+        itemHeight: 20,
+        height: 100,
+        data: genData(100),
+        onVisibleChange,
+      });
+      expect(getFiller(container)).toHaveStyle({ height: '2000px' });
+      expect(getOffsetY(container)).toEqual(0);
       onVisibleChange.mockReset();
 
       // scrollTop to end
       scrollTop = 2000 - 100;
-      wrapper.find('ul').simulate('scroll', {
-        scrollTop,
-      });
-      expect(wrapper.find(Filler).props().height).toEqual(2000);
-      expect(wrapper.find(Filler).props().offsetY + wrapper.find('li').length * 20).toEqual(2000);
+      fireEvent.scroll(getHolder(container));
+      expect(getFiller(container)).toHaveStyle({ height: '2000px' });
+      expect(getOffsetY(container) + container.querySelectorAll('li').length * 20).toEqual(2000);
 
       expect(onVisibleChange.mock.calls[0][0]).toHaveLength(6);
       expect(onVisibleChange.mock.calls[0][1]).toHaveLength(100);
@@ -132,39 +153,44 @@ describe('List.Basic', () => {
 
     it('raw to virtual', () => {
       let data = genData(5);
-      const wrapper = genList({ itemHeight: 20, height: 100, data });
+      const { container, rerender } = genList({ itemHeight: 20, height: 100, data });
 
-      expect(wrapper.find('li')).toHaveLength(5);
+      expect(container.querySelectorAll('li')).toHaveLength(5);
 
       data = genData(10);
-      wrapper.setProps({ data });
-      expect(wrapper.find('li').length < data.length).toBeTruthy();
+      rerender(genNode({ itemHeight: 20, height: 100, data }));
+      expect(container.querySelectorAll('li').length < data.length).toBeTruthy();
     });
 
     it('virtual to raw', () => {
       let data = genData(10);
-      const wrapper = genList({ itemHeight: 20, height: 100, data });
-      expect(wrapper.find('li').length < data.length).toBeTruthy();
+      const { container, rerender } = genList({ itemHeight: 20, height: 100, data });
+      expect(container.querySelectorAll('li').length < data.length).toBeTruthy();
 
       data = data.slice(0, 2);
-      wrapper.setProps({ data });
-      expect(wrapper.find('li')).toHaveLength(2);
+      rerender(genNode({ itemHeight: 20, height: 100, data }));
+      expect(container.querySelectorAll('li')).toHaveLength(2);
 
       // Should not crash if data count change
       data = data.slice(0, 1);
-      wrapper.setProps({ data });
-      expect(wrapper.find('li')).toHaveLength(1);
+      rerender(genNode({ itemHeight: 20, height: 100, data }));
+      expect(container.querySelectorAll('li')).toHaveLength(1);
     });
   });
 
   it('`virtual` is false', () => {
-    const wrapper = genList({ itemHeight: 20, height: 100, data: genData(100), virtual: false });
-    expect(wrapper.find('li')).toHaveLength(100);
+    const { container } = genList({
+      itemHeight: 20,
+      height: 100,
+      data: genData(100),
+      virtual: false,
+    });
+    expect(container.querySelectorAll('li')).toHaveLength(100);
   });
 
   it('Should not crash when height change makes virtual scroll to be raw scroll', () => {
-    const wrapper = genList({ itemHeight: 20, height: 40, data: genData(3) });
-    wrapper.setProps({ height: 1000 });
+    const { rerender } = genList({ itemHeight: 20, height: 40, data: genData(3) });
+    rerender(genNode({ itemHeight: 20, height: 1000, data: genData(3) }));
   });
 
   describe('should collect height', () => {
@@ -192,24 +218,25 @@ describe('List.Basic', () => {
     });
 
     it('work', async () => {
-      const wrapper = genList({ itemHeight: 20, height: 40, data: genData(3) });
-      wrapper.find('Filler').find('ResizeObserver').props().onResize({ offsetHeight: 0 });
-      expect(collected).toBeFalsy();
+      const { container } = genList({ itemHeight: 20, height: 40, data: genData(3) });
+      collected = false;
 
-      // Wait for collection
       await act(async () => {
-        await new Promise((resolve) => {
-          setTimeout(resolve, 10);
-        });
+        onLibResize([
+          {
+            target: getInner(container),
+          },
+        ]);
+
+        await Promise.resolve();
       });
 
-      wrapper.find('Filler').find('ResizeObserver').props().onResize({ offsetHeight: 100 });
       expect(collected).toBeTruthy();
     });
   });
 
   it('innerProps', () => {
-    const wrapper = genList({
+    const { container } = genList({
       itemHeight: 20,
       height: 100,
       data: genData(100),
@@ -220,12 +247,12 @@ describe('List.Basic', () => {
       },
     });
 
-    expect(wrapper.find('div#my_list').prop('role')).toEqual('listbox');
+    expect(container.querySelector('div#my_list')).toHaveAttribute('role', 'listbox');
   });
 
   it('nativeElement', () => {
     const ref = React.createRef();
-    const wrapper = genList({ data: genData(1), ref });
-    expect(ref.current.nativeElement).toBe(wrapper.getDOMNode());
+    const { container } = genList({ data: genData(1), ref });
+    expect(ref.current.nativeElement).toBe(container.firstChild);
   });
 });

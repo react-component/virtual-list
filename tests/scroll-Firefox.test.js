@@ -1,6 +1,5 @@
 import React from 'react';
-import { act } from 'react-dom/test-utils';
-import { mount } from 'enzyme';
+import { act, render } from '@testing-library/react';
 import { spyElementPrototypes } from './utils/domHook';
 import List from '../src';
 import isFF from '../src/utils/isFirefox';
@@ -38,17 +37,13 @@ describe('List.Firefox-Scroll', () => {
   });
 
   function genList(props) {
-    let node = (
+    const node = (
       <List component="ul" itemKey="id" {...props}>
         {({ id }) => <li>{id}</li>}
       </List>
     );
 
-    if (props.ref) {
-      node = <div>{node}</div>;
-    }
-
-    return mount(node);
+    return render(node);
   }
 
   it('should be true', () => {
@@ -59,8 +54,8 @@ describe('List.Firefox-Scroll', () => {
   it('FireFox should patch scroll speed', () => {
     const wheelPreventDefault = jest.fn();
     const firefoxPreventDefault = jest.fn();
-    const wrapper = genList({ itemHeight: 20, height: 100, data: genData(100) });
-    const ulElement = wrapper.find('ul').instance();
+    const { container } = genList({ itemHeight: 20, height: 100, data: genData(100) });
+    const ulElement = container.querySelector('ul');
 
     act(() => {
       const wheelEvent = new Event('wheel');
@@ -87,8 +82,8 @@ describe('List.Firefox-Scroll', () => {
 
   it('should call preventDefault on MozMousePixelScroll', () => {
     const preventDefault = jest.fn();
-    const wrapper = genList({ itemHeight: 20, height: 100, data: genData(100) });
-    const ulElement = wrapper.find('ul').instance();
+    const { container } = genList({ itemHeight: 20, height: 100, data: genData(100) });
+    const ulElement = container.querySelector('ul');
 
     act(() => {
       const event = new Event('MozMousePixelScroll');
@@ -104,8 +99,8 @@ describe('List.Firefox-Scroll', () => {
 
   it('should not call preventDefault on MozMousePixelScroll when scrolling up at top boundary', () => {
     const preventDefault = jest.fn();
-    const wrapper = genList({ itemHeight: 20, height: 100, data: genData(100) });
-    const ulElement = wrapper.find('ul').instance();
+    const { container } = genList({ itemHeight: 20, height: 100, data: genData(100) });
+    const ulElement = container.querySelector('ul');
 
     act(() => {
       const event = new Event('MozMousePixelScroll');
@@ -121,12 +116,14 @@ describe('List.Firefox-Scroll', () => {
   it('should not call preventDefault on MozMousePixelScroll when scrolling down at bottom boundary', () => {
     const preventDefault = jest.fn();
     const listRef = React.createRef();
-    const wrapper = genList({ itemHeight: 20, height: 100, data: genData(100), ref: listRef });
-    const ulElement = wrapper.find('ul').instance();
+    const { container } = genList({ itemHeight: 20, height: 100, data: genData(100), ref: listRef });
+    const ulElement = container.querySelector('ul');
     // scroll to bottom
-    listRef.current.scrollTo(99999);
-    jest.runAllTimers();
-    expect(wrapper.find('ul').instance().scrollTop).toEqual(1900);
+    act(() => {
+      listRef.current.scrollTo(99999);
+      jest.runAllTimers();
+    });
+    expect(container.querySelector('ul').scrollTop).toEqual(1900);
 
     act(() => {
       const event = new Event('MozMousePixelScroll');
