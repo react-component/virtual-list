@@ -146,7 +146,16 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     () => Object.values(heights.maps).reduce((total, curr) => total + curr, 0),
     [heights.id, heights.maps],
   );
+  // Defer virtual rendering until after first commit so SSR emits stable, hydration-safe
+  // markup (no virtual scrollbar / Filler wrap that depends on client-side measurement).
+  // `useLayoutEffect` here only fires on the client, so `mounted` stays `false` on the
+  // server and on the first client render that hydrates the SSR output.
+  const [mounted, setMounted] = useState(false);
+  useLayoutEffect(() => {
+    setMounted(true);
+  }, []);
   const inVirtual =
+    mounted &&
     useVirtual &&
     data &&
     (Math.max(itemHeight * data.length, containerHeight) > height || !!scrollWidth);
@@ -587,7 +596,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   if (height) {
     componentStyle = { [fullHeight ? 'height' : 'maxHeight']: height, ...ScrollStyle };
 
-    if (useVirtual) {
+    if (inVirtual) {
       componentStyle.overflowY = 'hidden';
 
       if (scrollWidth) {
