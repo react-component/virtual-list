@@ -1,79 +1,98 @@
-# @rc-component/virtual-list
+<div align="center">
+  <h1>@rc-component/virtual-list</h1>
+  <p>📜 Virtual scrolling list component for React.</p>
+  <p>
+    <a href="https://ant.design">
+      <img width="32" height="32" src="https://gw.alipayobjects.com/zos/bmw-prod/ae669a89-0c24-40ff-a91d-2b83497170f6.svg" alt="Ant Design" />
+    </a>
+  </p>
+  <p>Part of the <a href="https://ant.design">Ant Design</a> ecosystem.</p>
+  <p>
+    <a href="https://www.npmjs.com/package/@rc-component/virtual-list"><img src="https://img.shields.io/npm/v/@rc-component/virtual-list.svg?style=flat-square" alt="npm version" /></a>
+    <a href="https://www.npmjs.com/package/@rc-component/virtual-list"><img src="https://img.shields.io/npm/dm/@rc-component/virtual-list.svg?style=flat-square" alt="npm downloads" /></a>
+    <a href="https://github.com/react-component/virtual-list/actions/workflows/react-component-ci.yml"><img src="https://github.com/react-component/virtual-list/actions/workflows/react-component-ci.yml/badge.svg" alt="CI" /></a>
+    <a href="https://app.codecov.io/gh/react-component/virtual-list"><img src="https://img.shields.io/codecov/c/github/react-component/virtual-list/master.svg?style=flat-square" alt="Codecov" /></a>
+    <a href="https://bundlephobia.com/package/@rc-component/virtual-list"><img src="https://badgen.net/bundlephobia/minzip/@rc-component/virtual-list" alt="bundle size" /></a>
+    <a href="https://github.com/umijs/dumi"><img src="https://img.shields.io/badge/docs%20by-dumi-blue?style=flat-square" alt="dumi" /></a>
+  </p>
+</div>
 
-React Virtual List Component which works with animation.
+## Highlights
 
-[![NPM version][npm-image]][npm-url]
-[![npm download][download-image]][download-url]
-[![build status][github-actions-image]][github-actions-url]
-[![Codecov][codecov-image]][codecov-url]
-[![bundle size][bundlephobia-image]][bundlephobia-url]
-[![dumi][dumi-image]][dumi-url]
-
-[npm-image]: https://img.shields.io/npm/v/@rc-component/virtual-list.svg?style=flat-square
-[npm-url]: https://npmjs.org/package/@rc-component/virtual-list
-[travis-image]: https://img.shields.io/travis/react-component/virtual-list/master?style=flat-square
-[travis-url]: https://travis-ci.com/react-component/virtual-list
-[github-actions-image]: https://github.com/react-component/virtual-list/actions/workflows/main.yml/badge.svg
-[github-actions-url]: https://github.com/react-component/virtual-list/actions/workflows/main.yml
-[codecov-image]: https://img.shields.io/codecov/c/github/react-component/virtual-list/master.svg?style=flat-square
-[codecov-url]: https://app.codecov.io/gh/react-component/virtual-list
-[david-url]: https://david-dm.org/react-component/virtual-list
-[david-image]: https://david-dm.org/react-component/virtual-list/status.svg?style=flat-square
-[david-dev-url]: https://david-dm.org/react-component/virtual-list?type=dev
-[david-dev-image]: https://david-dm.org/react-component/virtual-list/dev-status.svg?style=flat-square
-[download-image]: https://img.shields.io/npm/dm/@rc-component/virtual-list.svg?style=flat-square
-[download-url]: https://npmjs.org/package/@rc-component/virtual-list
-[bundlephobia-url]: https://bundlephobia.com/package/@rc-component/virtual-list
-[bundlephobia-image]: https://badgen.net/bundlephobia/minzip/@rc-component/virtual-list
-[dumi-url]: https://github.com/umijs/dumi
-[dumi-image]: https://img.shields.io/badge/docs%20by-dumi-blue?style=flat-square
-
-## Online Preview
-
-https://virtual-list-react-component.vercel.app/
-
-## Development
-
-```bash
-npm install
-npm start
-open http://localhost:8000/
-```
-
-## Feature
-
-- Support react.js
-- Support animation
-- Support IE11+
+- Built for React and maintained by the rc-component team.
+- Used by Ant Design and other React component libraries.
+- Ships TypeScript declarations with both ES module and CommonJS outputs.
+- Keeps examples, tests, and preview builds aligned with the package source.
 
 ## Install
 
-[![@rc-component/virtual-list](https://nodei.co/npm/@rc-component/virtual-list.png)](https://npmjs.org/package/@rc-component/virtual-list)
+```bash
+npm install @rc-component/virtual-list
+```
 
 ## Usage
 
 ```tsx
 import List from '@rc-component/virtual-list';
 
-<List data={[0, 1, 2]} height={200} itemHeight={30} itemKey="id">
-  {(index) => <div>{index}</div>}
-</List>;
+const data = Array.from({ length: 1000 }).map((_, index) => ({
+  id: index,
+  label: `Item ${index}`,
+}));
+
+export default () => (
+  <List data={data} height={240} itemHeight={32} itemKey="id">
+    {(item) => <div>{item.label}</div>}
+  </List>
+);
 ```
 
-# API
+## Examples
 
-## List
+Run the local dumi site to explore the examples:
 
-| Prop       | Description                                             | Type                                                                                                                                                                                  | Default |
-| ---------- | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
-| children   | Render props of item                                    | (item, index, props) => ReactElement                                                                                                                                                  | -       |
-| component  | Customize List dom element                              | string \| Component                                                                                                                                                                   | div     |
-| data       | Data list                                               | Array                                                                                                                                                                                 | -       |
-| disabled   | Disable scroll check. Usually used on animation control | boolean                                                                                                                                                                               | false   |
-| height     | List height                                             | number                                                                                                                                                                                | -       |
-| itemHeight | Item minimum height                                     | number                                                                                                                                                                                | -       |
-| itemKey    | Match key with item                                     | string                                                                                                                                                                                | -       |
-| styles     | style                                                   | { horizontalScrollBar?: React.CSSProperties; horizontalScrollBarThumb?: React.CSSProperties; verticalScrollBar?: React.CSSProperties; verticalScrollBarThumb?: React.CSSProperties; } | -       |
+```bash
+npm install
+npm start
+```
 
-`children` provides additional `props` argument to support IE 11 scroll shaking.
-It will set `style` to `visibility: hidden` when measuring. You can ignore this if no requirement on IE.
+## API
+
+### List
+
+| Prop       | Description                                                                                                            | Type                                   | Default |
+| ---------- | ---------------------------------------------------------------------------------------------------------------------- | -------------------------------------- | ------- |
+| children   | Render function for each item. The third argument contains measuring props used by legacy browser compatibility paths. | `(item, index, props) => ReactElement` | -       |
+| component  | Custom list container element.                                                                                         | `string` \| `ComponentType`            | `div`   |
+| data       | Items rendered by the virtual list.                                                                                    | `T[]`                                  | -       |
+| disabled   | Disable scroll position checks, usually while coordinating animation.                                                  | `boolean`                              | `false` |
+| fullHeight | Whether the holder should keep full height.                                                                            | `boolean`                              | `true`  |
+| height     | Visible list height.                                                                                                   | `number`                               | -       |
+| itemHeight | Minimum item height used to calculate the virtual range.                                                               | `number`                               | -       |
+| itemKey    | Key field or key getter for items.                                                                                     | `string` \| `(item) => React.Key`      | -       |
+| onScroll   | Called when the list scrolls.                                                                                          | `React.UIEventHandler<HTMLElement>`    | -       |
+| styles     | Custom scrollbar part styles.                                                                                          | `object`                               | -       |
+| virtual    | Enable virtual rendering.                                                                                              | `boolean`                              | `true`  |
+
+## Development
+
+```bash
+npm install
+npm start
+npm test
+npm run tsc
+npm run compile
+npm run build
+```
+
+## Release
+
+The release flow is handled by `@rc-component/np` from the `prepublishOnly` script:
+
+```bash
+npm publish
+```
+
+## License
+
+@rc-component/virtual-list is released under the MIT license.

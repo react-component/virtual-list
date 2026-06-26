@@ -1,5 +1,5 @@
 ---
-title: rc-virtual-list
+title: '@rc-component/virtual-list'
 ---
 
 <embed src="../README.md"></embed>

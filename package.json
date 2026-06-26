@@ -1,7 +1,7 @@
 {
   "name": "@rc-component/virtual-list",
   "version": "1.2.0",
-  "description": "React Virtual List Component",
+  "description": "Virtual scrolling list component for React.",
   "engines": {
     "node": ">=8.x"
   },
@@ -28,13 +28,19 @@
   "main": "./lib/index",
   "module": "./es/index",
   "scripts": {
-    "start": "dumi dev",
-    "build": "dumi build",
+    "build": "npm run compile && npm run docs:build",
     "compile": "father build",
-    "prepublishOnly": "npm run compile && rc-np",
+    "coverage": "rc-test --coverage",
+    "docs:build": "dumi build",
+    "docs:deploy": "gh-pages -d docs-dist",
+    "deploy": "npm run gh-pages",
+    "gh-pages": "cross-env GH_PAGES=1 npm run compile && npm run docs:build && npm run docs:deploy",
     "lint": "eslint src/ --ext .tsx,.ts",
+    "prepublishOnly": "npm run compile && rc-np",
+    "prettier": "prettier --write --ignore-unknown .",
+    "start": "dumi dev",
     "test": "rc-test",
-    "now-build": "npm run build"
+    "tsc": "tsc --noEmit"
   },
   "peerDependencies": {
     "react": ">=18.0.0",
@@ -59,7 +65,10 @@
     "rc-test": "^7.1.3",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "cross-env": "^10.1.0",
+    "gh-pages": "^6.3.0",
+    "prettier": "^3.3.2"
   },
   "dependencies": {
     "@babel/runtime": "^7.20.0",

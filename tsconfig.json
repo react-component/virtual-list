@@ -8,15 +8,13 @@
     "skipLibCheck": true,
     "esModuleInterop": true,
     "paths": {
-      "@/*": [
-        "src/*"
-      ],
-      "@@/*": [
-        "src/.umi/*"
-      ],
-      "rc-virtual-list": [
-        "src/index.ts"
-      ]
+      "@/*": ["src/*"],
+      "@@/*": [".dumi/tmp/*"],
+      "@rc-component/virtual-list": ["src/index.ts"],
+      "@rc-component/virtual-list/es": ["src"],
+      "@rc-component/virtual-list/es/*": ["src/*"]
     }
-  }
+  },
+  "include": [".dumirc.ts", "src", "tests", "docs/examples"],
+  "exclude": ["docs-dist", "lib", "es"]
 }
