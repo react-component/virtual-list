@@ -80,14 +80,12 @@ npm start
 npm install
 npm start
 npm test
-npm run tsc
-npm run compile
 npm run build
 ```
 
 ## Release
 
-The release flow is handled by `@rc-component/np` from the `prepublishOnly` script:
+The `prepublishOnly` script runs `npm run compile` and then `rc-np` from `@rc-component/np`:
 
 ```bash
 npm publish

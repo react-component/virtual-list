@@ -16,7 +16,8 @@ bun.lockb
 .umi-production
 .umi-test
 .env.local
-.dumi
+.dumi/tmp
+.dumi/tmp-production
 lib
 es
 coverage
