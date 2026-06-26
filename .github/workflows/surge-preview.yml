@@ -26,7 +26,6 @@ jobs:
         with:
           build: npm run build
           dist: docs-dist
-          failOnMissingToken: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }}
+          failOnError: false
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          surge_token: ${{ secrets.SURGE_TOKEN }}
