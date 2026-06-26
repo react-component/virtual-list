@@ -15,6 +15,6 @@
       "@rc-component/virtual-list/es/*": ["src/*"]
     }
   },
-  "include": [".dumirc.ts", "src", "tests", "docs/examples"],
+  "include": [".dumirc.ts", "src", "tests", "examples"],
   "exclude": ["docs-dist", "lib", "es"]
 }
