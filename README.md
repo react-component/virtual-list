@@ -85,12 +85,12 @@ npm run build
 
 ## Release
 
-The `prepublishOnly` script runs `npm run compile` and then `rc-np` from `@rc-component/np`:
-
 ```bash
-npm publish
+npm run prepublishOnly
 ```
+
+The release flow is handled by `@rc-component/np` through the `rc-np` command after the package build.
 
 ## License
 
-@rc-component/virtual-list is released under the MIT license.
+@rc-component/virtual-list is released under the [MIT](./LICENSE) license.
