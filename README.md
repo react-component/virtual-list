@@ -1,6 +1,7 @@
 <div align="center">
   <h1>@rc-component/virtual-list</h1>
   <p><sub>Part of the Ant Design ecosystem.</sub></p>
+  <img alt="Ant Design" height="32" src="https://gw.alipayobjects.com/zos/rmsportal/KDpgvguMpGfqaHPjicRK.svg" />
   <p>📜 Virtual scrolling list component for React.</p>
   <p>
     <a href="https://www.npmjs.com/package/@rc-component/virtual-list"><img src="https://img.shields.io/npm/v/@rc-component/virtual-list.svg?style=flat-square" alt="npm version" /></a>

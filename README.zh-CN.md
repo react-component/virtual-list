@@ -1,6 +1,7 @@
 <div align="center">
   <h1>@rc-component/virtual-list</h1>
   <p><sub>Ant Design 生态的一部分。</sub></p>
+  <img alt="Ant Design" height="32" src="https://gw.alipayobjects.com/zos/rmsportal/KDpgvguMpGfqaHPjicRK.svg" />
   <p>🧾 React 虚拟列表组件，用于高性能渲染长列表。</p>
   <p>
     <a href="https://www.npmjs.com/package/@rc-component/virtual-list"><img src="https://img.shields.io/npm/v/@rc-component/virtual-list.svg?style=flat-square" alt="npm version" /></a>
