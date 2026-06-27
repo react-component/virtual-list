@@ -1,8 +1,7 @@
 <div align="center">
   <h1>@rc-component/virtual-list</h1>
-  <p><sub>Ant Design 生态的一部分。</sub></p>
-  <img alt="Ant Design" height="32" src="https://gw.alipayobjects.com/zos/rmsportal/KDpgvguMpGfqaHPjicRK.svg" />
-  <p>🧾 React 虚拟列表组件，用于高性能渲染长列表。</p>
+  <p><sub><img alt="Ant Design" height="14" src="https://gw.alipayobjects.com/zos/rmsportal/KDpgvguMpGfqaHPjicRK.svg" style="vertical-align: -0.125em;" /> Ant Design 生态的一部分。</sub></p>
+  <p>📜 React 虚拟列表组件，用于高性能渲染长列表。</p>
   <p>
     <a href="https://www.npmjs.com/package/@rc-component/virtual-list"><img src="https://img.shields.io/npm/v/@rc-component/virtual-list.svg?style=flat-square" alt="npm version" /></a>
     <a href="https://www.npmjs.com/package/@rc-component/virtual-list"><img src="https://img.shields.io/npm/dm/@rc-component/virtual-list.svg?style=flat-square" alt="npm downloads" /></a>
@@ -18,10 +17,10 @@
 
 ## 特性
 
-- Built for React and maintained by the rc-component team.
+- 面向 React 构建，并由 rc-component 团队维护。
 - 被 Ant Design 使用和其他 React 组件库使用。
-- 提供 TypeScript declarations with both ES module and CommonJS outputs.
-- 保留 examples, tests, and preview builds aligned with the package source.
+- 提供 TypeScript 类型声明，同时输出 ES module 和 CommonJS 产物。
+- 示例、测试和预览构建与包源码保持一致。
 
 ## 安装
 
@@ -48,7 +47,7 @@ export default () => (
 
 ## 示例
 
-Run the local dumi site to explore the examples:
+运行本地 dumi 站点查看示例：
 
 ```bash
 npm install
@@ -61,17 +60,17 @@ npm start
 
 | 属性 | 说明 | 类型 | 默认值 |
 | ---------- | ---------------------------------------------------------------------------------------------------------------------- | -------------------------------------- | ------- |
-| children   | Render function for each item. The third argument contains measuring props used by legacy browser compatibility paths. | `(item, index, props) => ReactElement` | -       |
-| component  | Custom list container element.                                                                                         | `string` \| `ComponentType`            | `div`   |
-| data       | Items rendered by the virtual list.                                                                                    | `T[]`                                  | -       |
-| disabled   | Disable scroll position checks, usually while coordinating animation.                                                  | `boolean`                              | `false` |
-| fullHeight | Whether the holder should keep full height.                                                                            | `boolean`                              | `true`  |
-| height     | Visible list height.                                                                                                   | `number`                               | -       |
-| itemHeight | Minimum item height used to calculate the virtual range.                                                               | `number`                               | -       |
-| itemKey    | Key field or key getter for items.                                                                                     | `string` \| `(item) => React.Key`      | -       |
-| onScroll   | Called when the list scrolls.                                                                                          | `React.UIEventHandler<HTMLElement>`    | -       |
-| styles     | Custom scrollbar part styles.                                                                                          | `object`                               | -       |
-| virtual    | Enable virtual rendering.                                                                                              | `boolean`                              | `true`  |
+| children   | 每一项的渲染函数。第三个参数包含旧浏览器兼容路径使用的测量 props。 | `(item, index, props) => ReactElement` | -       |
+| component  | 自定义列表容器元素。                                                                                         | `string` \| `ComponentType`            | `div`   |
+| data       | 虚拟列表渲染的数据项。                                                                                    | `T[]`                                  | -       |
+| disabled   | 禁用滚动位置检查，通常用于配合动画。                                                  | `boolean`                              | `false` |
+| fullHeight | holder 是否保持完整高度。                                                                            | `boolean`                              | `true`  |
+| height     | 可视列表高度。                                                                                                   | `number`                               | -       |
+| itemHeight | 用于计算虚拟范围的最小项高度。                                                               | `number`                               | -       |
+| itemKey    | 数据项 key 字段或 key 获取函数。                                                                                     | `string` \| `(item) => React.Key`      | -       |
+| onScroll   | 列表滚动时调用。                                                                                          | `React.UIEventHandler<HTMLElement>`    | -       |
+| styles     | 自定义滚动条部位样式。                                                                                          | `object`                               | -       |
+| virtual    | 启用虚拟渲染。                                                                                              | `boolean`                              | `true`  |
 
 ## 本地开发
 
@@ -88,8 +87,8 @@ npm run build
 npm run prepublishOnly
 ```
 
-The release flow is handled by `@rc-component/np` through the `rc-np` command after the package build.
+包构建完成后，发布流程由 `@rc-component/np` 通过 `rc-np` 命令处理。
 
 ## 许可证
 
-@rc-component/virtual-list is released under the [MIT](./LICENSE) license.
+@rc-component/virtual-list 基于 [MIT](./LICENSE) 许可证发布。
