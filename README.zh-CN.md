@@ -47,12 +47,14 @@ export default () => (
 
 ## 示例
 
-运行本地 dumi 站点查看示例：
+运行本地 dumi 站点：
 
 ```bash
 npm install
 npm start
 ```
+
+然后打开 `http://localhost:8000`。
 
 ## API
 

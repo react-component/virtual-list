@@ -2,7 +2,7 @@ import { defineConfig } from 'dumi';
 import path from 'path';
 
 const basePath = process.env.GH_PAGES ? '/virtual-list/' : '/';
-const publicPath = process.env.GH_PAGES ? '/virtual-list/' : '/';
+const publicPath = basePath;
 
 export default defineConfig({
   alias: {
