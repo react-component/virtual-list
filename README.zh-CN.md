@@ -1,7 +1,7 @@
 <div align="center">
   <h1>@rc-component/virtual-list</h1>
-  <p><sub>Part of the Ant Design ecosystem.</sub></p>
-  <p>📜 Virtual scrolling list component for React.</p>
+  <p><sub>Ant Design 生态的一部分。</sub></p>
+  <p>🧾 React 虚拟列表组件，用于高性能渲染长列表。</p>
   <p>
     <a href="https://www.npmjs.com/package/@rc-component/virtual-list"><img src="https://img.shields.io/npm/v/@rc-component/virtual-list.svg?style=flat-square" alt="npm version" /></a>
     <a href="https://www.npmjs.com/package/@rc-component/virtual-list"><img src="https://img.shields.io/npm/dm/@rc-component/virtual-list.svg?style=flat-square" alt="npm downloads" /></a>
@@ -12,23 +12,23 @@
   </p>
 </div>
 
-<p align="center">English | <a href="./README.zh-CN.md">简体中文</a></p>
+<p align="center"><a href="./README.md">English</a> | 简体中文</p>
 
 
-## Highlights
+## 特性
 
 - Built for React and maintained by the rc-component team.
-- Used by Ant Design and other React component libraries.
-- Ships TypeScript declarations with both ES module and CommonJS outputs.
-- Keeps examples, tests, and preview builds aligned with the package source.
+- 被 Ant Design 使用和其他 React 组件库使用。
+- 提供 TypeScript declarations with both ES module and CommonJS outputs.
+- 保留 examples, tests, and preview builds aligned with the package source.
 
-## Install
+## 安装
 
 ```bash
 npm install @rc-component/virtual-list
 ```
 
-## Usage
+## 使用
 
 ```tsx
 import List from '@rc-component/virtual-list';
@@ -45,7 +45,7 @@ export default () => (
 );
 ```
 
-## Examples
+## 示例
 
 Run the local dumi site to explore the examples:
 
@@ -58,7 +58,7 @@ npm start
 
 ### List
 
-| Prop       | Description                                                                                                            | Type                                   | Default |
+| 属性 | 说明 | 类型 | 默认值 |
 | ---------- | ---------------------------------------------------------------------------------------------------------------------- | -------------------------------------- | ------- |
 | children   | Render function for each item. The third argument contains measuring props used by legacy browser compatibility paths. | `(item, index, props) => ReactElement` | -       |
 | component  | Custom list container element.                                                                                         | `string` \| `ComponentType`            | `div`   |
@@ -72,7 +72,7 @@ npm start
 | styles     | Custom scrollbar part styles.                                                                                          | `object`                               | -       |
 | virtual    | Enable virtual rendering.                                                                                              | `boolean`                              | `true`  |
 
-## Development
+## 本地开发
 
 ```bash
 npm install
@@ -81,7 +81,7 @@ npm test
 npm run build
 ```
 
-## Release
+## 发布
 
 ```bash
 npm run prepublishOnly
@@ -89,6 +89,6 @@ npm run prepublishOnly
 
 The release flow is handled by `@rc-component/np` through the `rc-np` command after the package build.
 
-## License
+## 许可证
 
 @rc-component/virtual-list is released under the [MIT](./LICENSE) license.
