@@ -1,12 +1,7 @@
 <div align="center">
   <h1>@rc-component/virtual-list</h1>
+  <p><sub>Part of the Ant Design ecosystem.</sub></p>
   <p>📜 Virtual scrolling list component for React.</p>
-  <p>
-    <a href="https://ant.design">
-      <img width="32" height="32" src="https://gw.alipayobjects.com/zos/bmw-prod/ae669a89-0c24-40ff-a91d-2b83497170f6.svg" alt="Ant Design" />
-    </a>
-  </p>
-  <p>Part of the Ant Design ecosystem.</p>
   <p>
     <a href="https://www.npmjs.com/package/@rc-component/virtual-list"><img src="https://img.shields.io/npm/v/@rc-component/virtual-list.svg?style=flat-square" alt="npm version" /></a>
     <a href="https://www.npmjs.com/package/@rc-component/virtual-list"><img src="https://img.shields.io/npm/dm/@rc-component/virtual-list.svg?style=flat-square" alt="npm downloads" /></a>
@@ -16,6 +11,7 @@
     <a href="https://github.com/umijs/dumi"><img src="https://img.shields.io/badge/docs%20by-dumi-blue?style=flat-square" alt="dumi" /></a>
   </p>
 </div>
+
 
 ## Highlights
 
