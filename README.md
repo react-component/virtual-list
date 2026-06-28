@@ -83,6 +83,8 @@ npm test
 npm run build
 ```
 
+The dumi site runs at `http://localhost:8000` by default.
+
 ## Release
 
 ```bash
