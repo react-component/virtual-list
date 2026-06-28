@@ -2,13 +2,14 @@
   <h1>@rc-component/virtual-list</h1>
   <p><sub><img alt="Ant Design" height="14" src="https://gw.alipayobjects.com/zos/rmsportal/KDpgvguMpGfqaHPjicRK.svg" style="vertical-align: -0.125em;" /> Part of the Ant Design ecosystem.</sub></p>
   <p>📜 Virtual scrolling list component for React.</p>
+
   <p>
-    <a href="https://www.npmjs.com/package/@rc-component/virtual-list"><img src="https://img.shields.io/npm/v/@rc-component/virtual-list.svg?style=flat-square" alt="npm version" /></a>
-    <a href="https://www.npmjs.com/package/@rc-component/virtual-list"><img src="https://img.shields.io/npm/dm/@rc-component/virtual-list.svg?style=flat-square" alt="npm downloads" /></a>
-    <a href="https://github.com/react-component/virtual-list/actions/workflows/react-component-ci.yml"><img src="https://github.com/react-component/virtual-list/actions/workflows/react-component-ci.yml/badge.svg" alt="CI" /></a>
-    <a href="https://app.codecov.io/gh/react-component/virtual-list"><img src="https://img.shields.io/codecov/c/github/react-component/virtual-list/master.svg?style=flat-square" alt="Codecov" /></a>
-    <a href="https://bundlephobia.com/package/@rc-component/virtual-list"><img src="https://badgen.net/bundlephobia/minzip/@rc-component/virtual-list" alt="bundle size" /></a>
-    <a href="https://github.com/umijs/dumi"><img src="https://img.shields.io/badge/docs%20by-dumi-blue?style=flat-square" alt="dumi" /></a>
+    <a href="https://npmjs.org/package/@rc-component/virtual-list"><img alt="NPM version" src="https://img.shields.io/npm/v/@rc-component/virtual-list.svg?style=flat-square"></a>
+    <a href="https://npmjs.org/package/@rc-component/virtual-list"><img alt="npm downloads" src="https://img.shields.io/npm/dm/@rc-component/virtual-list.svg?style=flat-square"></a>
+    <a href="https://github.com/react-component/virtual-list/actions/workflows/react-component-ci.yml"><img alt="build status" src="https://github.com/react-component/virtual-list/actions/workflows/react-component-ci.yml/badge.svg"></a>
+    <a href="https://app.codecov.io/gh/react-component/virtual-list"><img alt="Codecov" src="https://img.shields.io/codecov/c/github/react-component/virtual-list/master.svg?style=flat-square"></a>
+    <a href="https://bundlephobia.com/package/@rc-component/virtual-list"><img alt="bundle size" src="https://img.shields.io/bundlephobia/minzip/@rc-component/virtual-list?style=flat-square"></a>
+    <a href="https://github.com/umijs/dumi"><img alt="dumi" src="https://img.shields.io/badge/docs%20by-dumi-blue?style=flat-square"></a>
   </p>
 </div>
 
