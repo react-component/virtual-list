@@ -28,6 +28,7 @@
   },
   "include": [
     ".dumirc.ts",
+    ".fatherrc.ts",
     "src",
     "tests",
     "examples"
