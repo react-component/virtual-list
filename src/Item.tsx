@@ -10,7 +10,7 @@ export function Item({ children, setRef }: ItemProps) {
     setRef(node);
   }, []);
 
-  return React.cloneElement(children, {
+  return React.cloneElement(children as React.ReactElement<any>, {
     ref: refFunc,
   });
 }

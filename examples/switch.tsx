@@ -6,7 +6,7 @@ interface Item {
   id: number;
 }
 
-const MyItem: React.FC<Item> = ({ id }, ref) => (
+const MyItem = React.forwardRef<HTMLSpanElement, Item>(({ id }, ref) => (
   <span
     ref={ref}
     style={{
@@ -21,7 +21,7 @@ const MyItem: React.FC<Item> = ({ id }, ref) => (
   >
     {id}
   </span>
-);
+));
 
 const ForwardMyItem = React.forwardRef(MyItem as any);
 
