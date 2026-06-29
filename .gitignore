@@ -11,11 +11,15 @@ pnpm-lock.yaml
 !tests/__mocks__/rc-util/lib
 !tests/__mocks__/@rc-component/util/lib
 bun.lockb
-
 # umi
 .umi
 .umi-production
 .umi-test
 .env.local
-
-.dumi
+.dumi/tmp
+.dumi/tmp-production
+lib
+es
+coverage
+docs-dist
+.vercel

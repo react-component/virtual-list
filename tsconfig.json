@@ -12,11 +12,30 @@
         "src/*"
       ],
       "@@/*": [
-        "src/.umi/*"
+        ".dumi/tmp/*"
       ],
-      "rc-virtual-list": [
+      "@rc-component/virtual-list": [
         "src/index.ts"
+      ],
+      "@rc-component/virtual-list/es": [
+        "src"
+      ],
+      "@rc-component/virtual-list/es/*": [
+        "src/*"
       ]
-    }
-  }
+    },
+    "ignoreDeprecations": "5.0"
+  },
+  "include": [
+    ".dumirc.ts",
+    ".fatherrc.ts",
+    "src",
+    "tests",
+    "examples"
+  ],
+  "exclude": [
+    "docs-dist",
+    "lib",
+    "es"
+  ]
 }

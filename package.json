@@ -1,7 +1,7 @@
 {
   "name": "@rc-component/virtual-list",
   "version": "1.2.0",
-  "description": "React Virtual List Component",
+  "description": "Virtual scrolling list component for React.",
   "engines": {
     "node": ">=8.x"
   },
@@ -10,7 +10,7 @@
     "react-component",
     "virtual-list"
   ],
-  "homepage": "https://github.com/react-component/virtual-list",
+  "homepage": "https://react-component.github.io/virtual-list",
   "author": "smith3816@gmail.com",
   "repository": {
     "type": "git",
@@ -28,38 +28,50 @@
   "main": "./lib/index",
   "module": "./es/index",
   "scripts": {
-    "start": "dumi dev",
-    "build": "dumi build",
+    "build": "npm run compile && npm run docs:build",
     "compile": "father build",
-    "prepublishOnly": "npm run compile && rc-np",
+    "coverage": "rc-test --coverage",
+    "docs:build": "dumi build",
+    "docs:deploy": "gh-pages -d docs-dist",
+    "deploy": "npm run gh-pages",
+    "gh-pages": "npm run compile && cross-env GH_PAGES=1 npm run docs:build && npm run docs:deploy",
     "lint": "eslint src/ --ext .tsx,.ts",
+    "prepublishOnly": "npm run compile && rc-np",
+    "prettier": "prettier --write --ignore-unknown .",
+    "start": "dumi dev",
     "test": "rc-test",
-    "now-build": "npm run build"
+    "tsc": "tsc --noEmit",
+    "prepare": "husky"
   },
   "peerDependencies": {
     "react": ">=18.0.0",
     "react-dom": ">=18.0.0"
   },
   "devDependencies": {
-    "@rc-component/father-plugin": "^2.1.3",
+    "@rc-component/father-plugin": "^2.2.0",
     "@rc-component/np": "^1.0.4",
-    "@testing-library/jest-dom": "^5.17.0",
-    "@testing-library/react": "^13.4.0",
-    "@types/jest": "^30.0.0",
-    "@types/node": "^24.10.1",
-    "@types/react": "^18.0.8",
-    "@types/react-dom": "^18.0.3",
-    "@types/warning": "^3.0.0",
-    "dumi": "^2.2.17",
-    "eslint": "^8.56.0",
-    "eslint-plugin-unicorn": "^55.0.0",
-    "father": "^4.4.0",
-    "glob": "^7.1.6",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^15.0.7",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^26.0.1",
+    "@types/react": "^18.3.31",
+    "@types/react-dom": "^18.3.7",
+    "@types/warning": "^3.0.4",
+    "dumi": "^2.4.35",
+    "eslint": "^8.57.1",
+    "eslint-plugin-unicorn": "^56.0.1",
+    "father": "^4.6.23",
+    "glob": "^13.0.6",
     "rc-animate": "^2.9.1",
     "rc-test": "^7.1.3",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "typescript": "^5.0.0"
+    "typescript": "^5.9.3",
+    "cross-env": "^10.1.0",
+    "gh-pages": "^6.3.0",
+    "prettier": "^3.9.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0"
   },
   "dependencies": {
     "@babel/runtime": "^7.20.0",
@@ -69,5 +81,9 @@
   },
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "lint-staged": {
+    "*": "prettier --write --ignore-unknown"
+  },
+  "types": "./es/index.d.ts"
 }
