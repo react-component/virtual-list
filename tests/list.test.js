@@ -1,6 +1,7 @@
 import '@testing-library/jest-dom';
+import { fireEvent } from '@testing-library/dom';
 import { _rs as onLibResize } from '@rc-component/resize-observer/lib/utils/observerUtil';
-import { act, fireEvent, render } from '@testing-library/react';
+import { act, render } from '@testing-library/react';
 import React from 'react';
 import List from '../src';
 import { spyElementPrototypes } from './utils/domHook';

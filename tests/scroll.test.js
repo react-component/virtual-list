@@ -1,5 +1,6 @@
 import '@testing-library/jest-dom';
-import { act, createEvent, fireEvent, render } from '@testing-library/react';
+import { createEvent, fireEvent } from '@testing-library/dom';
+import { act, render } from '@testing-library/react';
 import { _rs as onLibResize } from '@rc-component/resize-observer/lib/utils/observerUtil';
 import { resetWarned } from '@rc-component/util/lib/warning';
 import React from 'react';
