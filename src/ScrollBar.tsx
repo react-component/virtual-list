@@ -1,5 +1,5 @@
 import { clsx } from 'clsx';
-import { raf } from '@rc-component/util';
+import { raf, useEvent } from '@rc-component/util';
 import * as React from 'react';
 import { getPageXY } from './hooks/useScrollDrag';
 
@@ -88,7 +88,7 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
   const stateRef = React.useRef({ top, dragging, pageY: pageXY, startTop });
   stateRef.current = { top, dragging, pageY: pageXY, startTop };
 
-  const onThumbMouseDown = (e: React.MouseEvent | React.TouchEvent | TouchEvent) => {
+  const onThumbMouseDown = useEvent((e: React.MouseEvent | React.TouchEvent | TouchEvent) => {
     setDragging(true);
     setPageXY(getPageXY(e, horizontal));
     setStartTop(stateRef.current.top);
@@ -96,7 +96,7 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
     onStartMove();
     e.stopPropagation();
     e.preventDefault();
-  };
+  });
 
   // ======================== Effect ========================
 
@@ -117,7 +117,7 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
       scrollbarEle.removeEventListener('touchstart', onScrollbarTouchStart);
       thumbEle.removeEventListener('touchstart', onThumbMouseDown);
     };
-  }, []);
+  }, [onThumbMouseDown]);
 
   // Pass to effect
   const enableScrollRangeRef = React.useRef<number | undefined>(undefined);
