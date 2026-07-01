@@ -2,26 +2,16 @@
   "compilerOptions": {
     "target": "esnext",
     "moduleResolution": "bundler",
-    "jsx": "react",
+    "jsx": "react-jsx",
     "declaration": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
     "paths": {
-      "@/*": [
-        "./src/*"
-      ],
-      "@@/*": [
-        "./.dumi/tmp/*"
-      ],
-      "@rc-component/virtual-list": [
-        "./src/index.ts"
-      ],
-      "@rc-component/virtual-list/es": [
-        "./src"
-      ],
-      "@rc-component/virtual-list/es/*": [
-        "./src/*"
-      ]
+      "@/*": ["./src/*"],
+      "@@/*": ["./.dumi/tmp/*"],
+      "@rc-component/virtual-list": ["./src/index.ts"],
+      "@rc-component/virtual-list/es": ["./src"],
+      "@rc-component/virtual-list/es/*": ["./src/*"]
     },
     "noImplicitAny": false,
     "strictNullChecks": false,
@@ -41,9 +31,5 @@
     "tests",
     "examples"
   ],
-  "exclude": [
-    "docs-dist",
-    "lib",
-    "es"
-  ]
+  "exclude": ["docs-dist", "lib", "es"]
 }

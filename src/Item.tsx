@@ -2,12 +2,12 @@ import * as React from 'react';
 
 export interface ItemProps {
   children: React.ReactElement;
-  setRef: (element: HTMLElement) => void;
+  setRef: (element: HTMLElement | null) => void;
 }
 
 export function Item({ children, setRef }: ItemProps) {
   const refFunc = React.useCallback(
-    node => {
+    (node) => {
       setRef(node);
     },
     [setRef],

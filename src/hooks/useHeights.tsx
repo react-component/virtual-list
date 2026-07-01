@@ -13,7 +13,7 @@ export default function useHeights<T>(
   onItemAdd?: (item: T) => void,
   onItemRemove?: (item: T) => void,
 ): [
-  setInstanceRef: (item: T, instance: HTMLElement) => void,
+  setInstanceRef: (item: T, instance: HTMLElement | null) => void,
   collectHeight: (sync?: boolean) => void,
   cacheMap: CacheMap,
   updatedMark: number,
@@ -69,7 +69,7 @@ export default function useHeights<T>(
     }
   }
 
-  function setInstanceRef(item: T, instance: HTMLElement) {
+  function setInstanceRef(item: T, instance: HTMLElement | null) {
     const key = getKey(item);
     const origin = instanceRef.current.get(key);
 

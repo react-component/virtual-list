@@ -8,7 +8,7 @@ export default function useChildren<T>(
   endIndex: number,
   scrollWidth: number,
   offsetX: number,
-  setNodeRef: (item: T, element: HTMLElement) => void,
+  setNodeRef: (item: T, element: HTMLElement | null) => void,
   renderFunc: RenderFunc<T>,
   { getKey }: SharedConfig<T>,
 ) {
