@@ -15,7 +15,6 @@
 
 <p align="center"><a href="./README.md">English</a> | 简体中文</p>
 
-
 ## 特性
 
 - 面向 React 构建，并由 rc-component 团队维护。
@@ -51,7 +50,7 @@ export default () => (
 运行本地 dumi 站点：
 
 ```bash
-npm install
+ut install
 npm start
 ```
 
@@ -61,24 +60,24 @@ npm start
 
 ### List
 
-| 属性 | 说明 | 类型 | 默认值 |
-| ---------- | ---------------------------------------------------------------------------------------------------------------------- | -------------------------------------- | ------- |
+| 属性       | 说明                                                               | 类型                                   | 默认值  |
+| ---------- | ------------------------------------------------------------------ | -------------------------------------- | ------- |
 | children   | 每一项的渲染函数。第三个参数包含旧浏览器兼容路径使用的测量 props。 | `(item, index, props) => ReactElement` | -       |
-| component  | 自定义列表容器元素。                                                                                         | `string` \| `ComponentType`            | `div`   |
-| data       | 虚拟列表渲染的数据项。                                                                                    | `T[]`                                  | -       |
-| disabled   | 禁用滚动位置检查，通常用于配合动画。                                                  | `boolean`                              | `false` |
-| fullHeight | holder 是否保持完整高度。                                                                            | `boolean`                              | `true`  |
-| height     | 可视列表高度。                                                                                                   | `number`                               | -       |
-| itemHeight | 用于计算虚拟范围的最小项高度。                                                               | `number`                               | -       |
-| itemKey    | 数据项 key 字段或 key 获取函数。                                                                                     | `string` \| `(item) => React.Key`      | -       |
-| onScroll   | 列表滚动时调用。                                                                                          | `React.UIEventHandler<HTMLElement>`    | -       |
-| styles     | 自定义滚动条部位样式。                                                                                          | `object`                               | -       |
-| virtual    | 启用虚拟渲染。                                                                                              | `boolean`                              | `true`  |
+| component  | 自定义列表容器元素。                                               | `string` \| `ComponentType`            | `div`   |
+| data       | 虚拟列表渲染的数据项。                                             | `T[]`                                  | -       |
+| disabled   | 禁用滚动位置检查，通常用于配合动画。                               | `boolean`                              | `false` |
+| fullHeight | holder 是否保持完整高度。                                          | `boolean`                              | `true`  |
+| height     | 可视列表高度。                                                     | `number`                               | -       |
+| itemHeight | 用于计算虚拟范围的最小项高度。                                     | `number`                               | -       |
+| itemKey    | 数据项 key 字段或 key 获取函数。                                   | `string` \| `(item) => React.Key`      | -       |
+| onScroll   | 列表滚动时调用。                                                   | `React.UIEventHandler<HTMLElement>`    | -       |
+| styles     | 自定义滚动条部位样式。                                             | `object`                               | -       |
+| virtual    | 启用虚拟渲染。                                                     | `boolean`                              | `true`  |
 
 ## 本地开发
 
 ```bash
-npm install
+ut install
 npm start
 npm test
 npm run build

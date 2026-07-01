@@ -15,7 +15,6 @@
 
 <p align="center">English | <a href="./README.zh-CN.md">简体中文</a></p>
 
-
 ## Highlights
 
 - Built for React and maintained by the rc-component team.
@@ -51,7 +50,7 @@ export default () => (
 Run the local dumi site:
 
 ```bash
-npm install
+ut install
 npm start
 ```
 
@@ -78,7 +77,7 @@ Then open `http://localhost:8000`.
 ## Development
 
 ```bash
-npm install
+ut install
 npm start
 npm test
 npm run build
