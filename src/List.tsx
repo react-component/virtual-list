@@ -15,12 +15,7 @@ import useHeights from './hooks/useHeights';
 import useMobileTouchMove from './hooks/useMobileTouchMove';
 import useOriginScroll from './hooks/useOriginScroll';
 import useScrollDrag from './hooks/useScrollDrag';
-import type {
-  ScrollOffset,
-  ScrollOffsetInfo,
-  ScrollPos,
-  ScrollTarget,
-} from './hooks/useScrollTo';
+import type { ScrollOffset, ScrollOffsetInfo, ScrollPos, ScrollTarget } from './hooks/useScrollTo';
 import useScrollTo from './hooks/useScrollTo';
 import type { ExtraRenderInfo, GetKey, RenderFunc, SharedConfig } from './interface';
 import type { ScrollBarDirectionType, ScrollBarRef } from './ScrollBar';
@@ -154,9 +149,9 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
 
   const mergedClassName = clsx(prefixCls, { [`${prefixCls}-rtl`]: isRTL }, className);
   const mergedData = data || EMPTY_DATA;
-  const componentRef = useRef<HTMLDivElement>();
-  const fillerInnerRef = useRef<HTMLDivElement>();
-  const containerRef = useRef<HTMLDivElement>();
+  const componentRef = useRef<HTMLDivElement>(null);
+  const fillerInnerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // =============================== Item Key ===============================
 
@@ -196,7 +191,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   // Put ref here since the range is generate by follow
   const rangeRef = useRef({ start: 0, end: mergedData.length });
 
-  const diffItemRef = useRef<T>();
+  const diffItemRef = useRef<T | undefined>(undefined);
   const [diffItem] = useDiffItem(mergedData, getKey);
   diffItemRef.current = diffItem;
 
@@ -315,8 +310,8 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   };
 
   // Hack on scrollbar to enable flash call
-  const verticalScrollBarRef = useRef<ScrollBarRef>();
-  const horizontalScrollBarRef = useRef<ScrollBarRef>();
+  const verticalScrollBarRef = useRef<ScrollBarRef>(null);
+  const horizontalScrollBarRef = useRef<ScrollBarRef>(null);
 
   const horizontalScrollBarSpinSize = React.useMemo(
     () => getSpinSize(size.width, scrollWidth),

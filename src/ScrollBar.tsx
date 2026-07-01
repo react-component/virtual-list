@@ -49,12 +49,12 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
   const isLTR = !rtl;
 
   // ========================= Refs =========================
-  const scrollbarRef = React.useRef<HTMLDivElement>();
-  const thumbRef = React.useRef<HTMLDivElement>();
+  const scrollbarRef = React.useRef<HTMLDivElement>(null);
+  const thumbRef = React.useRef<HTMLDivElement>(null);
 
   // ======================= Visible ========================
   const [visible, setVisible] = React.useState(showScrollBar);
-  const visibleTimeoutRef = React.useRef<ReturnType<typeof setTimeout>>();
+  const visibleTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const delayHidden = () => {
     if (showScrollBar === true || showScrollBar === false) return;
@@ -120,9 +120,9 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
   }, []);
 
   // Pass to effect
-  const enableScrollRangeRef = React.useRef<number>();
+  const enableScrollRangeRef = React.useRef<number | undefined>(undefined);
   enableScrollRangeRef.current = enableScrollRange;
-  const enableOffsetRangeRef = React.useRef<number>();
+  const enableOffsetRangeRef = React.useRef<number | undefined>(undefined);
   enableOffsetRangeRef.current = enableOffsetRange;
 
   React.useEffect(() => {

@@ -39,7 +39,7 @@ const Demo = () => {
   const [height, setHeight] = React.useState(200);
   const [data, setData] = React.useState(getData(20));
   const [fullHeight, setFullHeight] = React.useState(true);
-  const listRef = React.useRef<ListRef>();
+  const listRef = React.useRef<ListRef>(null);
 
   return (
     <React.StrictMode>
