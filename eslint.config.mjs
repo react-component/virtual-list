@@ -17,10 +17,7 @@ const compat = new FlatCompat({
 
 const recommendedTsRulesConfig = tsEslintPlugin.configs.recommended;
 const recommendedTsRulesObject = Array.isArray(recommendedTsRulesConfig)
-  ? recommendedTsRulesConfig.reduce(
-      (rules, config) => ({ ...rules, ...(config.rules || {}) }),
-      {},
-    )
+  ? recommendedTsRulesConfig.reduce((rules, config) => ({ ...rules, ...(config.rules || {}) }), {})
   : recommendedTsRulesConfig?.rules || {};
 const recommendedTsRules = new Set(Object.keys(recommendedTsRulesObject));
 const noopRule = {
@@ -82,7 +79,13 @@ export default [
     rules: {
       '@typescript-eslint/no-empty-object-type': 'off',
       '@typescript-eslint/no-unsafe-function-type': 'off',
-      '@typescript-eslint/no-unused-vars': 'off',
+      '@typescript-eslint/no-unused-vars': [
+        'warn',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+        },
+      ],
     },
   },
 ];
