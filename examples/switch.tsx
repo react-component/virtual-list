@@ -23,7 +23,7 @@ const MyItem = React.forwardRef<HTMLSpanElement, Item>(({ id }, ref) => (
   </span>
 ));
 
-const ForwardMyItem = React.forwardRef(MyItem as any);
+const ForwardMyItem = MyItem;
 
 function getData(count: number) {
   const data: Item[] = [];
