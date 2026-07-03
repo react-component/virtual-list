@@ -308,6 +308,23 @@ describe('List.Scroll', () => {
       expect(container.querySelector('ul').scrollTop > 0).toBeTruthy();
     });
 
+    it('click track to scroll', () => {
+      const { container } = genList({
+        itemHeight: 20,
+        height: 100,
+        data: genData(100),
+      });
+
+      act(() => {
+        const scrollbar = container.querySelector('.rc-virtual-list-scrollbar-vertical');
+        const mouseDownEvent = createEvent.mouseDown(scrollbar);
+        Object.defineProperty(mouseDownEvent, 'pageY', { value: 50 });
+        fireEvent(scrollbar, mouseDownEvent);
+      });
+
+      expect(container.querySelector('ul').scrollTop).toEqual(950);
+    });
+
     it('should show scrollbar when element has showScrollBar prop set to true', () => {
       jest.useFakeTimers();
       const listRef = React.createRef();
