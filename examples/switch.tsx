@@ -6,7 +6,7 @@ interface Item {
   id: number;
 }
 
-const MyItem: React.FC<Item> = ({ id }, ref) => (
+const MyItem = React.forwardRef<HTMLSpanElement, Item>(({ id }, ref) => (
   <span
     ref={ref}
     style={{
@@ -21,9 +21,9 @@ const MyItem: React.FC<Item> = ({ id }, ref) => (
   >
     {id}
   </span>
-);
+));
 
-const ForwardMyItem = React.forwardRef(MyItem as any);
+const ForwardMyItem = MyItem;
 
 function getData(count: number) {
   const data: Item[] = [];
@@ -39,7 +39,7 @@ const Demo = () => {
   const [height, setHeight] = React.useState(200);
   const [data, setData] = React.useState(getData(20));
   const [fullHeight, setFullHeight] = React.useState(true);
-  const listRef = React.useRef<ListRef>();
+  const listRef = React.useRef<ListRef>(null);
 
   return (
     <React.StrictMode>

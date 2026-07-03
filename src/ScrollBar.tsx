@@ -1,5 +1,5 @@
 import { clsx } from 'clsx';
-import { raf } from '@rc-component/util';
+import { raf, useEvent } from '@rc-component/util';
 import * as React from 'react';
 import { getPageXY } from './hooks/useScrollDrag';
 
@@ -49,12 +49,12 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
   const isLTR = !rtl;
 
   // ========================= Refs =========================
-  const scrollbarRef = React.useRef<HTMLDivElement>();
-  const thumbRef = React.useRef<HTMLDivElement>();
+  const scrollbarRef = React.useRef<HTMLDivElement>(null);
+  const thumbRef = React.useRef<HTMLDivElement>(null);
 
   // ======================= Visible ========================
   const [visible, setVisible] = React.useState(showScrollBar);
-  const visibleTimeoutRef = React.useRef<ReturnType<typeof setTimeout>>();
+  const visibleTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const delayHidden = () => {
     if (showScrollBar === true || showScrollBar === false) return;
@@ -88,7 +88,7 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
   const stateRef = React.useRef({ top, dragging, pageY: pageXY, startTop });
   stateRef.current = { top, dragging, pageY: pageXY, startTop };
 
-  const onThumbMouseDown = (e: React.MouseEvent | React.TouchEvent | TouchEvent) => {
+  const onThumbMouseDown = useEvent((e: React.MouseEvent | React.TouchEvent | TouchEvent) => {
     setDragging(true);
     setPageXY(getPageXY(e, horizontal));
     setStartTop(stateRef.current.top);
@@ -96,7 +96,7 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
     onStartMove();
     e.stopPropagation();
     e.preventDefault();
-  };
+  });
 
   // ======================== Effect ========================
 
@@ -117,12 +117,12 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
       scrollbarEle.removeEventListener('touchstart', onScrollbarTouchStart);
       thumbEle.removeEventListener('touchstart', onThumbMouseDown);
     };
-  }, []);
+  }, [onThumbMouseDown]);
 
   // Pass to effect
-  const enableScrollRangeRef = React.useRef<number>();
+  const enableScrollRangeRef = React.useRef<number | undefined>(undefined);
   enableScrollRangeRef.current = enableScrollRange;
-  const enableOffsetRangeRef = React.useRef<number>();
+  const enableOffsetRangeRef = React.useRef<number | undefined>(undefined);
   enableOffsetRangeRef.current = enableOffsetRange;
 
   React.useEffect(() => {

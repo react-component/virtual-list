@@ -52,7 +52,7 @@ export default function useScrollTo<T>(
   syncScrollTop: (newTop: number) => void,
   triggerFlash: () => void,
 ): (arg: number | ScrollTarget) => void {
-  const scrollRef = React.useRef<number>();
+  const scrollRef = React.useRef<number | undefined>(undefined);
 
   const [syncState, setSyncState] = React.useState<{
     times: number;

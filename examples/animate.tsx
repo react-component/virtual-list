@@ -130,7 +130,7 @@ const Demo = () => {
   const [animating, setAnimating] = React.useState(false);
   const [insertIndex, setInsertIndex] = React.useState<number>();
 
-  const listRef = React.useRef<ListRef>();
+  const listRef = React.useRef<ListRef>(null);
 
   const onClose = (id: string) => {
     setCloseMap({
