@@ -25,6 +25,25 @@ export interface ScrollBarRef {
   delayHidden: () => void;
 }
 
+function getScrollOffsetByThumbTop(
+  thumbTop: number,
+  enabledScrollRange: number,
+  enabledOffsetRange: number,
+) {
+  if (enabledScrollRange <= 0 || enabledOffsetRange <= 0) {
+    return 0;
+  }
+
+  const mergedThumbTop = Math.max(Math.min(thumbTop, enabledOffsetRange), 0);
+  const ptg: number = mergedThumbTop / enabledOffsetRange;
+
+  let nextScrollOffset = Math.ceil(ptg * enabledScrollRange);
+  nextScrollOffset = Math.max(nextScrollOffset, 0);
+  nextScrollOffset = Math.min(nextScrollOffset, enabledScrollRange);
+
+  return nextScrollOffset;
+}
+
 const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) => {
   const {
     prefixCls,
@@ -79,9 +98,57 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
   }, [scrollOffset, enableScrollRange, enableOffsetRange]);
 
   // ====================== Container =======================
+  const isThumbTarget = (target: EventTarget | null) => {
+    return !!target && thumbRef.current?.contains(target as Node);
+  };
+
+  const scrollToTrackPosition = (e: React.MouseEvent | MouseEvent) => {
+    const scrollbarEle = scrollbarRef.current;
+
+    if (!scrollbarEle) {
+      return;
+    }
+
+    const rect = scrollbarEle.getBoundingClientRect();
+    const pagePosition = getPageXY(e, horizontal);
+    let nextTop: number;
+
+    if (!Number.isFinite(pagePosition)) {
+      return;
+    }
+
+    if (horizontal) {
+      const horizontalStart = isLTR ? rect.left : rect.right;
+
+      if (!Number.isFinite(horizontalStart)) {
+        return;
+      }
+
+      nextTop =
+        (isLTR ? pagePosition - horizontalStart : horizontalStart - pagePosition) - spinSize / 2;
+    } else {
+      if (!Number.isFinite(rect.top)) {
+        return;
+      }
+
+      nextTop = pagePosition - rect.top - spinSize / 2;
+    }
+
+    onScroll(
+      getScrollOffsetByThumbTop(nextTop, enableScrollRange, enableOffsetRange),
+      horizontal,
+    );
+  };
+
   const onContainerMouseDown: React.MouseEventHandler = (e) => {
     e.stopPropagation();
     e.preventDefault();
+
+    if (e.button !== 0 || isThumbTarget(e.target)) {
+      return;
+    }
+
+    scrollToTrackPosition(e);
   };
 
   // ======================== Thumb =========================
@@ -153,11 +220,11 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
           const tmpEnableScrollRange = enableScrollRangeRef.current;
           const tmpEnableOffsetRange = enableOffsetRangeRef.current;
 
-          const ptg: number = tmpEnableOffsetRange ? newTop / tmpEnableOffsetRange : 0;
-
-          let newScrollTop = Math.ceil(ptg * tmpEnableScrollRange);
-          newScrollTop = Math.max(newScrollTop, 0);
-          newScrollTop = Math.min(newScrollTop, tmpEnableScrollRange);
+          const newScrollTop = getScrollOffsetByThumbTop(
+            newTop,
+            tmpEnableScrollRange,
+            tmpEnableOffsetRange,
+          );
 
           moveRafId = raf(() => {
             onScroll(newScrollTop, horizontal);
