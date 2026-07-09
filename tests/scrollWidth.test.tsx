@@ -42,6 +42,10 @@ describe('List.scrollWidth', () => {
       },
       getBoundingClientRect() {
         return {
+          top: 0,
+          bottom: holderHeight,
+          left: 0,
+          right: holderWidth,
           width: holderWidth,
           height: holderHeight,
         };
@@ -102,6 +106,41 @@ describe('List.scrollWidth', () => {
   });
 
   describe('trigger offset', () => {
+    it('click horizontal track to scroll', async () => {
+      const listRef = React.createRef<ListRef>();
+
+      const { container } = await genList({
+        itemHeight: ITEM_HEIGHT,
+        height: 100,
+        data: genData(100),
+        scrollWidth: 1000,
+        ref: listRef,
+      });
+
+      pageX = 30;
+      fireEvent.mouseDown(container.querySelector('.rc-virtual-list-scrollbar-horizontal')!);
+
+      expect(listRef.current.getScrollInfo()).toEqual({ x: 225, y: 0 });
+    });
+
+    it('click horizontal track to scroll in rtl', async () => {
+      const listRef = React.createRef<ListRef>();
+
+      const { container } = await genList({
+        itemHeight: ITEM_HEIGHT,
+        height: 100,
+        data: genData(100),
+        scrollWidth: 1000,
+        direction: 'rtl',
+        ref: listRef,
+      });
+
+      pageX = 30;
+      fireEvent.mouseDown(container.querySelector('.rc-virtual-list-scrollbar-horizontal')!);
+
+      expect(listRef.current.getScrollInfo()).toEqual({ x: -675, y: 0 });
+    });
+
     it('drag scrollbar', async () => {
       const onVirtualScroll = jest.fn();
       const listRef = React.createRef<ListRef>();
