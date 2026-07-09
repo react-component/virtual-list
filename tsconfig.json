@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "esnext",
     "moduleResolution": "bundler",
-    "jsx": "react-jsx",
+    "jsx": "react",
     "declaration": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
