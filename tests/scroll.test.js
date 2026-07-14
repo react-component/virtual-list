@@ -99,7 +99,12 @@ describe('List.Scroll', () => {
   it('scrollTo null will show the scrollbar', () => {
     jest.useFakeTimers();
     const listRef = React.createRef();
-    const { container } = genList({ itemHeight: 20, height: 100, data: genData(100), ref: listRef });
+    const { container } = genList({
+      itemHeight: 20,
+      height: 100,
+      data: genData(100),
+      ref: listRef,
+    });
     act(() => {
       jest.runAllTimers();
       listRef.current.scrollTo(null);
@@ -211,9 +216,40 @@ describe('List.Scroll', () => {
 
       expect(offset).toHaveBeenCalledWith({
         getSize: expect.any(Function),
+        align: 'top',
       });
       expect(offset).toHaveBeenCalledTimes(2);
       expect(container.querySelector('ul').scrollTop).toEqual(540);
+    });
+
+    it('auto align exposes resolved direction to offset callback', () => {
+      const { scrollTo, container } = presetList();
+
+      // Target below viewport → auto pins to bottom
+      scrollTo(0);
+      const belowAligns = [];
+      scrollTo({
+        index: 30,
+        offset: ({ align }) => {
+          belowAligns.push(align);
+          return 0;
+        },
+      });
+      expect(belowAligns).toContain('bottom');
+      expect(container.querySelector('ul').scrollTop).toEqual(520);
+
+      // Target above viewport → auto pins to top
+      scrollTo(800);
+      const aboveAligns = [];
+      scrollTo({
+        index: 30,
+        offset: ({ align }) => {
+          aboveAligns.push(align);
+          return 0;
+        },
+      });
+      expect(aboveAligns).toContain('top');
+      expect(container.querySelector('ul').scrollTop).toEqual(600);
     });
 
     it('fallbacks invalid function offset to zero', () => {
@@ -328,15 +364,13 @@ describe('List.Scroll', () => {
     it('should show scrollbar when element has showScrollBar prop set to true', () => {
       jest.useFakeTimers();
       const listRef = React.createRef();
-      const { container } = genList(
-        {
-          itemHeight: 20,
-          height: 100,
-          data: genData(100),
-          ref: listRef,
-          showScrollBar: true,
-        }
-      );
+      const { container } = genList({
+        itemHeight: 20,
+        height: 100,
+        data: genData(100),
+        ref: listRef,
+        showScrollBar: true,
+      });
       act(() => {
         jest.runAllTimers();
       });
