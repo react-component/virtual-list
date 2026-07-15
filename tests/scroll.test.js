@@ -559,7 +559,7 @@ describe('List.Scroll', () => {
     const holder = container.querySelector('ul');
 
     const event = createEvent.wheel(holder, {
-      deltaY: 99999999999999999999,
+      deltaY: 1e20,
     });
     fireEvent(holder, event);
 
