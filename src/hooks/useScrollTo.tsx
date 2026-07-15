@@ -19,6 +19,14 @@ export interface ScrollOffsetInfo {
    * 通过 key 获取元素在虚拟列表中的尺寸范围。
    */
   getSize: GetSize;
+  /**
+   * Resolved align direction. For `auto` this reads `'auto'` on the first
+   * measure pass (before the direction is decided) and settles to
+   * `'top'`/`'bottom'` on the pass that actually positions the item.
+   *
+   * 已解析的对齐方向。auto 在首帧测量时仍是 'auto'，定向后变 'top'/'bottom'。
+   */
+  align: ScrollAlign;
 }
 
 export type ScrollOffset = number | ((info: ScrollOffsetInfo) => number);
@@ -75,7 +83,8 @@ export default function useScrollTo<T>(
       collectHeight();
 
       const { targetAlign, originAlign, index, offset: rawOffset } = syncState;
-      const offset = getOffset(rawOffset, { getSize });
+      const mergedAlign = targetAlign || originAlign;
+      const offset = getOffset(rawOffset, { getSize, align: mergedAlign });
 
       const height = containerRef.current.clientHeight;
       let needCollectHeight = false;
@@ -84,8 +93,6 @@ export default function useScrollTo<T>(
 
       // Go to next frame if height not exist
       if (height) {
-        const mergedAlign = targetAlign || originAlign;
-
         // Get top & bottom
         let stackTop = 0;
         let itemTop = 0;
