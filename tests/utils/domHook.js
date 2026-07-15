@@ -1,11 +1,10 @@
-/* eslint-disable no-param-reassign */
 const NO_EXIST = { __NOT_EXIST: true };
 
 export function spyElementPrototypes(Element, properties) {
   const propNames = Object.keys(properties);
   const originDescriptors = {};
 
-  propNames.forEach(propName => {
+  propNames.forEach((propName) => {
     const originDescriptor = Object.getOwnPropertyDescriptor(Element.prototype, propName);
     originDescriptors[propName] = originDescriptor || NO_EXIST;
 
@@ -22,9 +21,10 @@ export function spyElementPrototypes(Element, properties) {
         ...spyProp,
         set(value) {
           if (spyProp.set) {
-            return spyProp.set.call(this, originDescriptor, value);
+            spyProp.set.call(this, originDescriptor, value);
+          } else {
+            originDescriptor.set(value);
           }
-          return originDescriptor.set(value);
         },
         get() {
           if (spyProp.get) {
@@ -39,7 +39,7 @@ export function spyElementPrototypes(Element, properties) {
 
   return {
     mockRestore() {
-      propNames.forEach(propName => {
+      propNames.forEach((propName) => {
         const originDescriptor = originDescriptors[propName];
         if (originDescriptor === NO_EXIST) {
           delete Element.prototype[propName];
@@ -58,4 +58,3 @@ export function spyElementPrototype(Element, propName, property) {
     [propName]: property,
   });
 }
-/* eslint-enable no-param-reassign */

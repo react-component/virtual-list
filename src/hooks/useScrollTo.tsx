@@ -1,4 +1,3 @@
-/* eslint-disable no-param-reassign */
 import * as React from 'react';
 import { raf, useLayoutEffect, warning } from '@rc-component/util';
 import type { GetKey, GetSize } from '../interface';
