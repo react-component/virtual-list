@@ -61,14 +61,15 @@ export default function useScrollTo<T>(
 ): (arg: number | ScrollTarget) => void {
   const scrollRef = React.useRef<number | undefined>(undefined);
 
-  const [syncState, setSyncState] = React.useState<{
-    times: number;
-    index: number;
-    offset: ScrollOffset;
-    originAlign: ScrollAlign;
-    targetAlign?: 'top' | 'bottom';
-    lastTop?: number;
-  }>(null);
+  const [syncState, setSyncState] = React.useState<
+    {
+      times: number;
+      offset: ScrollOffset;
+      originAlign: ScrollAlign;
+      targetAlign?: 'top' | 'bottom';
+      lastTop?: number;
+    } & ({ index: number } | { key: React.Key })
+  >(null);
 
   // ========================== Sync Scroll ==========================
   useLayoutEffect(() => {
@@ -81,17 +82,21 @@ export default function useScrollTo<T>(
 
       collectHeight();
 
-      const { targetAlign, originAlign, index, offset: rawOffset } = syncState;
+      const { targetAlign, originAlign, offset: rawOffset } = syncState;
+      const index =
+        'key' in syncState
+          ? data.findIndex((item) => getKey(item) === syncState.key)
+          : syncState.index;
       const mergedAlign = targetAlign || originAlign;
       const offset = getOffset(rawOffset, { getSize, align: mergedAlign });
 
       const height = containerRef.current.clientHeight;
-      let needCollectHeight = false;
+      let needCollectHeight = 'key' in syncState && index < 0;
       let newTargetAlign: 'top' | 'bottom' | null = targetAlign;
       let targetTop: number | null = null;
 
       // Go to next frame if height not exist
-      if (height) {
+      if (height && index >= 0) {
         // Get top & bottom
         let stackTop = 0;
         let itemTop = 0;
@@ -186,20 +191,20 @@ export default function useScrollTo<T>(
     if (typeof arg === 'number') {
       syncScrollTop(arg);
     } else if (arg && typeof arg === 'object') {
-      let index: number;
+      let target: { index: number } | { key: React.Key };
       const { align } = arg;
 
       if ('index' in arg) {
-        ({ index } = arg);
+        target = { index: arg.index };
       } else {
-        index = data.findIndex((item) => getKey(item) === arg.key);
+        target = { key: arg.key };
       }
 
       const { offset: rawOffset = 0 } = arg;
 
       setSyncState({
         times: 0,
-        index,
+        ...target,
         offset: rawOffset,
         originAlign: align,
       });
