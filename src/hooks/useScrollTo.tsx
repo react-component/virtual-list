@@ -61,15 +61,15 @@ export default function useScrollTo<T>(
 ): (arg: number | ScrollTarget) => void {
   const scrollRef = React.useRef<number | undefined>(undefined);
 
-  const [syncState, setSyncState] = React.useState<
-    {
-      times: number;
-      offset: ScrollOffset;
-      originAlign: ScrollAlign;
-      targetAlign?: 'top' | 'bottom';
-      lastTop?: number;
-    } & ({ index: number } | { key: React.Key })
-  >(null);
+  const [syncState, setSyncState] = React.useState<{
+    times: number;
+    index: number;
+    key?: React.Key;
+    offset: ScrollOffset;
+    originAlign: ScrollAlign;
+    targetAlign?: 'top' | 'bottom';
+    lastTop?: number;
+  }>(null);
 
   // ========================== Sync Scroll ==========================
   useLayoutEffect(() => {
@@ -84,7 +84,7 @@ export default function useScrollTo<T>(
 
       const { targetAlign, originAlign, offset: rawOffset } = syncState;
       const index =
-        'key' in syncState
+        syncState.index < 0 && 'key' in syncState
           ? data.findIndex((item) => getKey(item) === syncState.key)
           : syncState.index;
       const mergedAlign = targetAlign || originAlign;
@@ -165,6 +165,7 @@ export default function useScrollTo<T>(
         setSyncState({
           ...syncState,
           times: syncState.times + 1,
+          index,
           targetAlign: newTargetAlign,
           lastTop: targetTop,
         });
@@ -191,16 +192,9 @@ export default function useScrollTo<T>(
     if (typeof arg === 'number') {
       syncScrollTop(arg);
     } else if (arg && typeof arg === 'object') {
-      let target: { index: number } | { key: React.Key };
       const { align } = arg;
-
-      if ('index' in arg) {
-        target = { index: arg.index };
-      } else {
-        target = { key: arg.key };
-      }
-
       const { offset: rawOffset = 0 } = arg;
+      const target = 'index' in arg ? { index: arg.index } : { index: -1, key: arg.key };
 
       setSyncState({
         times: 0,
