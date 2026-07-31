@@ -84,14 +84,14 @@ export default function useScrollTo<T>(
 
       const { targetAlign, originAlign, offset: rawOffset } = syncState;
       const index =
-        syncState.index < 0 && 'key' in syncState
-          ? data.findIndex((item) => getKey(item) === syncState.key)
-          : syncState.index;
+        syncState.index >= 0
+          ? syncState.index
+          : data.findIndex((item) => getKey(item) === syncState.key);
       const mergedAlign = targetAlign || originAlign;
       const offset = getOffset(rawOffset, { getSize, align: mergedAlign });
 
       const height = containerRef.current.clientHeight;
-      let needCollectHeight = 'key' in syncState && index < 0;
+      let needCollectHeight = false;
       let newTargetAlign: 'top' | 'bottom' | null = targetAlign;
       let targetTop: number | null = null;
 
@@ -162,13 +162,13 @@ export default function useScrollTo<T>(
 
       // Trigger next effect
       if (needCollectHeight) {
-        setSyncState({
-          ...syncState,
-          times: syncState.times + 1,
+        setSyncState((prev) => ({
+          ...prev,
+          times: prev.times + 1,
           index,
           targetAlign: newTargetAlign,
           lastTop: targetTop,
-        });
+        }));
       }
     } else if (process.env.NODE_ENV !== 'production' && syncState?.times === MAX_TIMES) {
       warning(
@@ -192,13 +192,23 @@ export default function useScrollTo<T>(
     if (typeof arg === 'number') {
       syncScrollTop(arg);
     } else if (arg && typeof arg === 'object') {
+      let index: number;
+      let key: React.Key;
       const { align } = arg;
+
+      if ('index' in arg) {
+        ({ index } = arg);
+      } else {
+        key = arg.key;
+        index = data.findIndex((item) => getKey(item) === key);
+      }
+
       const { offset: rawOffset = 0 } = arg;
-      const target = 'index' in arg ? { index: arg.index } : { index: -1, key: arg.key };
 
       setSyncState({
         times: 0,
-        ...target,
+        index,
+        key,
         offset: rawOffset,
         originAlign: align,
       });
