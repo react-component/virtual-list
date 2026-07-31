@@ -64,6 +64,7 @@ export default function useScrollTo<T>(
   const [syncState, setSyncState] = React.useState<{
     times: number;
     index: number;
+    key?: React.Key;
     offset: ScrollOffset;
     originAlign: ScrollAlign;
     targetAlign?: 'top' | 'bottom';
@@ -81,7 +82,11 @@ export default function useScrollTo<T>(
 
       collectHeight();
 
-      const { targetAlign, originAlign, index, offset: rawOffset } = syncState;
+      const { targetAlign, originAlign, offset: rawOffset } = syncState;
+      const index =
+        syncState.index >= 0
+          ? syncState.index
+          : data.findIndex((item) => getKey(item) === syncState.key);
       const mergedAlign = targetAlign || originAlign;
       const offset = getOffset(rawOffset, { getSize, align: mergedAlign });
 
@@ -91,7 +96,7 @@ export default function useScrollTo<T>(
       let targetTop: number | null = null;
 
       // Go to next frame if height not exist
-      if (height) {
+      if (height && index >= 0) {
         // Get top & bottom
         let stackTop = 0;
         let itemTop = 0;
@@ -157,12 +162,13 @@ export default function useScrollTo<T>(
 
       // Trigger next effect
       if (needCollectHeight) {
-        setSyncState({
-          ...syncState,
-          times: syncState.times + 1,
+        setSyncState((prev) => ({
+          ...prev,
+          times: prev.times + 1,
+          index,
           targetAlign: newTargetAlign,
           lastTop: targetTop,
-        });
+        }));
       }
     } else if (process.env.NODE_ENV !== 'production' && syncState?.times === MAX_TIMES) {
       warning(
@@ -187,12 +193,14 @@ export default function useScrollTo<T>(
       syncScrollTop(arg);
     } else if (arg && typeof arg === 'object') {
       let index: number;
+      let key: React.Key;
       const { align } = arg;
 
       if ('index' in arg) {
         ({ index } = arg);
       } else {
-        index = data.findIndex((item) => getKey(item) === arg.key);
+        key = arg.key;
+        index = data.findIndex((item) => getKey(item) === key);
       }
 
       const { offset: rawOffset = 0 } = arg;
@@ -200,6 +208,7 @@ export default function useScrollTo<T>(
       setSyncState({
         times: 0,
         index,
+        key,
         offset: rawOffset,
         originAlign: align,
       });

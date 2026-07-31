@@ -208,6 +208,31 @@ describe('List.Scroll', () => {
       expect(container.querySelector('ul').scrollTop).toEqual(520);
     });
 
+    it('refreshes key index when data changes', () => {
+      const ref = React.createRef();
+
+      function Demo() {
+        const [data, setData] = React.useState(genData(1));
+
+        return (
+          <>
+            <button
+              onClick={() => {
+                setData(genData(100));
+                ref.current.scrollTo({ key: '30', align: 'top' });
+              }}
+            />
+            {genNode({ itemHeight: 20, height: 100, data, ref })}
+          </>
+        );
+      }
+
+      const { container } = render(<Demo />);
+      fireEvent.click(container.querySelector('button'));
+
+      expect(container.querySelector('ul').scrollTop).toEqual(600);
+    });
+
     it('supports function offset with getSize info', () => {
       const { scrollTo, container } = presetList();
       const offset = jest.fn(({ getSize }) => getSize('2').bottom);
