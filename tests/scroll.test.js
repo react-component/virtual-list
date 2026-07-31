@@ -208,17 +208,24 @@ describe('List.Scroll', () => {
       expect(container.querySelector('ul').scrollTop).toEqual(520);
     });
 
-    it('refreshes key index when data changes', () => {
+    it('retries key scroll when data changes after layout', () => {
       const ref = React.createRef();
 
       function Demo() {
         const [data, setData] = React.useState(genData(1));
+        const [update, setUpdate] = React.useState(false);
+
+        React.useLayoutEffect(() => {
+          if (update) {
+            setData(genData(100));
+          }
+        }, [update]);
 
         return (
           <>
             <button
               onClick={() => {
-                setData(genData(100));
+                setUpdate(true);
                 ref.current.scrollTo({ key: '30', align: 'top' });
               }}
             />

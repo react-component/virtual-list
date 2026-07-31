@@ -91,7 +91,7 @@ export default function useScrollTo<T>(
       const offset = getOffset(rawOffset, { getSize, align: mergedAlign });
 
       const height = containerRef.current.clientHeight;
-      let needCollectHeight = false;
+      let needCollectHeight = index < 0;
       let newTargetAlign: 'top' | 'bottom' | null = targetAlign;
       let targetTop: number | null = null;
 
