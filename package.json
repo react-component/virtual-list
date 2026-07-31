@@ -1,6 +1,6 @@
 {
   "name": "@rc-component/virtual-list",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "description": "Virtual scrolling list component for React.",
   "engines": {
     "node": ">=8.x"
