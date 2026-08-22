@@ -8,6 +8,19 @@ interface FireFoxDOMMouseScrollEvent {
   preventDefault: VoidFunction;
 }
 
+const LINE_HEIGHT = 16;
+const PAGE_HEIGHT = 100;
+
+function normalizeWheelDelta(delta: number, deltaMode: number): number {
+  if (deltaMode === 1) {
+    return delta * LINE_HEIGHT;
+  }
+  if (deltaMode === 2) {
+    return delta * PAGE_HEIGHT;
+  }
+  return delta;
+}
+
 export default function useFrameWheel(
   inVirtual: boolean,
   isScrollAtTop: boolean,
@@ -89,10 +102,10 @@ export default function useFrameWheel(
       wheelDirectionRef.current = null;
     }, 2);
 
-    const { deltaX, deltaY, shiftKey } = event;
+    const { deltaX, deltaY, deltaMode, shiftKey } = event;
 
-    let mergedDeltaX = deltaX;
-    let mergedDeltaY = deltaY;
+    let mergedDeltaX = normalizeWheelDelta(deltaX, deltaMode);
+    let mergedDeltaY = normalizeWheelDelta(deltaY, deltaMode);
 
     if (
       wheelDirectionRef.current === 'sx' ||
