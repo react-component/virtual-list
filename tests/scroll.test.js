@@ -336,6 +336,34 @@ describe('List.Scroll', () => {
     expect(preventDefault).toHaveBeenCalled();
   });
 
+  it('normalizes line-mode wheel delta to pixels', () => {
+    const { container } = genList({ itemHeight: 20, height: 100, data: genData(100) });
+    const ulElement = container.querySelector('ul');
+    act(() => {
+      const wheelEvent = new Event('wheel');
+      wheelEvent.deltaY = 3;
+      wheelEvent.deltaMode = 1;
+      wheelEvent.preventDefault = () => {};
+      ulElement.dispatchEvent(wheelEvent);
+      jest.runAllTimers();
+    });
+    expect(getScrollOffset(container)).toBe(48);
+  });
+
+  it('normalizes page-mode wheel delta to pixels', () => {
+    const { container } = genList({ itemHeight: 20, height: 100, data: genData(100) });
+    const ulElement = container.querySelector('ul');
+    act(() => {
+      const wheelEvent = new Event('wheel');
+      wheelEvent.deltaY = 1;
+      wheelEvent.deltaMode = 2;
+      wheelEvent.preventDefault = () => {};
+      ulElement.dispatchEvent(wheelEvent);
+      jest.runAllTimers();
+    });
+    expect(getScrollOffset(container)).toBe(100);
+  });
+
   describe('scrollbar', () => {
     it('moving', () => {
       const listRef = React.createRef();
