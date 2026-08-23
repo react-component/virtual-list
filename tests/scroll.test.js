@@ -374,14 +374,23 @@ describe('List.Scroll', () => {
       scrollWidth: 1000,
     });
     const holder = container.querySelector('ul');
-    const event = createEvent.wheel(holder, {
-      deltaX: 3,
-      deltaY: 0,
-      deltaMode: 1,
+
+    act(() => {
+      const event = createEvent.wheel(holder, {
+        deltaX: 3,
+        deltaY: 0,
+        deltaMode: 1,
+      });
+      fireEvent(holder, event);
+      jest.runAllTimers();
     });
-    const spyPreventDefault = jest.spyOn(event, 'preventDefault');
-    fireEvent(holder, event);
-    expect(spyPreventDefault).toHaveBeenCalled();
+
+    // Horizontal scrollbar is the second [data-dev-offset] element.
+    // deltaX 3 in line mode should normalize to 3 * 16 = 48px.
+    expect(container.querySelectorAll('[data-dev-offset]')[1]).toHaveAttribute(
+      'data-dev-offset',
+      '48',
+    );
   });
 
   describe('scrollbar', () => {
