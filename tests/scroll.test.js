@@ -341,6 +341,7 @@ describe('List.Scroll', () => {
     const ulElement = container.querySelector('ul');
     act(() => {
       const wheelEvent = new Event('wheel');
+      wheelEvent.deltaX = 0;
       wheelEvent.deltaY = 3;
       wheelEvent.deltaMode = 1;
       wheelEvent.preventDefault = () => {};
@@ -355,6 +356,7 @@ describe('List.Scroll', () => {
     const ulElement = container.querySelector('ul');
     act(() => {
       const wheelEvent = new Event('wheel');
+      wheelEvent.deltaX = 0;
       wheelEvent.deltaY = 1;
       wheelEvent.deltaMode = 2;
       wheelEvent.preventDefault = () => {};
@@ -362,6 +364,24 @@ describe('List.Scroll', () => {
       jest.runAllTimers();
     });
     expect(getScrollOffset(container)).toBe(100);
+  });
+
+  it('normalizes line-mode wheel delta to pixels horizontally', () => {
+    const { container } = genList({
+      itemHeight: 20,
+      height: 100,
+      data: genData(100),
+      scrollWidth: 1000,
+    });
+    const holder = container.querySelector('ul');
+    const event = createEvent.wheel(holder, {
+      deltaX: 3,
+      deltaY: 0,
+      deltaMode: 1,
+    });
+    const spyPreventDefault = jest.spyOn(event, 'preventDefault');
+    fireEvent(holder, event);
+    expect(spyPreventDefault).toHaveBeenCalled();
   });
 
   describe('scrollbar', () => {
