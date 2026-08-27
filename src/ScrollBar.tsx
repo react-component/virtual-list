@@ -75,14 +75,14 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
   const [visible, setVisible] = React.useState(showScrollBar);
   const visibleTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
-  const delayHidden = () => {
+  const delayHidden = useEvent(() => {
     if (showScrollBar === true || showScrollBar === false) return;
     clearTimeout(visibleTimeoutRef.current);
     setVisible(true);
     visibleTimeoutRef.current = setTimeout(() => {
       setVisible(false);
     }, 3000);
-  };
+  });
 
   // ======================== Range =========================
   const enableScrollRange = scrollRange - containerSize || 0;
@@ -134,10 +134,7 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
       nextTop = pagePosition - rect.top - spinSize / 2;
     }
 
-    onScroll(
-      getScrollOffsetByThumbTop(nextTop, enableScrollRange, enableOffsetRange),
-      horizontal,
-    );
+    onScroll(getScrollOffsetByThumbTop(nextTop, enableScrollRange, enableOffsetRange), horizontal);
   };
 
   const onContainerMouseDown: React.MouseEventHandler = (e) => {
@@ -255,11 +252,17 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
   }, [dragging]);
 
   React.useEffect(() => {
-    delayHidden();
+    if (showScrollBar === true || showScrollBar === false) {
+      clearTimeout(visibleTimeoutRef.current);
+      setVisible(showScrollBar);
+    } else {
+      delayHidden();
+    }
+
     return () => {
       clearTimeout(visibleTimeoutRef.current);
     };
-  }, [scrollOffset]);
+  }, [scrollOffset, showScrollBar, delayHidden]);
 
   // ====================== Imperative ======================
   React.useImperativeHandle(ref, () => ({
