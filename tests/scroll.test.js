@@ -409,6 +409,34 @@ describe('List.Scroll', () => {
       const scrollbarElement = container.querySelector('.rc-virtual-list-scrollbar-visible');
       expect(scrollbarElement).not.toBeNull();
     });
+
+    it('syncs scrollbar visibility when showScrollBar changes', () => {
+      const props = {
+        itemHeight: 20,
+        height: 100,
+        data: genData(100),
+        showScrollBar: false,
+      };
+      const { container, rerender } = genList(props);
+      const getScrollbar = () => container.querySelector('.rc-virtual-list-scrollbar-vertical');
+
+      expect(getScrollbar()).not.toHaveClass('rc-virtual-list-scrollbar-visible');
+
+      rerender(genNode({ ...props, showScrollBar: true }));
+      expect(getScrollbar()).toHaveClass('rc-virtual-list-scrollbar-visible');
+
+      rerender(genNode(props));
+      expect(getScrollbar()).not.toHaveClass('rc-virtual-list-scrollbar-visible');
+
+      rerender(genNode({ ...props, showScrollBar: 'optional' }));
+      expect(getScrollbar()).toHaveClass('rc-virtual-list-scrollbar-visible');
+
+      act(() => {
+        jest.advanceTimersByTime(3000);
+      });
+      expect(getScrollbar()).not.toHaveClass('rc-virtual-list-scrollbar-visible');
+    });
+
     describe('not show scrollbar when disabled virtual', () => {
       [
         { name: '!virtual', props: { virtual: false } },
