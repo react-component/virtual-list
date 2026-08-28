@@ -65,7 +65,6 @@ Then open `http://localhost:8000`.
 | children   | Render function for each item. The third argument contains measuring props used by legacy browser compatibility paths. | `(item, index, props) => ReactElement` | -       |
 | component  | Custom list container element.                                                                                         | `string` \| `ComponentType`            | `div`   |
 | data       | Items rendered by the virtual list.                                                                                    | `T[]`                                  | -       |
-| disabled   | Disable scroll position checks, usually while coordinating animation.                                                  | `boolean`                              | `false` |
 | fullHeight | Whether the holder should keep full height.                                                                            | `boolean`                              | `true`  |
 | height     | Visible list height.                                                                                                   | `number`                               | -       |
 | itemHeight | Minimum item height used to calculate the virtual range.                                                               | `number`                               | -       |
