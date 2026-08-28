@@ -180,13 +180,11 @@ const Demo = () => {
           height={200}
           itemHeight={20}
           itemKey="id"
-          // disabled={animating}
           ref={listRef}
           style={{
             border: '1px solid red',
             boxSizing: 'border-box',
           }}
-          // onSkipRender={onAppear}
           // onItemRemove={onAppear}
         >
           {(item, index) => (

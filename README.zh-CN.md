@@ -65,7 +65,6 @@ npm start
 | children   | 每一项的渲染函数。第三个参数包含旧浏览器兼容路径使用的测量 props。 | `(item, index, props) => ReactElement` | -       |
 | component  | 自定义列表容器元素。                                               | `string` \| `ComponentType`            | `div`   |
 | data       | 虚拟列表渲染的数据项。                                             | `T[]`                                  | -       |
-| disabled   | 禁用滚动位置检查，通常用于配合动画。                               | `boolean`                              | `false` |
 | fullHeight | holder 是否保持完整高度。                                          | `boolean`                              | `true`  |
 | height     | 可视列表高度。                                                     | `number`                               | -       |
 | itemHeight | 用于计算虚拟范围的最小项高度。                                     | `number`                               | -       |
