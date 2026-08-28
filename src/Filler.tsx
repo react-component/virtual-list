@@ -61,7 +61,7 @@ const Filler = React.forwardRef(
       innerStyle = {
         ...innerStyle,
         transform: `translateY(${offsetY}px)`,
-        [rtl ? 'marginRight' : 'marginLeft']: -offsetX,
+        [rtl ? 'marginRight' : 'marginLeft']: -offsetX || 0,
         position: 'absolute',
         left: 0,
         right: 0,
