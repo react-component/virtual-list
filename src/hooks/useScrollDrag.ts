@@ -13,6 +13,22 @@ export function getPageXY(
   return obj[horizontal ? 'pageX' : 'pageY'] - window[horizontal ? 'scrollX' : 'scrollY'];
 }
 
+/**
+ * Check the element itself or any of its ancestors is draggable.
+ * Use the IDL attribute instead of `[draggable]` selector so that
+ * implicitly draggable elements (`a[href]`, `img`) are also covered.
+ */
+function isDraggable(ele: HTMLElement | null): boolean {
+  let current = ele;
+  while (current) {
+    if (current.draggable) {
+      return true;
+    }
+    current = current.parentElement;
+  }
+  return false;
+}
+
 export default function useScrollDrag(
   inVirtual: boolean,
   componentRef: React.RefObject<HTMLElement>,
@@ -45,7 +61,9 @@ export default function useScrollDrag(
 
       const onMouseDown = (e: MouseEvent) => {
         // Skip if element set draggable
-        if ((e.target as HTMLElement).draggable || e.button !== 0) {
+        // Note the mousedown target is the deepest node in the event path (e.g. the
+        // title span inside a Tree node), while `draggable` is set on the ancestor.
+        if (isDraggable(e.target as HTMLElement) || e.button !== 0) {
           return;
         }
         // Skip if nest List has handled this event
