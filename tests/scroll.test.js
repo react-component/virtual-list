@@ -819,6 +819,83 @@ describe('List.Scroll', () => {
       // Assert that scroll did not change after drag
       expect(getScrollTop(container)).toEqual(0);
     });
+
+    it('can not move when dragging a child of a draggable item', () => {
+      const onScroll = jest.fn();
+      const { container } = render(
+        <List
+          component="ul"
+          itemKey="id"
+          itemHeight={20}
+          height={100}
+          data={genData(100)}
+          onScroll={onScroll}
+        >
+          {({ id }) => (
+            <li draggable>
+              <span className="drag-child">{id}</span>
+            </li>
+          )}
+        </List>,
+      );
+
+      // Initial scroll should be 0
+      expect(getScrollTop(container)).toEqual(0);
+
+      // Mousedown / mousemove happen on the inner child, while `draggable`
+      // is set on the <li> ancestor. The child's own `draggable` is false,
+      // so the fix must walk up to the ancestor to skip the drag scroll.
+      const child = container.querySelector('.drag-child');
+      fireEvent.mouseDown(child, { button: 0 });
+      const moveEvent = createEvent.mouseMove(child);
+      moveEvent.pageY = 100;
+      fireEvent(child, moveEvent);
+      act(() => {
+        jest.advanceTimersByTime(100);
+      });
+      fireEvent.mouseUp(child);
+
+      // Should not scroll because an ancestor is draggable
+      expect(getScrollTop(container)).toEqual(0);
+    });
+
+    it('can not move when dragging a child of an implicitly draggable item', () => {
+      const onScroll = jest.fn();
+      const { container } = render(
+        <List
+          component="ul"
+          itemKey="id"
+          itemHeight={20}
+          height={100}
+          data={genData(100)}
+          onScroll={onScroll}
+        >
+          {({ id }) => (
+            <li>
+              <a href="#">
+                <span className="drag-child">{id}</span>
+              </a>
+            </li>
+          )}
+        </List>,
+      );
+
+      expect(getScrollTop(container)).toEqual(0);
+
+      // `a[href]` is draggable by default and carries no `draggable` attribute,
+      // so matching on the attribute would miss it.
+      const child = container.querySelector('.drag-child');
+      fireEvent.mouseDown(child, { button: 0 });
+      const moveEvent = createEvent.mouseMove(child);
+      moveEvent.pageY = 100;
+      fireEvent(child, moveEvent);
+      act(() => {
+        jest.advanceTimersByTime(100);
+      });
+      fireEvent.mouseUp(child);
+
+      expect(getScrollTop(container)).toEqual(0);
+    });
   });
 
   it('not scroll jump for item height change', async () => {
