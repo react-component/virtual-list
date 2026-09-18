@@ -64,6 +64,17 @@ export default function useDragEdgeScroll(
     };
 
     const onDragOver = (e: DragEvent) => {
+      // Skip if a nested virtual List already handled this event, the same way
+      // `useScrollDrag` does on `mousedown`: a nested List's `dragover` bubbles
+      // to both holders and only the innermost one should scroll.
+      const event = e as DragEvent & { _virtualHandled?: boolean };
+      if (event._virtualHandled) {
+        return;
+      }
+      // `dragover` keeps firing while the drag lasts, so mark each event: the
+      // innermost holder sees it first and the outer ones bail out above.
+      event._virtualHandled = true;
+
       const { top, bottom } = ele.getBoundingClientRect();
       const { clientY } = e;
 
@@ -79,8 +90,6 @@ export default function useDragEdgeScroll(
     };
 
     const onDragLeave = (e: DragEvent) => {
-      // `dragleave` also fires when moving between inner nodes; only stop when
-      // the pointer truly leaves the container.
       const related = e.relatedTarget as Node | null;
       if (!related || !ele.contains(related)) {
         stopScroll();
