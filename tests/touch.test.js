@@ -1,6 +1,7 @@
 import { act, fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import List from '../src';
+import useMobileTouchMove from '../src/hooks/useMobileTouchMove';
 import { spyElementPrototypes } from './utils/domHook';
 
 // Mock ScrollBar
@@ -187,5 +188,101 @@ describe('List.Touch', () => {
       'data-dev-offset',
       '0',
     );
+  });
+
+  describe('smooth scroll ease out', () => {
+    function setupProbe(impl = () => true) {
+      const callback = jest.fn(impl);
+
+      function Probe() {
+        const listRef = React.useRef(null);
+        useMobileTouchMove(true, listRef, callback);
+        return (
+          <div ref={listRef} className="holder">
+            <span className="item">item</span>
+          </div>
+        );
+      }
+
+      const { container } = render(<Probe />);
+      return { container, callback };
+    }
+
+    function dispatchTouch(el, type, pageY) {
+      const ev = new Event(type, { bubbles: true, cancelable: true });
+      ev.touches = [{ pageY, pageX: 0 }];
+      el.dispatchEvent(ev);
+    }
+
+    // Offset is `start - current`, so moving the finger DOWN gives a negative
+    // offset (content scrolls up). `Math.floor` never returns 0 for a negative
+    // value (-0.9 -> -1), which used to keep the interval running forever.
+    [200, -200].forEach((move) => {
+      it(`stops easing out when the finger moved ${move > 0 ? 'down' : 'up'}`, () => {
+        const { container, callback } = setupProbe();
+        const item = container.querySelector('.item');
+
+        act(() => {
+          dispatchTouch(item, 'touchstart', 100);
+        });
+        act(() => {
+          dispatchTouch(item, 'touchmove', 100 + move);
+        });
+
+        // Let the smooth interval run longer than the easing needs.
+        act(() => {
+          jest.advanceTimersByTime(5000);
+        });
+        const settledCalls = callback.mock.calls.length;
+        expect(settledCalls).toBeGreaterThan(0);
+
+        // Nothing may happen after it settled.
+        act(() => {
+          jest.advanceTimersByTime(5000);
+        });
+        expect(callback.mock.calls.length).toBe(settledCalls);
+      });
+    });
+
+    it('stops as soon as the list reports it cannot scroll further', () => {
+      // First call (the touchmove itself) reports handled, then the list is at
+      // its limit, so the interval must give up right away.
+      let handled = true;
+      const { container, callback } = setupProbe(() => {
+        const result = handled;
+        handled = false;
+        return result;
+      });
+      const item = container.querySelector('.item');
+
+      act(() => {
+        dispatchTouch(item, 'touchstart', 100);
+      });
+      act(() => {
+        dispatchTouch(item, 'touchmove', 300);
+      });
+
+      act(() => {
+        jest.advanceTimersByTime(5000);
+      });
+      // touchmove + a single interval frame, then it bailed out.
+      expect(callback.mock.calls.length).toBe(2);
+
+      act(() => {
+        jest.advanceTimersByTime(5000);
+      });
+      expect(callback.mock.calls.length).toBe(2);
+    });
+
+    it('ignores a touchmove that never had a touchstart', () => {
+      const { container, callback } = setupProbe();
+      const item = container.querySelector('.item');
+
+      act(() => {
+        dispatchTouch(item, 'touchmove', 300);
+      });
+
+      expect(callback).not.toHaveBeenCalled();
+    });
   });
 });
