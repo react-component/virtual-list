@@ -148,7 +148,7 @@ describe('List.NativeDragEdgeScroll', () => {
 
     // Second `dragover`, still inside the band: the loop is already scheduled, so
     // the next frame moves by the same amount. A second loop would double it.
-    fireDragOver(getInnerLi(container), 88);
+    fireDragOver(getInnerLi(container), 95);
     act(() => {
       jest.advanceTimersByTime(100);
     });
@@ -232,6 +232,39 @@ describe('List.NativeDragEdgeScroll', () => {
     });
 
     expect(getScrollTop(container)).toBeGreaterThan(afterEdge);
+  });
+
+  it('only the innermost virtual list scrolls on a nested drag', () => {
+    // `examples/nest.tsx` renders a virtual List inside the item of another one,
+    // so a `dragover` on an inner item bubbles to both holders.
+    const { container } = render(
+      <List component="ul" itemKey="id" itemHeight={20} height={100} data={genData(20)}>
+        {() => (
+          <li>
+            <List component="ul" itemKey="id" itemHeight={10} height={40} data={genData(20)}>
+              {({ id }) => <li>{id}</li>}
+            </List>
+          </li>
+        )}
+      </List>,
+    );
+
+    const holdersInners = () => container.querySelectorAll('.rc-virtual-list-holder-inner');
+    const readTop = (ele) => {
+      const matched = ele.style.transform && ele.style.transform.match(/\d+/);
+      return matched ? Number(matched[0]) : 0;
+    };
+
+    // The mocked rect is 0..100 for every element, so `95` lands in both bottom
+    // bands: inner `min(10 * 1.2, 40 / 4)` = 10 -> [90, 100], outer
+    // `min(20 * 1.2, 100 / 4)` = 24 -> [76, 100]. Only the inner one may react.
+    fireDragOver(holdersInners()[1].querySelector('li'), 95);
+    act(() => {
+      jest.advanceTimersByTime(100);
+    });
+
+    expect(readTop(holdersInners()[1])).toBeGreaterThan(0);
+    expect(readTop(holdersInners()[0])).toEqual(0);
   });
 
   it('does not attach the behavior for a non-virtual list', () => {
