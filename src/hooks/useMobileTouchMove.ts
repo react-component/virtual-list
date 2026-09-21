@@ -54,7 +54,7 @@ export default function useMobileTouchMove(
           } else {
             offsetY *= SMOOTH_PTG;
           }
-          const offset = Math.floor(isHorizontal ? offsetX : offsetY);
+          const offset = Math.trunc(isHorizontal ? offsetX : offsetY);
           if (!callback(isHorizontal, offset, true) || Math.abs(offset) <= 0.1) {
             clearInterval(intervalRef.current);
           }
