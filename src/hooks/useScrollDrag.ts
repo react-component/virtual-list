@@ -1,7 +1,7 @@
 import { raf } from '@rc-component/util';
 import * as React from 'react';
 
-function smoothScrollOffset(offset: number) {
+export function smoothScrollOffset(offset: number) {
   return Math.floor(offset ** 0.5);
 }
 
