@@ -73,6 +73,32 @@ describe('List.NativeDragEdgeScroll', () => {
     return container.querySelector('.rc-virtual-list-holder-inner li');
   }
 
+  // A virtual List rendered inside the item of another one, as in
+  // `examples/nest.tsx`. The outer keeps the default `itemHeight` (20 / height
+  // 100) and the nested one uses 10 / 40.
+  function renderNested() {
+    return render(
+      <List component="ul" itemKey="id" itemHeight={20} height={100} data={genData(20)}>
+        {() => (
+          <li>
+            <List component="ul" itemKey="id" itemHeight={10} height={40} data={genData(20)}>
+              {({ id }) => <li>{id}</li>}
+            </List>
+          </li>
+        )}
+      </List>,
+    );
+  }
+
+  function getHoldersInners(container) {
+    return container.querySelectorAll('.rc-virtual-list-holder-inner');
+  }
+
+  function readHolderTop(ele) {
+    const matched = ele.style.transform && ele.style.transform.match(/\d+/);
+    return matched ? Number(matched[0]) : 0;
+  }
+
   it('scrolls down when a drag reaches the bottom edge', () => {
     const { container } = renderList();
     expect(getScrollTop(container)).toEqual(0);
@@ -265,6 +291,53 @@ describe('List.NativeDragEdgeScroll', () => {
 
     expect(readTop(holdersInners()[1])).toBeGreaterThan(0);
     expect(readTop(holdersInners()[0])).toEqual(0);
+  });
+
+  it('stops the outer list when the drag moves on into a nested one', () => {
+    const { container } = renderNested();
+    // The outer list re-renders as it scrolls, so always read the holders again
+    // instead of keeping the first snapshot.
+    const holdersInners = () => getHoldersInners(container);
+
+    // Start scrolling from the outer bottom edge: `80` misses the nested bottom
+    // band (`[90, 100]`), so only the outer list reacts.
+    fireDragOver(holdersInners()[0].querySelector('li'), 80);
+    act(() => {
+      jest.advanceTimersByTime(200);
+    });
+    const outerScrolled = readHolderTop(holdersInners()[0]);
+    expect(outerScrolled).toBeGreaterThan(0);
+
+    // The same drag continues on the nested list (`80` is in its idle zone), so
+    // the nested list owns the event now. The outer list must give up its own
+    // loop instead of keeping on scrolling.
+    fireDragOver(holdersInners()[1].querySelector('li'), 80);
+    act(() => {
+      jest.advanceTimersByTime(300);
+    });
+
+    expect(readHolderTop(holdersInners()[0])).toEqual(outerScrolled);
+  });
+
+  it('does not scroll the outer list while the nested one handles the edge', () => {
+    const { container } = renderNested();
+    const holdersInners = () => getHoldersInners(container);
+
+    fireDragOver(holdersInners()[0].querySelector('li'), 80);
+    act(() => {
+      jest.advanceTimersByTime(200);
+    });
+    const outerScrolled = readHolderTop(holdersInners()[0]);
+    expect(outerScrolled).toBeGreaterThan(0);
+
+    // `95` is inside both bottom bands, so the nested list scrolls. The outer
+    // one must stay where it was instead of doubling the movement.
+    fireDragOver(holdersInners()[1].querySelector('li'), 95);
+    act(() => {
+      jest.advanceTimersByTime(300);
+    });
+
+    expect(readHolderTop(holdersInners()[0])).toEqual(outerScrolled);
   });
 
   it('does not attach the behavior for a non-virtual list', () => {

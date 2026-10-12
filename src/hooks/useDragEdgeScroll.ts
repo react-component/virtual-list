@@ -69,6 +69,10 @@ export default function useDragEdgeScroll(
       // to both holders and only the innermost one should scroll.
       const event = e as DragEvent & { _virtualHandled?: boolean };
       if (event._virtualHandled) {
+        // A nested list took this event over. Stop our own loop first: it may
+        // already be running from an earlier `dragover` near our edge, and
+        // `dragleave` will not fire while the pointer stays inside our element.
+        stopScroll();
         return;
       }
       // `dragover` keeps firing while the drag lasts, so mark each event: the
