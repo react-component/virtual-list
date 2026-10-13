@@ -134,19 +134,16 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
       nextTop = pagePosition - rect.top - spinSize / 2;
     }
 
-    onScroll(
-      getScrollOffsetByThumbTop(nextTop, enableScrollRange, enableOffsetRange),
-      horizontal,
-    );
+    onScroll(getScrollOffsetByThumbTop(nextTop, enableScrollRange, enableOffsetRange), horizontal);
   };
 
   const onContainerMouseDown: React.MouseEventHandler = (e) => {
-    e.stopPropagation();
-    e.preventDefault();
-
     if (e.button !== 0 || isThumbTarget(e.target)) {
       return;
     }
+
+    e.stopPropagation();
+    e.preventDefault();
 
     scrollToTrackPosition(e);
   };
@@ -156,6 +153,10 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
   stateRef.current = { top, dragging, pageY: pageXY, startTop };
 
   const onThumbMouseDown = useEvent((e: React.MouseEvent | React.TouchEvent | TouchEvent) => {
+    if ('button' in e && e.button !== 0) {
+      return;
+    }
+
     setDragging(true);
     setPageXY(getPageXY(e, horizontal));
     setStartTop(stateRef.current.top);
