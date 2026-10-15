@@ -336,6 +336,63 @@ describe('List.Scroll', () => {
     expect(preventDefault).toHaveBeenCalled();
   });
 
+  it('normalizes line-mode wheel delta to pixels', () => {
+    const { container } = genList({ itemHeight: 20, height: 100, data: genData(100) });
+    const ulElement = container.querySelector('ul');
+    act(() => {
+      const wheelEvent = new Event('wheel');
+      wheelEvent.deltaX = 0;
+      wheelEvent.deltaY = 3;
+      wheelEvent.deltaMode = 1;
+      wheelEvent.preventDefault = () => {};
+      ulElement.dispatchEvent(wheelEvent);
+      jest.runAllTimers();
+    });
+    expect(getScrollOffset(container)).toBe(48);
+  });
+
+  it('normalizes page-mode wheel delta to pixels', () => {
+    const { container } = genList({ itemHeight: 20, height: 100, data: genData(100) });
+    const ulElement = container.querySelector('ul');
+    act(() => {
+      const wheelEvent = new Event('wheel');
+      wheelEvent.deltaX = 0;
+      wheelEvent.deltaY = 1;
+      wheelEvent.deltaMode = 2;
+      wheelEvent.preventDefault = () => {};
+      ulElement.dispatchEvent(wheelEvent);
+      jest.runAllTimers();
+    });
+    expect(getScrollOffset(container)).toBe(100);
+  });
+
+  it('normalizes line-mode wheel delta to pixels horizontally', () => {
+    const { container } = genList({
+      itemHeight: 20,
+      height: 100,
+      data: genData(100),
+      scrollWidth: 1000,
+    });
+    const holder = container.querySelector('ul');
+
+    act(() => {
+      const event = createEvent.wheel(holder, {
+        deltaX: 3,
+        deltaY: 0,
+        deltaMode: 1,
+      });
+      fireEvent(holder, event);
+      jest.runAllTimers();
+    });
+
+    // Horizontal scrollbar is the second [data-dev-offset] element.
+    // deltaX 3 in line mode should normalize to 3 * 16 = 48px.
+    expect(container.querySelectorAll('[data-dev-offset]')[1]).toHaveAttribute(
+      'data-dev-offset',
+      '48',
+    );
+  });
+
   describe('scrollbar', () => {
     it('moving', () => {
       const listRef = React.createRef();

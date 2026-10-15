@@ -2,12 +2,21 @@ import { raf } from '@rc-component/util';
 import { useRef } from 'react';
 import isFF from '../utils/isFirefox';
 import useOriginScroll from './useOriginScroll';
-
 interface FireFoxDOMMouseScrollEvent {
   detail: number;
   preventDefault: VoidFunction;
 }
-
+const LINE_HEIGHT = 16;
+const PAGE_HEIGHT = 100;
+function normalizeWheelDelta(delta: number, deltaMode: number): number {
+  if (deltaMode === 1) {
+    return delta * LINE_HEIGHT;
+  }
+  if (deltaMode === 2) {
+    return delta * PAGE_HEIGHT;
+  }
+  return delta;
+}
 export default function useFrameWheel(
   inVirtual: boolean,
   isScrollAtTop: boolean,
@@ -22,11 +31,9 @@ export default function useFrameWheel(
 ): [(e: WheelEvent) => void, (e: FireFoxDOMMouseScrollEvent) => void] {
   const offsetRef = useRef(0);
   const nextFrameRef = useRef<number>(null);
-
   // Firefox patch
   const wheelValueRef = useRef<number>(null);
   const isMouseScrollRef = useRef<boolean>(false);
-
   // Scroll status sync
   const originScroll = useOriginScroll(
     isScrollAtTop,
@@ -34,13 +41,10 @@ export default function useFrameWheel(
     isScrollAtLeft,
     isScrollAtRight,
   );
-
-  function onWheelY(e: WheelEvent, deltaY: number) {
+  function onWheelY(e: WheelEvent, rawDeltaY: number, deltaY: number) {
     raf.cancel(nextFrameRef.current);
-
     // Do nothing when scroll at the edge, Skip check when is in scroll
     if (originScroll(false, deltaY)) return;
-
     // Skip if nest List has handled this event
     const event = e as WheelEvent & {
       _virtualHandled?: boolean;
@@ -50,15 +54,14 @@ export default function useFrameWheel(
     } else {
       return;
     }
-
     offsetRef.current += deltaY;
-    wheelValueRef.current = deltaY;
-
+    // Keep the raw delta here so the Firefox `DOMMouseScroll.detail`
+    // comparison in `onFireFoxScroll` still matches (detail is in lines).
+    wheelValueRef.current = rawDeltaY;
     // Proxy of scroll events
     if (!isFF) {
       event.preventDefault();
     }
-
     nextFrameRef.current = raf(() => {
       // Patch a multiple for Firefox to fix wheel number too small
       // ref: https://github.com/ant-design/ant-design/issues/26372#issuecomment-679460266
@@ -67,63 +70,48 @@ export default function useFrameWheel(
       offsetRef.current = 0;
     });
   }
-
   function onWheelX(event: WheelEvent, deltaX: number) {
     onWheelDelta(deltaX, true);
-
     if (!isFF) {
       event.preventDefault();
     }
   }
-
   // Check for which direction does wheel do. `sx` means `shift + wheel`
   const wheelDirectionRef = useRef<'x' | 'y' | 'sx' | null>(null);
   const wheelDirectionCleanRef = useRef<number>(null);
-
   function onWheel(event: WheelEvent) {
     if (!inVirtual) return;
-
     // Wait for 2 frame to clean direction
     raf.cancel(wheelDirectionCleanRef.current);
     wheelDirectionCleanRef.current = raf(() => {
       wheelDirectionRef.current = null;
     }, 2);
-
-    const { deltaX, deltaY, shiftKey } = event;
-
-    let mergedDeltaX = deltaX;
-    let mergedDeltaY = deltaY;
-
+    const { deltaX, deltaY, deltaMode, shiftKey } = event;
+    let mergedDeltaX = normalizeWheelDelta(deltaX, deltaMode);
+    let mergedDeltaY = normalizeWheelDelta(deltaY, deltaMode);
     if (
       wheelDirectionRef.current === 'sx' ||
-      (!wheelDirectionRef.current && (shiftKey || false) && deltaY && !deltaX)
+      (!wheelDirectionRef.current && (shiftKey || false) && mergedDeltaY && !mergedDeltaX)
     ) {
-      mergedDeltaX = deltaY;
+      mergedDeltaX = mergedDeltaY;
       mergedDeltaY = 0;
-
       wheelDirectionRef.current = 'sx';
     }
-
     const absX = Math.abs(mergedDeltaX);
     const absY = Math.abs(mergedDeltaY);
-
     if (wheelDirectionRef.current === null) {
       wheelDirectionRef.current = horizontalScroll && absX > absY ? 'x' : 'y';
     }
-
     if (wheelDirectionRef.current === 'y') {
-      onWheelY(event, mergedDeltaY);
+      onWheelY(event, deltaY, mergedDeltaY);
     } else {
       onWheelX(event, mergedDeltaX);
     }
   }
-
   // A patch for firefox
   function onFireFoxScroll(event: FireFoxDOMMouseScrollEvent) {
     if (!inVirtual) return;
-
     isMouseScrollRef.current = event.detail === wheelValueRef.current;
   }
-
   return [onWheel, onFireFoxScroll];
 }
