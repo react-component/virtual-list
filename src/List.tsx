@@ -14,6 +14,7 @@ import { useGetSize } from './hooks/useGetSize';
 import useHeights from './hooks/useHeights';
 import useMobileTouchMove from './hooks/useMobileTouchMove';
 import useOriginScroll from './hooks/useOriginScroll';
+import useDragEdgeScroll from './hooks/useDragEdgeScroll';
 import useScrollDrag from './hooks/useScrollDrag';
 import type { ScrollOffset, ScrollOffsetInfo, ScrollPos, ScrollTarget } from './hooks/useScrollTo';
 import useScrollTo from './hooks/useScrollTo';
@@ -467,6 +468,14 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
 
   // MouseDown drag for scroll
   useScrollDrag(inVirtual, componentRef, (offset) => {
+    syncScrollTop((top) => top + offset);
+  });
+
+  // Native HTML5 drag (e.g. a draggable Tree node) toward the edge: the
+  // `mousemove` path above is not fired during a native drag, and the native
+  // drag-to-edge autoscroll is disabled by `overflow: hidden`, so drive it from
+  // the drag events here instead.
+  useDragEdgeScroll(inVirtual, componentRef, height, itemHeight, (offset) => {
     syncScrollTop((top) => top + offset);
   });
 
