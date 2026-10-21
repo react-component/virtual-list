@@ -64,8 +64,6 @@ export default function useMobileTouchMove(
   };
 
   const onTouchEnd = () => {
-    touchedRef.current = false;
-
     cleanUpEvents();
   };
 
@@ -80,13 +78,17 @@ export default function useMobileTouchMove(
       elementRef.current = e.target as HTMLElement;
       elementRef.current.addEventListener('touchmove', onTouchMove, { passive: false });
       elementRef.current.addEventListener('touchend', onTouchEnd, { passive: true });
+      elementRef.current.addEventListener('touchcancel', onTouchEnd, { passive: true });
     }
   };
 
   cleanUpEvents = () => {
+    touchedRef.current = false;
+
     if (elementRef.current) {
       elementRef.current.removeEventListener('touchmove', onTouchMove);
       elementRef.current.removeEventListener('touchend', onTouchEnd);
+      elementRef.current.removeEventListener('touchcancel', onTouchEnd);
     }
   };
 

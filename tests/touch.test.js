@@ -90,6 +90,75 @@ describe('List.Touch', () => {
       unmount();
     });
 
+    it('recover touch scroll after multi-touch', () => {
+      const { container, unmount } = genList({ itemHeight: 20, height: 100, data: genData(100) });
+      const element = container.querySelector('.rc-virtual-list-holder');
+
+      // 1. Initial touch start with 1 finger
+      const touchStart1 = new Event('touchstart');
+      touchStart1.touches = [{ pageY: 100 }];
+      element.dispatchEvent(touchStart1);
+
+      // 2. Second finger touches down (multi-touch gesture)
+      const multiTouchStart = new Event('touchstart');
+      multiTouchStart.touches = [{ pageY: 100 }, { pageY: 120 }];
+      element.dispatchEvent(multiTouchStart);
+
+      // 3. User releases fingers and performs normal single-finger touch
+      act(() => {
+        const touchStart2 = new Event('touchstart');
+        touchStart2.touches = [{ pageY: 100 }];
+        element.dispatchEvent(touchStart2);
+
+        const moveEvent = new Event('touchmove');
+        moveEvent.touches = [{ pageY: 90 }];
+        element.dispatchEvent(moveEvent);
+
+        const endEvent = new Event('touchend');
+        element.dispatchEvent(endEvent);
+
+        jest.runAllTimers();
+      });
+
+      expect(container.querySelector('ul').scrollTop > 10).toBeTruthy();
+
+      unmount();
+    });
+
+    it('recover touch scroll after touchcancel', () => {
+      const { container, unmount } = genList({ itemHeight: 20, height: 100, data: genData(100) });
+      const element = container.querySelector('.rc-virtual-list-holder');
+
+      // 1. Touch start with 1 finger
+      const touchStart1 = new Event('touchstart');
+      touchStart1.touches = [{ pageY: 100 }];
+      element.dispatchEvent(touchStart1);
+
+      // 2. Browser fires touchcancel (e.g. system gesture)
+      const cancelEvent = new Event('touchcancel');
+      element.dispatchEvent(cancelEvent);
+
+      // 3. User touches again
+      act(() => {
+        const touchStart2 = new Event('touchstart');
+        touchStart2.touches = [{ pageY: 100 }];
+        element.dispatchEvent(touchStart2);
+
+        const moveEvent = new Event('touchmove');
+        moveEvent.touches = [{ pageY: 90 }];
+        element.dispatchEvent(moveEvent);
+
+        const endEvent = new Event('touchend');
+        element.dispatchEvent(endEvent);
+
+        jest.runAllTimers();
+      });
+
+      expect(container.querySelector('ul').scrollTop > 10).toBeTruthy();
+
+      unmount();
+    });
+
     it('not call when not scroll-able', () => {
       const { container } = genList({ itemHeight: 20, height: 100, data: genData(100) });
 
