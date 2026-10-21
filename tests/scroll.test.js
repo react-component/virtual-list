@@ -393,6 +393,29 @@ describe('List.Scroll', () => {
       expect(container.querySelector('ul').scrollTop).toEqual(950);
     });
 
+    it('ignores right mouse button', () => {
+      const { container } = genList({
+        itemHeight: 20,
+        height: 100,
+        data: genData(100),
+      });
+      const holder = getHolder(container);
+      const scrollbar = container.querySelector('.rc-virtual-list-scrollbar-vertical');
+      const thumb = container.querySelector('.rc-virtual-list-scrollbar-thumb');
+
+      const trackEvent = createEvent.mouseDown(scrollbar, { button: 2 });
+      fireEvent(scrollbar, trackEvent);
+
+      expect(trackEvent.defaultPrevented).toBeFalsy();
+      expect(holder.scrollTop).toEqual(0);
+
+      const thumbEvent = createEvent.mouseDown(thumb, { button: 2 });
+      fireEvent(thumb, thumbEvent);
+
+      expect(thumbEvent.defaultPrevented).toBeFalsy();
+      expect(holder.style.pointerEvents).toEqual('');
+    });
+
     it('should show scrollbar when element has showScrollBar prop set to true', () => {
       jest.useFakeTimers();
       const listRef = React.createRef();
