@@ -138,6 +138,14 @@ describe('List.Touch', () => {
       const cancelEvent = new Event('touchcancel');
       element.dispatchEvent(cancelEvent);
 
+      act(() => {
+        const cancelledMove = new Event('touchmove');
+        cancelledMove.touches = [{ pageY: 90 }];
+        element.dispatchEvent(cancelledMove);
+        jest.runAllTimers();
+      });
+      expect(container.querySelector('ul').scrollTop).toBe(0);
+
       // 3. User touches again
       act(() => {
         const touchStart2 = new Event('touchstart');
