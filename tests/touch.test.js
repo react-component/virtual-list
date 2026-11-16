@@ -181,7 +181,7 @@ describe('List.Touch', () => {
 
       // move
       const preventDefault = jest.fn();
-      const moveEvent = new Event('touchmove');
+      const moveEvent = new Event('touchmove', { cancelable: true });
       moveEvent.touches = [{ pageY: 0 }];
       moveEvent.preventDefault = preventDefault;
       getElement().dispatchEvent(moveEvent);
@@ -201,12 +201,54 @@ describe('List.Touch', () => {
       getElement().dispatchEvent(touchEvent2);
 
       // move
-      const moveEvent2 = new Event('touchmove');
+      const moveEvent2 = new Event('touchmove', { cancelable: true });
       moveEvent2.touches = [{ pageY: 0 }];
       moveEvent2.preventDefault = preventDefault;
       getElement().dispatchEvent(moveEvent2);
 
       expect(preventDefault).not.toHaveBeenCalled();
+    });
+
+    it('registers a non-passive touchmove listener on the list before any touch starts', () => {
+      // Browsers decide at touchstart whether the touch sequence is cancelable, so a
+      // blocking touchmove listener must already be present on the list at that point.
+      const addEventListener = jest.spyOn(HTMLElement.prototype, 'addEventListener');
+      const { container, unmount } = genList({ itemHeight: 20, height: 100, data: genData(100) });
+      const element = container.querySelector('.rc-virtual-list-holder');
+
+      const listTouchMove = addEventListener.mock.instances
+        .map((instance, index) => [instance, addEventListener.mock.calls[index]])
+        .find(([instance, [type]]) => instance === element && type === 'touchmove');
+      addEventListener.mockRestore();
+
+      expect(listTouchMove).toBeTruthy();
+      expect(listTouchMove[1][2]).toEqual(expect.objectContaining({ passive: false }));
+
+      unmount();
+    });
+
+    it('does not preventDefault a non-cancelable touchmove', () => {
+      const { container, unmount } = genList({ itemHeight: 20, height: 100, data: genData(100) });
+      const element = container.querySelector('.rc-virtual-list-holder');
+
+      const touchStart = new Event('touchstart');
+      touchStart.touches = [{ pageY: 100 }];
+      element.dispatchEvent(touchStart);
+
+      // The browser already started a native scroll, so the move cannot be cancelled
+      const preventDefault = jest.fn();
+      const moveEvent = new Event('touchmove', { cancelable: false });
+      moveEvent.touches = [{ pageY: 90 }];
+      moveEvent.preventDefault = preventDefault;
+      act(() => {
+        element.dispatchEvent(moveEvent);
+        element.dispatchEvent(new Event('touchend'));
+        jest.runAllTimers();
+      });
+
+      expect(preventDefault).not.toHaveBeenCalled();
+
+      unmount();
     });
   });
 
