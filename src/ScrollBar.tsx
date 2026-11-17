@@ -5,6 +5,8 @@ import { getPageXY } from './hooks/useScrollDrag';
 
 export type ScrollBarDirectionType = 'ltr' | 'rtl';
 
+export const SCROLLBAR_SIZE = 8;
+
 export interface ScrollBarProps {
   prefixCls: string;
   scrollOffset: number;
@@ -134,10 +136,7 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
       nextTop = pagePosition - rect.top - spinSize / 2;
     }
 
-    onScroll(
-      getScrollOffsetByThumbTop(nextTop, enableScrollRange, enableOffsetRange),
-      horizontal,
-    );
+    onScroll(getScrollOffsetByThumbTop(nextTop, enableScrollRange, enableOffsetRange), horizontal);
   };
 
   const onContainerMouseDown: React.MouseEventHandler = (e) => {
@@ -284,7 +283,7 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
 
   if (horizontal) {
     Object.assign(containerStyle, {
-      height: 8,
+      height: SCROLLBAR_SIZE,
       left: 0,
       right: 0,
       bottom: 0,
@@ -297,7 +296,7 @@ const ScrollBar = React.forwardRef<ScrollBarRef, ScrollBarProps>((props, ref) =>
     });
   } else {
     Object.assign(containerStyle, {
-      width: 8,
+      width: SCROLLBAR_SIZE,
       top: 0,
       bottom: 0,
       [isLTR ? 'right' : 'left']: 0,
