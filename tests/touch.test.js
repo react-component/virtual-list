@@ -256,11 +256,52 @@ describe('List.Touch', () => {
     const preventDefault = jest.fn();
     const { container } = genList({ itemHeight: 20, height: 100, data: genData(100) });
 
-    const touchEvent = new Event('touchstart');
+    const touchEvent = new Event('touchstart', { cancelable: true });
     touchEvent.preventDefault = preventDefault;
     container.querySelector('.rc-virtual-list-scrollbar').dispatchEvent(touchEvent);
 
     expect(preventDefault).toHaveBeenCalled();
+  });
+
+  describe('scrollbar touch during a momentum scroll', () => {
+    // While a fling is running the browser dispatches touchstart with cancelable=false
+    function dispatchUncancelableTouchStart(element) {
+      const preventDefault = jest.fn();
+      const touchEvent = new Event('touchstart', { bubbles: true, cancelable: false });
+      touchEvent.touches = [{ pageX: 0, pageY: 0 }];
+      touchEvent.preventDefault = preventDefault;
+      act(() => {
+        element.dispatchEvent(touchEvent);
+      });
+      return preventDefault;
+    }
+
+    it('does not preventDefault on the track', () => {
+      const { container } = genList({ itemHeight: 20, height: 100, data: genData(100) });
+
+      const preventDefault = dispatchUncancelableTouchStart(
+        container.querySelector('.rc-virtual-list-scrollbar'),
+      );
+
+      expect(preventDefault).not.toHaveBeenCalled();
+    });
+
+    it('does not preventDefault on the thumb but still starts dragging', () => {
+      const { container } = genList({ itemHeight: 20, height: 100, data: genData(100) });
+
+      const preventDefault = dispatchUncancelableTouchStart(
+        container.querySelector('.rc-virtual-list-scrollbar-thumb'),
+      );
+
+      expect(preventDefault).not.toHaveBeenCalled();
+      expect(container.querySelector('.rc-virtual-list-scrollbar-thumb-moving')).toBeTruthy();
+    });
+
+    it('disables native panning on the scrollbar', () => {
+      const { container } = genList({ itemHeight: 20, height: 100, data: genData(100) });
+
+      expect(container.querySelector('.rc-virtual-list-scrollbar').style.touchAction).toBe('none');
+    });
   });
 
   it('nest touch', async () => {
